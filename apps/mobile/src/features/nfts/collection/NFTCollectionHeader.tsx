@@ -5,14 +5,21 @@ import { BackButton } from 'src/components/buttons/BackButton'
 import { Loader } from 'src/components/loading'
 import { LongMarkdownText } from 'src/components/text/LongMarkdownText'
 import { NFTCollectionContextMenu } from 'src/features/nfts/collection/NFTCollectionContextMenu'
-import { Flex, FlexProps, Logos, Text, useDeviceInsets, useSporeColors } from 'ui/src'
+import {
+  Flex,
+  FlexProps,
+  Logos,
+  Text,
+  useDeviceInsets,
+  useExtractedColors,
+  useSporeColors,
+} from 'ui/src'
 import VerifiedIcon from 'ui/src/assets/icons/verified.svg'
 import { iconSizes, spacing } from 'ui/src/theme'
 import { NumberType } from 'utilities/src/format/types'
 import { ImageUri } from 'wallet/src/features/images/ImageUri'
 import { NFTViewer } from 'wallet/src/features/images/NFTViewer'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
-import { useExtractedColors } from 'wallet/src/utils/colors'
 import { NFTCollectionData } from './types'
 
 const PROFILE_IMAGE_SIZE = 72
@@ -153,7 +160,7 @@ export function NFTCollectionHeader({
           <Flex row gap="$spacing8" justifyContent="space-between">
             <Flex fill alignItems="flex-start" gap="$spacing4">
               <Text color="$neutral2" numberOfLines={1} variant="subheading2">
-                {t('Items')}
+                {t('tokens.nfts.collection.label.items')}
               </Text>
               <Text loading={loading} variant="body1">
                 {formatNumberOrString({
@@ -164,7 +171,7 @@ export function NFTCollectionHeader({
             </Flex>
             <Flex fill alignItems="flex-start" gap="$spacing4">
               <Text color="$neutral2" numberOfLines={1} variant="subheading2">
-                {t('Owners')}
+                {t('tokens.nfts.collection.label.owners')}
               </Text>
               <Text loading={loading} variant="body1">
                 {formatNumberOrString({
@@ -175,7 +182,7 @@ export function NFTCollectionHeader({
             </Flex>
             <Flex fill alignItems="flex-start" gap="$spacing4">
               <Text color="$neutral2" numberOfLines={1} variant="subheading2">
-                {t('Floor')}
+                {t('tokens.nfts.collection.label.priceFloor')}
               </Text>
               <Flex row alignItems="center">
                 <Text loading={loading} variant="body1">
@@ -191,7 +198,7 @@ export function NFTCollectionHeader({
             </Flex>
             <Flex fill alignItems="flex-start" gap="$spacing4">
               <Text color="$neutral2" numberOfLines={1} variant="subheading2">
-                {t('Volume')}
+                {t('tokens.nfts.collection.label.swapVolume')}
               </Text>
               <Flex row alignItems="center" gap="$spacing4">
                 <Text loading={loading} pr="$spacing1" variant="body1">

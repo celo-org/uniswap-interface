@@ -16,6 +16,7 @@ import { useSelectHasTokenFavorited, useToggleFavoriteCallback } from 'src/featu
 import { openModal } from 'src/features/modals/modalSlice'
 import { sendMobileAnalyticsEvent } from 'src/features/telemetry'
 import { MobileEventName, ShareableEntity } from 'src/features/telemetry/constants'
+import { CurrencyId } from 'uniswap/src/types/currency'
 import { logger } from 'utilities/src/logger/logger'
 import { ChainId } from 'wallet/src/constants/chains'
 import { AssetType } from 'wallet/src/entities/assets'
@@ -25,7 +26,7 @@ import {
 } from 'wallet/src/features/transactions/transactionState/types'
 import { useAppDispatch } from 'wallet/src/state'
 import { ElementName, ModalName, SectionNameType } from 'wallet/src/telemetry/constants'
-import { CurrencyId, currencyIdToAddress } from 'wallet/src/utils/currencyId'
+import { currencyIdToAddress } from 'wallet/src/utils/currencyId'
 import { getTokenUrl } from 'wallet/src/utils/linking'
 
 interface TokenMenuParams {
@@ -107,29 +108,31 @@ export function useExploreTokenContextMenu({
   const menuActions = useMemo(
     () => [
       {
-        title: isFavorited ? t('Remove favorite') : t('Favorite token'),
+        title: isFavorited
+          ? t('explore.tokens.favorite.action.remove')
+          : t('explore.tokens.favorite.action.add'),
         systemIcon: isFavorited ? 'heart.fill' : 'heart',
         onPress: onPressToggleFavorite,
       },
       ...(onEditFavorites
         ? [
             {
-              title: t('Edit favorites'),
+              title: t('explore.tokens.favorite.action.edit'),
               systemIcon: 'square.and.pencil',
               onPress: onEditFavorites,
             },
           ]
         : []),
-      { title: t('Swap'), systemIcon: 'arrow.2.squarepath', onPress: onPressSwap },
+      { title: t('common.button.swap'), systemIcon: 'arrow.2.squarepath', onPress: onPressSwap },
       {
-        title: t('Receive'),
+        title: t('common.button.receive'),
         systemIcon: 'qrcode',
         onPress: onPressReceive,
       },
       ...(!onEditFavorites
         ? [
             {
-              title: t('Share'),
+              title: t('common.button.share'),
               systemIcon: 'square.and.arrow.up',
               onPress: onPressShare,
             },

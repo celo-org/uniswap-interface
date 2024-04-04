@@ -7,10 +7,12 @@ import { initAndPersistCache } from 'src/data/cache'
 import { sendMobileAnalyticsEvent } from 'src/features/telemetry'
 import { MobileEventName } from 'src/features/telemetry/constants'
 import { selectCustomEndpoint } from 'src/features/tweaks/selectors'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 import { isNonJestDev } from 'utilities/src/environment'
 import { logger } from 'utilities/src/logger/logger'
 import { useAsyncData } from 'utilities/src/react/hooks'
-import { uniswapUrls } from 'wallet/src/constants/urls'
 import {
   getCustomGraphqlHttpLink,
   getErrorLink,
@@ -18,10 +20,47 @@ import {
   getPerformanceLink,
   getRestLink,
 } from 'wallet/src/data/links'
-import { FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
-import { useFeatureFlag } from 'wallet/src/features/experiments/hooks'
 
-export let apolloClient: ApolloClient<NormalizedCacheObject> | null = null
+type ApolloClientRef = {
+  current: ApolloClient<NormalizedCacheObject> | null
+  onReady: () => Promise<ApolloClient<NormalizedCacheObject>>
+}
+
+// This object allows us to get access to the apollo client in places outside of React where we can't use hooks.
+export const apolloClientRef: ApolloClientRef = ((): ApolloClientRef => {
+  let apolloClient: ApolloClient<NormalizedCacheObject> | null = null
+
+  const listeners: Array<
+    (
+      value: ApolloClient<NormalizedCacheObject> | PromiseLike<ApolloClient<NormalizedCacheObject>>
+    ) => void
+  > = []
+
+  const ref: ApolloClientRef = {
+    get current() {
+      return apolloClient
+    },
+
+    set current(newApolloClient) {
+      if (!newApolloClient) {
+        throw new Error("Can't set `apolloClient` to `null`")
+      }
+
+      apolloClient = newApolloClient
+      listeners.forEach((resolve) => resolve(newApolloClient))
+    },
+
+    onReady: async (): Promise<ApolloClient<NormalizedCacheObject>> => {
+      if (apolloClient) {
+        return Promise.resolve(apolloClient)
+      }
+
+      return new Promise<ApolloClient<NormalizedCacheObject>>((resolve) => listeners.push(resolve))
+    },
+  }
+
+  return ref
+})()
 
 const mmkv = new MMKV()
 if (isNonJestDev) {
@@ -33,7 +72,7 @@ if (isNonJestDev) {
 export const usePersistedApolloClient = (): ApolloClient<NormalizedCacheObject> | undefined => {
   const [client, setClient] = useState<ApolloClient<NormalizedCacheObject>>()
   const customEndpoint = useAppSelector(selectCustomEndpoint)
-  const cloudflareGatewayEnabled = useFeatureFlag(FEATURE_FLAGS.CloudflareGateway)
+  const cloudflareGatewayEnabled = useFeatureFlag(FeatureFlags.GatewayDNSUpdateMobile)
 
   const apolloLink = customEndpoint
     ? getCustomGraphqlHttpLink(customEndpoint)
@@ -80,7 +119,7 @@ export const usePersistedApolloClient = (): ApolloClient<NormalizedCacheObject> 
       },
     })
 
-    apolloClient = newClient
+    apolloClientRef.current = newClient
     setClient(newClient)
 
     // Ensure this callback only is computed once even if apolloLink changes,

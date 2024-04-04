@@ -1,5 +1,3 @@
-import { FeatureFlag } from 'featureFlags'
-
 import { getTestSelector } from '../utils'
 import { CONNECTED_WALLET_USER_STATE, DISCONNECTED_WALLET_USER_STATE } from '../utils/user-state'
 
@@ -38,14 +36,14 @@ describe('Landing Page', () => {
     cy.viewport(2000, 1600)
     cy.visit('/swap')
     cy.get(getTestSelector('pool-nav-link')).first().click()
-    cy.url().should('include', '/pools')
+    cy.url().should('include', '/pool')
   })
 
   it('allows navigation to pool on mobile', () => {
     cy.viewport('iphone-6')
     cy.visit('/swap')
     cy.get(getTestSelector('pool-nav-link')).last().click()
-    cy.url().should('include', '/pools')
+    cy.url().should('include', '/pool')
   })
 
   it('does not render landing page when / path is blocked', () => {
@@ -95,24 +93,11 @@ describe('Landing Page', () => {
   })
 
   it('shows a nav button to download the app when feature is enabled', () => {
-    cy.visit('/?intro=true', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: true }],
-    })
+    cy.visit('/?intro=true')
     cy.get('nav').within(() => {
       cy.contains('Get the app').should('be.visible')
     })
-    cy.visit('/swap', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: true }],
-    })
-    cy.get('nav').within(() => {
-      cy.contains('Get the app').should('not.exist')
-    })
-  })
-
-  it('does not show a nav button to download the app when feature is in control', () => {
-    cy.visit('/?intro=true', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: false }],
-    })
+    cy.visit('/swap')
     cy.get('nav').within(() => {
       cy.contains('Get the app').should('not.exist')
     })
@@ -120,16 +105,12 @@ describe('Landing Page', () => {
 
   it('hides call to action text on small screen sizes', () => {
     cy.viewport('iphone-8')
-    cy.visit('/?intro=true', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: true }],
-    })
+    cy.visit('/?intro=true')
     cy.get(getTestSelector('get-the-app-cta')).should('not.be.visible')
   })
 
   it('opens modal when Get-the-App button is selected', () => {
-    cy.visit('/?intro=true', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: true }],
-    })
+    cy.visit('/?intro=true')
     cy.get('nav').within(() => {
       cy.contains('Get the app').should('exist').click()
     })
@@ -137,9 +118,7 @@ describe('Landing Page', () => {
   })
 
   it('closes modal when close button is selected', () => {
-    cy.visit('/?intro=true', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: true }],
-    })
+    cy.visit('/?intro=true')
     cy.get('nav').within(() => {
       cy.contains('Get the app').should('exist').click()
     })
@@ -149,9 +128,7 @@ describe('Landing Page', () => {
   })
 
   it('closes modal when user selects area outside of modal', () => {
-    cy.visit('/?intro=true', {
-      featureFlags: [{ name: FeatureFlag.landingPageV2, value: true }],
-    })
+    cy.visit('/?intro=true')
     cy.get('nav').within(() => {
       cy.contains('Get the app').should('exist').click()
     })

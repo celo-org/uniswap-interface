@@ -212,7 +212,7 @@ exports[`PoolDetailsPositionsTable renders with PositionStatus Closed 1`] = `
               <img
                 class="c6"
                 size="16"
-                src="blank_token.svg"
+                src="https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
               />
             </div>
             <div
@@ -525,7 +525,7 @@ exports[`PoolDetailsPositionsTable renders with PositionStatus In Range 1`] = `
               <img
                 class="c6"
                 size="16"
-                src="blank_token.svg"
+                src="https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
               />
             </div>
             <div
@@ -799,7 +799,7 @@ exports[`PoolDetailsPositionsTable renders with PositionStatus Out Of Range 1`] 
               <img
                 class="c6"
                 size="16"
-                src="blank_token.svg"
+                src="https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
               />
             </div>
             <div

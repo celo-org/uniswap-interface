@@ -5,7 +5,19 @@ import { validPoolDataResponse } from 'test-utils/pools/fixtures'
 import { act, render, screen } from 'test-utils/render'
 import { BREAKPOINTS } from 'theme'
 
+import { USDC_MAINNET } from 'constants/tokens'
 import { PoolDetailsStats } from './PoolDetailsStats'
+
+jest.mock('hooks/Tokens', () => {
+  return {
+    useCurrency: (address?: string) => {
+      if (address?.toLowerCase() === USDC_MAINNET.address.toLowerCase()) {
+        return USDC_MAINNET
+      }
+      return undefined
+    },
+  }
+})
 
 describe('PoolDetailsStats', () => {
   const mockProps = {
@@ -42,6 +54,12 @@ describe('PoolDetailsStats', () => {
   })
 
   it('renders stats text correctly', async () => {
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: BREAKPOINTS.xl,
+    })
+
     const { asFragment } = render(<PoolDetailsStats {...mockProps} />)
     // After the first render, the extracted color is updated to an a11y compliant color
     // This is why we need to wrap the fragment in act(...)
@@ -54,7 +72,7 @@ describe('PoolDetailsStats', () => {
     expect(screen.getByText('90.9M')).toBeInTheDocument()
     expect(screen.getByText('USDC')).toBeInTheDocument()
     expect(screen.getByText('82.5K')).toBeInTheDocument()
-    expect(screen.getByText('WETH')).toBeInTheDocument()
+    expect(screen.getByText('ETH')).toBeInTheDocument()
     expect(screen.getByText(/TVL/i)).toBeInTheDocument()
     expect(screen.getByText('$223.2M')).toBeInTheDocument()
     expect(screen.getByTestId('pool-balance-chart')).toBeInTheDocument()
@@ -64,7 +82,7 @@ describe('PoolDetailsStats', () => {
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
-      value: BREAKPOINTS.md,
+      value: BREAKPOINTS.lg,
     })
     const { asFragment } = render(<PoolDetailsStats {...mockProps} />)
     await act(async () => {

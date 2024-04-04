@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { iconSizes } from 'ui/src/theme'
 import { WarningModal } from 'wallet/src/components/modals/WarningModal/WarningModal'
-import { ParsedWarnings } from 'wallet/src/features/transactions/hooks/useParsedSwapWarnings'
+import { ParsedWarnings } from 'wallet/src/features/transactions/hooks/useParsedTransactionWarnings'
 import { ModalName } from 'wallet/src/telemetry/constants'
 
 export function SwapWarningModal({
@@ -18,7 +18,7 @@ export function SwapWarningModal({
   return (
     <WarningModal
       caption={warning.message}
-      confirmText={t('Close')}
+      confirmText={t('common.button.close')}
       icon={Icon && <Icon color={color.text} height={iconSizes.icon24} width={iconSizes.icon24} />}
       modalName={ModalName.SwapWarning}
       severity={warning.severity}

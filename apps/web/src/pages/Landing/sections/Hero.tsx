@@ -5,10 +5,11 @@ import { Swap } from 'pages/Swap'
 import { useEffect, useState } from 'react'
 import { ChevronDown } from 'react-feather'
 import styled, { css, keyframes } from 'styled-components'
-import { ThemedText } from 'theme/components'
 
 import { BREAKPOINTS } from 'theme'
-import { Box, H1, Subheading } from '../components/Generics'
+import { Text } from 'ui/src'
+import { heightBreakpoints } from 'ui/src/theme'
+import { Box, H1 } from '../components/Generics'
 import { TokenCloud } from '../components/TokenCloud/index'
 import { Hover, RiseIn, RiseInText } from '../components/animations'
 
@@ -21,9 +22,6 @@ const LandingSwapContainer = styled(Box)`
   padding: 8px;
   border-radius: 24px;
   background: ${({ theme }) => theme.surface1};
-  @media (max-width: 768px) {
-    width: 100%;
-  }
 `
 const LandingSwap = styled(Swap)`
   position: relative;
@@ -43,6 +41,9 @@ const StyledH1 = styled(H1)`
   @media (max-width: 464px) {
     font-size: 36px;
   }
+  @media (max-height: 668px) {
+    font-size: 28px;
+  }
 `
 const shrinkAndFade = keyframes`
   0% {
@@ -50,7 +51,7 @@ const shrinkAndFade = keyframes`
     opacity: 1;
   }
   100% {
-    transform: scale(0.8));
+    transform: scale(0.8);
     opacity: 0;
   }
 `
@@ -59,11 +60,14 @@ const Center = styled(Box)<{ transition?: boolean }>`
   pointer-events: none;
   padding: 48px 0px;
   @media (max-width: 464px), (max-height: 700px) {
-    padding: 0px;
+    padding-top: 24px;
   }
-  gap: 20px;
+  @media (max-width: 464px), (max-height: 668px) {
+    padding-top: 8px;
+  }
+  gap: 24px;
   @media (max-height: 800px) {
-    gap: 0px;
+    gap: 16px;
   }
   ${({ transition }) =>
     transition &&
@@ -75,6 +79,10 @@ const LearnMoreContainer = styled(Box)`
   bottom: 48px;
   @media (max-width: ${BREAKPOINTS.md}px) {
     bottom: 64px;
+  }
+
+  @media (max-height: ${heightBreakpoints.short}px) {
+    display: none;
   }
 `
 
@@ -113,7 +121,7 @@ export function Hero({ scrollToRef, transition }: HeroProps) {
       <Center
         direction="column"
         align="center"
-        maxWidth="75vw"
+        maxWidth="85vw"
         transition={transition}
         style={{ transform: `translate(0px, ${translateY}px)`, opacity: opacityY }}
       >
@@ -135,14 +143,22 @@ export function Hero({ scrollToRef, transition }: HeroProps) {
 
         <RiseIn delay={0.4}>
           <LandingSwapContainer>
-            <LandingSwap initialInputCurrency={initialInputCurrency} />
+            <LandingSwap syncTabToUrl={false} initialInputCurrency={initialInputCurrency} />
           </LandingSwapContainer>
         </RiseIn>
 
         <RiseIn delay={0.3}>
-          <Subheading>
+          <Text
+            variant="body1"
+            textAlign="center"
+            maxWidth={430}
+            color="$neutral2"
+            $short={{
+              variant: 'body2',
+            }}
+          >
             <Trans>The largest onchain marketplace. Buy and sell crypto on Ethereum and 7+ other chains.</Trans>
-          </Subheading>
+          </Text>
         </RiseIn>
       </Center>
       <LearnMoreContainer
@@ -164,9 +180,9 @@ export function Hero({ scrollToRef, transition }: HeroProps) {
           >
             <Hover>
               <ColumnCenter>
-                <ThemedText.BodySecondary>
-                  <Trans>Scroll to Learn More</Trans>
-                </ThemedText.BodySecondary>
+                <Text variant="body2">
+                  <Trans>Scroll to learn more</Trans>
+                </Text>
                 <ChevronDown />
               </ColumnCenter>
             </Hover>

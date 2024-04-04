@@ -1,7 +1,8 @@
-import { Flex, getTokenValue, Icons, Shine, Skeleton, Text, useSporeColors } from 'ui/src'
+import { Flex, Icons, Shine, Skeleton, Text, isWeb, useSporeColors } from 'ui/src'
+import { NumberType } from 'utilities/src/format/types'
 import { isWarmLoadingStatus } from 'wallet/src/data/utils'
 import { usePortfolioTotalValue } from 'wallet/src/features/dataApi/balances'
-
+import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 type WalletBalanceProps = {
   address: Address
 }
@@ -16,6 +17,7 @@ export function PortfolioBalance({ address }: WalletBalanceProps): JSX.Element {
   const isPositiveChange = change !== undefined ? change >= 0 : undefined
   const colors = useSporeColors()
   const arrowColor = isPositiveChange ? colors.statusSuccess : colors.statusCritical
+  const { convertFiatAmountFormatted } = useLocalizationContext()
 
   const formattedChange = change !== undefined ? `${Math.abs(change).toFixed(2)}%` : '-'
   return (
@@ -27,7 +29,7 @@ export function PortfolioBalance({ address }: WalletBalanceProps): JSX.Element {
               loading="no-shimmer"
               loadingPlaceholderText="$-,---.--"
               numberOfLines={1}
-              variant="heading1"
+              variant={isWeb ? 'heading2' : 'heading1'}
             />
           </Skeleton>
 
@@ -47,14 +49,16 @@ export function PortfolioBalance({ address }: WalletBalanceProps): JSX.Element {
         <Flex gap="$spacing12">
           <Shine disabled={!isWarmLoadingStatus(networkStatus)}>
             <Flex>
-              <Text variant="heading1">${balanceUSD?.toFixed(2)}</Text>
+              <Text variant={isWeb ? 'heading2' : 'heading1'}>
+                {convertFiatAmountFormatted(balanceUSD, NumberType.FiatTokenDetails)}
+              </Text>
               <Flex row alignItems="center">
                 <Icons.ArrowChange
                   color={arrowColor.get()}
                   rotation={isPositiveChange ? 180 : 0}
-                  size={getTokenValue('$icon.20')}
+                  size={isWeb ? '$icon.16' : '$icon.20'}
                 />
-                <Text color="$neutral2" variant="body1">
+                <Text color="$neutral2" variant={isWeb ? 'body2' : 'body1'}>
                   {/* TODO(EXT-298): add absolute change here too, share from mobile */}
                   {formattedChange}
                 </Text>

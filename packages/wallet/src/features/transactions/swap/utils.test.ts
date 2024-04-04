@@ -5,7 +5,7 @@ import { UNI, WBTC, wrappedNativeCurrency } from 'wallet/src/constants/tokens'
 import { NativeCurrency } from 'wallet/src/features/tokens/NativeCurrency'
 import { Trade } from 'wallet/src/features/transactions/swap/trade/types'
 import { WrapType } from 'wallet/src/features/transactions/types'
-import { mockPool } from 'wallet/src/test/fixtures'
+import { mockPool } from 'wallet/src/test/mocks'
 import { getWrapType, requireAcceptNewTrade, serializeQueryParams } from './utils'
 
 describe(serializeQueryParams, () => {
@@ -63,6 +63,7 @@ describe(requireAcceptNewTrade, () => {
     mixedRoutes: [],
     tradeType: TradeType.EXACT_INPUT,
     slippageTolerance: 0.5,
+    deadline: Date.now() + 60 * 30 * 1000,
   })
 
   it('returns false when prices are within threshold', () => {
@@ -79,6 +80,7 @@ describe(requireAcceptNewTrade, () => {
       mixedRoutes: [],
       tradeType: TradeType.EXACT_INPUT,
       slippageTolerance: 0.5,
+      deadline: Date.now() + 60 * 30 * 1000,
     })
     expect(requireAcceptNewTrade(oldTrade, newTrade)).toBe(false)
   })
@@ -97,6 +99,7 @@ describe(requireAcceptNewTrade, () => {
       mixedRoutes: [],
       tradeType: TradeType.EXACT_INPUT,
       slippageTolerance: 0.5,
+      deadline: Date.now() + 60 * 30 * 1000,
     })
     expect(requireAcceptNewTrade(oldTrade, newTrade)).toBe(true)
   })
@@ -114,6 +117,7 @@ describe(requireAcceptNewTrade, () => {
       mixedRoutes: [],
       tradeType: TradeType.EXACT_INPUT,
       slippageTolerance: 0.5,
+      deadline: Date.now() + 60 * 30 * 1000,
     })
     expect(requireAcceptNewTrade(oldTrade, newTrade)).toBe(false)
   })

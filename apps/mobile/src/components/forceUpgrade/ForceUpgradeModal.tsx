@@ -4,11 +4,11 @@ import { BackButtonView } from 'src/components/layout/BackButtonView'
 import { SeedPhraseDisplay } from 'src/components/mnemonic/SeedPhraseDisplay'
 import { APP_STORE_LINK } from 'src/constants/urls'
 import { UpgradeStatus } from 'src/features/forceUpgrade/types'
-import { Statsig } from 'statsig-react-native'
 import { Flex, Text, TouchableArea, useSporeColors } from 'ui/src'
+import { DynamicConfigs } from 'uniswap/src/features/experiments/configs'
+import { useDynamicConfig } from 'uniswap/src/features/experiments/hooks'
 import { BottomSheetModal } from 'wallet/src/components/modals/BottomSheetModal'
 import { WarningModal } from 'wallet/src/components/modals/WarningModal/WarningModal'
-import { DYNAMIC_CONFIGS } from 'wallet/src/features/experiments/constants'
 import { WarningSeverity } from 'wallet/src/features/transactions/WarningModal/types'
 import { SignerMnemonicAccount } from 'wallet/src/features/wallet/accounts/types'
 import { useNonPendingSignerAccounts } from 'wallet/src/features/wallet/hooks'
@@ -18,6 +18,7 @@ import { openUri } from 'wallet/src/utils/linking'
 export function ForceUpgradeModal(): JSX.Element {
   const { t } = useTranslation()
   const colors = useSporeColors()
+  const forceUpgradeConfig = useDynamicConfig(DynamicConfigs.MobileForceUpgrade)
 
   const [isVisible, setIsVisible] = useState(false)
   const [upgradeStatus, setUpgradeStatus] = useState(UpgradeStatus.NotRequired)
@@ -32,8 +33,7 @@ export function ForceUpgradeModal(): JSX.Element {
   const [showSeedPhrase, setShowSeedPhrase] = useState(false)
 
   useEffect(() => {
-    const config = Statsig.getConfig(DYNAMIC_CONFIGS.ForceUpgrade)
-    const statusString = config.getValue('status')?.toString()
+    const statusString = forceUpgradeConfig.getValue('status')?.toString()
 
     let status = UpgradeStatus.NotRequired
     if (statusString === 'recommended') {
@@ -43,7 +43,7 @@ export function ForceUpgradeModal(): JSX.Element {
     }
     setUpgradeStatus(status)
     setIsVisible(status !== UpgradeStatus.NotRequired)
-  }, [])
+  }, [forceUpgradeConfig])
 
   const onPressConfirm = async (): Promise<void> => {
     await openUri(APP_STORE_LINK, /*openExternalBrowser=*/ true, /*isSafeUri=*/ true)
@@ -65,22 +65,20 @@ export function ForceUpgradeModal(): JSX.Element {
     <>
       {isVisible && (
         <WarningModal
-          confirmText={t('Update app')}
+          confirmText={t('forceUpgrade.action.confirm')}
           hideHandlebar={upgradeStatus === UpgradeStatus.Required}
           isDismissible={upgradeStatus !== UpgradeStatus.Required}
           modalName={ModalName.ForceUpgradeModal}
           severity={WarningSeverity.High}
-          title={t('Update the app to continue')}
+          title={t('forceUpgrade.title')}
           onClose={onClose}
           onConfirm={onPressConfirm}>
           <Text color="$neutral2" textAlign="center" variant="body2">
-            {t(
-              'The version of Uniswap Wallet you’re using is out of date and is missing critical upgrades. If you don’t update the app or you don’t have your recovery phrase written down, you won’t be able to access your assets.'
-            )}
+            {t('forceUpgrade.description')}
           </Text>
           {mnemonicId && (
             <Text color="$accent1" variant="buttonLabel3" onPress={onPressViewRecovery}>
-              {t('View recovery phrase')}
+              {t('forceUpgrade.action.recoveryPhrase')}
             </Text>
           )}
         </WarningModal>
@@ -96,7 +94,7 @@ export function ForceUpgradeModal(): JSX.Element {
               <TouchableArea onPress={onDismiss}>
                 <BackButtonView size={BACK_BUTTON_SIZE} />
               </TouchableArea>
-              <Text variant="subheading1">{t('Recovery phrase')}</Text>
+              <Text variant="subheading1">{t('forceUpgrade.label.recoveryPhrase')}</Text>
               <Flex width={BACK_BUTTON_SIZE} />
             </Flex>
             <SeedPhraseDisplay mnemonicId={mnemonicId} onDismiss={onDismiss} />

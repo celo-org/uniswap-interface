@@ -1,3 +1,9 @@
+import { isAndroid, isIOS } from 'uniswap/src/utils/platform'
+import { FORLogo } from './types'
+
+const APPLE_PAY = 'Apple Pay'
+const GOOGLE_PAY = 'Google Pay'
+
 export interface FORApiError {
   data: {
     statusCode: number
@@ -65,4 +71,21 @@ export function isFiatOnRampApiError(error: unknown): error is FORApiError {
     )
   }
   return false
+}
+
+export function getServiceProviderLogo(
+  logos: FORLogo | undefined,
+  isDarkMode: boolean
+): string | undefined {
+  if (!logos) {
+    return
+  }
+
+  return isDarkMode ? logos.darkLogo : logos.lightLogo
+}
+
+export function transformPaymentMethods(paymentMethods: string[]): string[] {
+  return paymentMethods.filter(
+    (pm) => !(pm === APPLE_PAY && isAndroid) && !(pm === GOOGLE_PAY && isIOS)
+  )
 }

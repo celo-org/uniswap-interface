@@ -1,20 +1,20 @@
 import { Currency, CurrencyAmount, Price, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { Field } from 'components/swap/constants'
-import { nativeOnChain } from 'constants/tokens'
+import { isStablecoin, nativeOnChain } from 'constants/tokens'
 import JSBI from 'jsbi'
 import { useCurrencyBalances } from 'lib/hooks/useCurrencyBalance'
 import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
 import ms from 'ms'
-import { useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Expiry, LimitState } from 'state/limit/types'
 import { getWrapInfo } from 'state/routing/gas'
 import { LimitOrderTrade, RouterPreference, SubmittableTrade, SwapFeeInfo, WrapInfo } from 'state/routing/types'
 import { useRoutingAPITrade } from 'state/routing/useRoutingAPITrade'
 import { getUSDCostPerGas, isClassicTrade } from 'state/routing/utils'
-import { useSwapAndLimitContext } from 'state/swap/SwapContext'
-
-import { useLimitsFeesEnabled } from 'featureFlags/flags/limitsFees'
-import { Expiry, LimitState } from './LimitContext'
+import { useSwapAndLimitContext } from 'state/swap/hooks'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 
 export type LimitInfo = {
   currencyBalances: { [field in Field]?: CurrencyAmount<Currency> }
@@ -40,7 +40,15 @@ export function expiryToDeadlineSeconds(expiry: Expiry): number {
   }
 }
 
-export function useDerivedLimitInfo(state: LimitState): LimitInfo {
+// By default, inputCurrency is base currency and outputCurrency is quote currency
+// If only one of these tokens is a stablecoin, prefer the denomination (quote currency) to be the stablecoin
+// TODO(limits): Also add preference for ETH, BTC to be default
+export function getDefaultPriceInverted(inputCurrency?: Currency, outputCurrency?: Currency): boolean {
+  const [isInputStablecoin, isOutputStablecoin] = [isStablecoin(inputCurrency), isStablecoin(outputCurrency)]
+  return isInputStablecoin && !isOutputStablecoin
+}
+
+export function useDerivedLimitInfo(state: LimitState, setState: Dispatch<SetStateAction<LimitState>>): LimitInfo {
   const { account } = useWeb3React()
   const { inputAmount, outputAmount, limitPriceInverted } = state
   const {
@@ -51,6 +59,13 @@ export function useDerivedLimitInfo(state: LimitState): LimitInfo {
     account ?? undefined,
     useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrency, outputCurrency])
   )
+
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      limitPriceInverted: getDefaultPriceInverted(inputCurrency, outputCurrency),
+    }))
+  }, [inputCurrency, outputCurrency, setState])
 
   const currencyBalances = useMemo(
     () => ({
@@ -65,31 +80,21 @@ export function useDerivedLimitInfo(state: LimitState): LimitInfo {
       return undefined
     }
 
-    if (limitPriceInverted) {
-      const parsedLimitPriceInputAmount = tryParseCurrencyAmount(state.limitPrice, inputCurrency)
-      if (!parsedLimitPriceInputAmount) {
-        return undefined
-      }
+    const [baseCurrency, quoteCurrency] = limitPriceInverted
+      ? [outputCurrency, inputCurrency]
+      : [inputCurrency, outputCurrency]
 
-      return new Price(
-        outputCurrency,
-        inputCurrency,
-        JSBI.BigInt(10 ** outputCurrency.decimals),
-        parsedLimitPriceInputAmount.quotient
-      )
-    } else {
-      const parsedLimitPriceOutputAmount = tryParseCurrencyAmount(state.limitPrice, outputCurrency)
-      if (!parsedLimitPriceOutputAmount) {
-        return undefined
-      }
-
-      return new Price(
-        inputCurrency,
-        outputCurrency,
-        JSBI.BigInt(10 ** inputCurrency.decimals),
-        parsedLimitPriceOutputAmount.quotient
-      )
+    const parsedLimitPriceQuoteAmount = tryParseCurrencyAmount(state.limitPrice, quoteCurrency)
+    if (!parsedLimitPriceQuoteAmount) {
+      return undefined
     }
+
+    return new Price(
+      baseCurrency,
+      quoteCurrency,
+      JSBI.BigInt(10 ** baseCurrency.decimals),
+      parsedLimitPriceQuoteAmount.quotient
+    )
   }, [inputCurrency, limitPriceInverted, outputCurrency, state.limitPrice])
 
   const parsedAmounts = useMemo(() => {
@@ -276,7 +281,7 @@ function useMarketPriceAndFee(
     return priceA.multiply(priceB)
   }, [inputCurrency, outputCurrency, skip, tradeA, tradeB])
 
-  const feesEnabled = useLimitsFeesEnabled()
+  const feesEnabled = useFeatureFlag(FeatureFlags.LimitsFees)
   const fee = useMemo(() => {
     if (!marketPrice || !inputCurrency || !outputCurrency || !feesEnabled) return undefined
 

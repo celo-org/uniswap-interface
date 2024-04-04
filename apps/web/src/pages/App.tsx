@@ -5,11 +5,11 @@ import ErrorBoundary from 'components/ErrorBoundary'
 import Loader from 'components/Icons/LoadingSpinner'
 import NavBar, { PageTabs } from 'components/NavBar'
 import { UK_BANNER_HEIGHT, UK_BANNER_HEIGHT_MD, UK_BANNER_HEIGHT_SM, UkBanner } from 'components/NavBar/UkBanner'
-import { useFeatureFlagsIsLoaded, useFeatureFlagURLOverrides } from 'featureFlags'
+import { useFeatureFlagURLOverrides } from 'featureFlags'
 import { useAtom } from 'jotai'
 import { useBag } from 'nft/hooks/useBag'
 import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async/lib/index'
 import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
 import { shouldDisableNFTRoutesAtom } from 'state/application/atoms'
 import { useAppSelector } from 'state/hooks'
@@ -80,7 +80,7 @@ const HeaderWrapper = styled.div<{ transparent?: boolean; bannerIsVisible?: bool
   justify-content: space-between;
   position: fixed;
   top: ${({ bannerIsVisible }) => (bannerIsVisible ? Math.max(UK_BANNER_HEIGHT - scrollY, 0) : 0)}px;
-  z-index: ${Z_INDEX.dropdown};
+  z-index: ${Z_INDEX.sticky};
 
   @media only screen and (max-width: ${({ theme }) => `${theme.breakpoint.md}px`}) {
     top: ${({ bannerIsVisible }) => (bannerIsVisible ? Math.max(UK_BANNER_HEIGHT_MD - scrollY, 0) : 0)}px;
@@ -147,7 +147,7 @@ export default function App() {
         {/*
           This is where *static* page titles are injected into the <head> tag. If you
           want to set a page title based on data that's dynamic or not available on first render,
-          you can set it later in the page component itself, since react-helmet prefers the most recently rendered title.
+          you can set it later in the page component itself, since react-helmet-async prefers the most recently rendered title.
         */}
         <Helmet>
           <title>{findRouteByPath(pathname)?.getTitle(pathname) ?? 'Uniswap Interface'}</title>
@@ -179,7 +179,6 @@ export default function App() {
 }
 
 const Body = memo(function Body() {
-  const isLoaded = useFeatureFlagsIsLoaded()
   const routerConfig = useRouterConfig()
   const renderUkBanner = useRenderUkBanner()
 
@@ -189,25 +188,21 @@ const Body = memo(function Body() {
         <AppChrome />
       </Suspense>
       <Suspense fallback={<Loader />}>
-        {isLoaded ? (
-          <Routes>
-            {routes.map((route: RouteDefinition) =>
-              route.enabled(routerConfig) ? (
-                <Route key={route.path} path={route.path} element={route.getElement(routerConfig)}>
-                  {route.nestedPaths.map((nestedPath) => (
-                    <Route
-                      path={nestedPath}
-                      element={route.getElement(routerConfig)}
-                      key={`${route.path}/${nestedPath}`}
-                    />
-                  ))}
-                </Route>
-              ) : null
-            )}
-          </Routes>
-        ) : (
-          <Loader />
-        )}
+        <Routes>
+          {routes.map((route: RouteDefinition) =>
+            route.enabled(routerConfig) ? (
+              <Route key={route.path} path={route.path} element={route.getElement(routerConfig)}>
+                {route.nestedPaths.map((nestedPath) => (
+                  <Route
+                    path={nestedPath}
+                    element={route.getElement(routerConfig)}
+                    key={`${route.path}/${nestedPath}`}
+                  />
+                ))}
+              </Route>
+            ) : null
+          )}
+        </Routes>
       </Suspense>
     </BodyWrapper>
   )
@@ -275,7 +270,21 @@ function UserPropertyUpdater() {
     const isServiceWorkerHit = Boolean((window as any).__isDocumentCached)
     const serviceWorkerProperty = isServiceWorkerInstalled ? (isServiceWorkerHit ? 'hit' : 'miss') : 'uninstalled'
 
-    const pageLoadProperties = { service_worker: serviceWorkerProperty }
+    let cache = 'unknown'
+    try {
+      const timing = performance
+        .getEntriesByType('resource')
+        .find((timing) => timing.name.match(/\/static\/js\/main\.\w{8}\.js$/)) as PerformanceResourceTiming
+      if (timing.transferSize === 0) {
+        cache = 'hit'
+      } else {
+        cache = 'miss'
+      }
+    } catch {
+      // ignore
+    }
+
+    const pageLoadProperties = { service_worker: serviceWorkerProperty, cache }
     sendInitializationEvent(SharedEventName.APP_LOADED, pageLoadProperties)
     const sendWebVital =
       (metric: string) =>

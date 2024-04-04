@@ -1,15 +1,15 @@
 import { SwapEventName } from '@uniswap/analytics-events'
 import { providers } from 'ethers'
 import { useEffect, useMemo } from 'react'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
+import { useRestQuery } from 'uniswap/src/data/rest'
 import { logger } from 'utilities/src/logger/logger'
 import { ONE_MINUTE_MS } from 'utilities/src/time/time'
-import { uniswapUrls } from 'wallet/src/constants/urls'
-import { useRestQuery } from 'wallet/src/data/rest'
 import {
   CreateSwapRequest,
   CreateSwapResponse,
   TransactionFailureReason,
-} from 'wallet/src/data/tradingApi/__generated__/api'
+} from 'wallet/src/data/tradingApi/__generated__/index'
 import { useTransactionGasFee } from 'wallet/src/features/gas/hooks'
 import { GasFeeResult, GasSpeed } from 'wallet/src/features/gas/types'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
@@ -114,7 +114,7 @@ export function useTransactionRequestInfo({
 
   // This is a case where simulation fails on backend, meaning txn is expected to fail
   const simulationError = swapQuote?.txFailureReasons?.includes(
-    TransactionFailureReason.SimulationError
+    TransactionFailureReason.SIMULATION_ERROR
   )
   const gasEstimateError = useMemo(
     () => (simulationError ? new Error(UNKNOWN_SIM_ERROR) : error),

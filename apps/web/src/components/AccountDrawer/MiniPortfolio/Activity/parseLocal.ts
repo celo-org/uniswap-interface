@@ -3,7 +3,6 @@ import { t } from '@lingui/macro'
 import { ChainId, Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import UniswapXBolt from 'assets/svg/bolt.svg'
 import { nativeOnChain } from 'constants/tokens'
-import { TransactionStatus } from 'graphql/data/__generated__/types-and-hooks'
 import { ChainTokenMap, useAllTokensMultichain } from 'hooks/Tokens'
 import { useMemo } from 'react'
 import { isOnChainOrder, useAllSignatures } from 'state/signatures/hooks'
@@ -24,6 +23,7 @@ import {
   TransactionType,
   WrapTransactionInfo,
 } from 'state/transactions/types'
+import { TransactionStatus } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { isAddress } from 'utilities/src/addresses'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 
@@ -269,6 +269,7 @@ export function signatureToActivity(
 ): Activity | undefined {
   switch (signature.type) {
     case SignatureType.SIGN_UNISWAPX_ORDER:
+    case SignatureType.SIGN_UNISWAPX_V2_ORDER:
     case SignatureType.SIGN_LIMIT: {
       // Only returns Activity items for orders that don't have an on-chain counterpart
       if (isOnChainOrder(signature.status)) return undefined
@@ -289,8 +290,7 @@ export function signatureToActivity(
           offerer: signature.offerer,
           txHash: signature.txHash,
           chainId: signature.chainId,
-          type:
-            signature.type === SignatureType.SIGN_LIMIT ? SignatureType.SIGN_LIMIT : SignatureType.SIGN_UNISWAPX_ORDER,
+          type: signature.type,
           status: signature.status,
           swapInfo: signature.swapInfo,
           addedTime: signature.addedTime,

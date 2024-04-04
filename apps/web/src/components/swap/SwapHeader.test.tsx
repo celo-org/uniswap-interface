@@ -1,12 +1,12 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { Dispatch, PropsWithChildren, SetStateAction } from 'react'
-import { CurrencyState, EMPTY_DERIVED_SWAP_INFO, SwapAndLimitContext, SwapContext } from 'state/swap/SwapContext'
-import { render, screen } from 'test-utils/render'
-
-import { Field, SwapTab } from './constants'
+import { CurrencyState, EMPTY_DERIVED_SWAP_INFO, SwapAndLimitContext, SwapContext } from 'state/swap/types'
+import { mocked } from 'test-utils/mocked'
+import { act, render, screen } from 'test-utils/render'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 import SwapHeader from './SwapHeader'
-
-jest.mock('../../featureFlags/flags/limits', () => ({ useLimitsEnabled: () => true }))
+import { Field, SwapTab } from './constants'
 
 interface WrapperProps {
   setCurrentTab?: Dispatch<SetStateAction<SwapTab>>
@@ -45,11 +45,15 @@ function Wrapper(props: PropsWithChildren<WrapperProps>) {
   )
 }
 
+beforeEach(() => {
+  mocked(useFeatureFlag).mockImplementation((f) => f === FeatureFlags.LimitsEnabled)
+})
+
 describe('SwapHeader.tsx', () => {
   it('matches base snapshot', () => {
     const { asFragment } = render(
       <Wrapper>
-        <SwapHeader />
+        <SwapHeader compact={false} syncTabToUrl={false} />
       </Wrapper>
     )
     expect(asFragment()).toMatchSnapshot()
@@ -62,10 +66,12 @@ describe('SwapHeader.tsx', () => {
     const onClickTab = jest.fn()
     render(
       <Wrapper setCurrentTab={onClickTab}>
-        <SwapHeader />
+        <SwapHeader compact={false} syncTabToUrl={true} />
       </Wrapper>
     )
-    screen.getByText('Limit').click()
+    act(() => {
+      screen.getByText('Limit').click()
+    })
     expect(onClickTab).toHaveBeenCalledWith(SwapTab.Limit)
   })
 
@@ -73,7 +79,7 @@ describe('SwapHeader.tsx', () => {
     const onClickTab = jest.fn()
     render(
       <Wrapper setCurrentTab={onClickTab} chainId={ChainId.ARBITRUM_GOERLI}>
-        <SwapHeader />
+        <SwapHeader compact={false} syncTabToUrl={false} />
       </Wrapper>
     )
     expect(screen.queryByText('Limit')).toBeNull()

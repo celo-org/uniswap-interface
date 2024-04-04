@@ -2,13 +2,13 @@
 
 exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
 <DocumentFragment>
-  .c3 {
+  .c4 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c4 {
+.c5 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -25,7 +25,25 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   justify-content: flex-start;
 }
 
-.c11 {
+.c10 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.c12 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -47,25 +65,6 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   -moz-letter-spacing: -0.01em;
   -ms-letter-spacing: -0.01em;
   letter-spacing: -0.01em;
-}
-
-.c17 {
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition-duration: 125ms;
-  transition-duration: 125ms;
-  color: #FC72FF;
-  stroke: #FC72FF;
-  font-weight: 500;
-}
-
-.c17:hover {
-  opacity: 0.6;
-}
-
-.c17:active {
-  opacity: 0.4;
 }
 
 .c21 {
@@ -103,7 +102,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   animation: 2s fvtopB linear infinite;
 }
 
-.c0 {
+.c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -122,8 +121,8 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   height: inherit;
 }
 
-.c1 {
-  max-width: 1200px;
+.c2 {
+  max-width: px;
   max-height: 600px;
   -webkit-box-pack: center;
   -webkit-justify-content: center;
@@ -136,7 +135,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   margin: 0px auto 24px auto;
 }
 
-.c2 {
+.c3 {
   width: 100%;
   position: relative;
   display: -webkit-box;
@@ -200,7 +199,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   z-index: 990;
 }
 
-.c5 {
+.c6 {
   padding: 0px 12px;
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -213,11 +212,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   min-height: 64px;
 }
 
-.c20:hover {
-  background: #22222212;
-}
-
-.c6 {
+.c7 {
   border: 1px solid #22222212;
   border-top-right-radius: 20px;
   border-top-left-radius: 20px;
@@ -233,11 +228,11 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   overscroll-behavior: none;
 }
 
-.c6::-webkit-scrollbar {
+.c7::-webkit-scrollbar {
   display: none;
 }
 
-.c7 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -248,14 +243,14 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   flex-grow: 1;
 }
 
-.c7:last-child {
+.c8:last-child {
   -webkit-box-pack: end;
   -webkit-justify-content: flex-end;
   -ms-flex-pack: end;
   justify-content: flex-end;
 }
 
-.c7:first-child {
+.c8:first-child {
   -webkit-box-flex: 0;
   -webkit-flex-grow: 0;
   -ms-flex-positive: 0;
@@ -281,30 +276,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   opacity: 0.4;
 }
 
-.c9 {
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
-  cursor: pointer;
-  width: 100%;
-  gap: 4px;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition-duration: 125ms;
-  transition-duration: 125ms;
-}
-
-.c9:hover {
-  opacity: 0.6;
-}
-
-.c9:active {
-  opacity: 0.4;
-}
-
-.c10 {
+.c11 {
   height: 16px;
   width: 16px;
   color: #222222;
@@ -313,11 +285,11 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   transform: rotate(0deg);
 }
 
-.c12 {
+.c13 {
   color: #222222;
 }
 
-.c14 {
+.c15 {
   -webkit-text-decoration: none;
   text-decoration: none;
   cursor: pointer;
@@ -331,11 +303,11 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   gap: 4px;
 }
 
-.c14:hover {
+.c15:hover {
   opacity: 0.6;
 }
 
-.c14:active {
+.c15:active {
   opacity: 0.4;
 }
 
@@ -366,8 +338,8 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   display: block;
 }
 
-.c8 {
-  min-width: 164px;
+.c9 {
+  min-width: 120px;
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
@@ -388,8 +360,8 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   padding: 12px 8px;
 }
 
-.c13 {
-  min-width: 100px;
+.c14 {
+  min-width: 144px;
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
@@ -410,7 +382,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   padding: 12px 8px;
 }
 
-.c16 {
+.c17 {
   min-width: 125px;
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -454,13 +426,23 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
   padding: 12px 8px;
 }
 
-.c15 {
+.c16 {
   position: relative;
 }
 
 .c30 {
   color: #7D7D7D;
   stroke: #7D7D7D;
+}
+
+.c0 {
+  min-height: 256px;
+}
+
+@media not all and (hover:none) {
+  .c20:hover {
+    background: #22222212;
+  }
 }
 
 <span
@@ -470,29 +452,30 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
       class=" t_light _dsp_contents is_Theme"
     >
       <div
+        class="c0"
         data-testid="pool-details-transactions-table"
       >
         <div>
           <div
-            class="c0 c1"
+            class="c1 c2"
           >
             <div
-              class="c2"
+              class="c3"
             >
               <div
-                class="c3 c4 c5 c6"
+                class="c4 c5 c6 c7"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c3 c4 c9"
+                      class="c4 c10"
                     >
                       <svg
-                        class="c10"
+                        class="c11"
                         direction="desc"
                         fill="none"
                         height="24"
@@ -515,7 +498,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                         />
                       </svg>
                       <div
-                        class="c11 c12 css-1urox24"
+                        class="c12 c13 css-1urox24"
                       >
                         Time
                       </div>
@@ -523,16 +506,16 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c3 c4 c14"
+                      class="c4 c5 c15"
                     >
                       <svg
-                        class="c15"
+                        class="c16"
                         fill="none"
                         height="17"
                         viewBox="0 0 16 17"
@@ -549,7 +532,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                         />
                       </svg>
                       <div
-                        class="c11 css-1urox24"
+                        class="c12 css-1urox24"
                       >
                         Type
                       </div>
@@ -557,58 +540,48 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c11 css-1urox24"
+                      class="c12 css-1urox24"
                     >
                       USD
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
-                    <a
-                      class="c17"
-                      href="/explore/tokens/ethereum/undefined"
-                    >
-                      <div
-                        class="c11 css-1urox24"
-                      />
-                    </a>
+                    <div
+                      class="c12 css-1urox24"
+                    />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
-                    <a
-                      class="c17"
-                      href="/explore/tokens/ethereum/undefined"
-                    >
-                      <div
-                        class="c11 css-1urox24"
-                      />
-                    </a>
+                    <div
+                      class="c12 css-1urox24"
+                    />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
                     class="c18"
                   >
                     <div
-                      class="c11 css-1urox24"
+                      class="c12 css-1urox24"
                     >
                       Wallet
                     </div>
@@ -617,16 +590,16 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
               </div>
             </div>
             <div
-              class="c0 c19"
+              class="c1 c19"
             >
               <div
-                class="c3 c4 c5 c20"
+                class="c4 c5 c6 c20"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <a
                       class="c21 c22 c23 c24"
@@ -639,9 +612,9 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                       >
                         <div>
                           <div
-                            class="c11 css-1urox24"
+                            class="c12 css-1urox24"
                           >
-                            01/12, 05:46am
+                            1mo ago
                           </div>
                         </div>
                       </div>
@@ -674,10 +647,10 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
                       class="c28 css-1urox24"
@@ -689,10 +662,10 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
                       class="c29 css-1urox24"
@@ -702,10 +675,10 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
                       class="c29 css-1urox24"
@@ -715,10 +688,10 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
                       class="c29 css-1urox24"
@@ -728,7 +701,7 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
                     class="c18"
@@ -748,10 +721,10 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
               </div>
             </div>
             <div
-              class="c3 c4 c31"
+              class="c4 c5 c31"
             >
               <div
-                class="c3 c4 c32"
+                class="c4 c5 c32"
               >
                 <svg
                   class="c33 c34"
@@ -780,13 +753,13 @@ exports[`PoolDetailsTransactionsTable renders data filled state 1`] = `
 
 exports[`PoolDetailsTransactionsTable renders error state 1`] = `
 <DocumentFragment>
-  .c3 {
+  .c4 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c4 {
+.c5 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -803,7 +776,25 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   justify-content: flex-start;
 }
 
-.c11 {
+.c10 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.c12 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -811,7 +802,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c23 {
+.c24 {
   color: #222222;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -819,23 +810,23 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c26 {
+.c27 {
   height: 16px;
   width: 16px;
 }
 
-.c26 path {
+.c27 path {
   stroke: #FC72FF;
   background: #7D7D7D;
   fill: none;
 }
 
-.c27 {
+.c28 {
   -webkit-animation: 2s fvtopB linear infinite;
   animation: 2s fvtopB linear infinite;
 }
 
-.c0 {
+.c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -849,7 +840,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   justify-content: flex-start;
 }
 
-.c22 {
+.c23 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -879,8 +870,8 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   border-radius: 20px;
 }
 
-.c1 {
-  max-width: 1200px;
+.c2 {
+  max-width: px;
   max-height: 600px;
   -webkit-box-pack: center;
   -webkit-justify-content: center;
@@ -893,7 +884,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   margin: 0px auto 24px auto;
 }
 
-.c2 {
+.c3 {
   width: 100%;
   position: relative;
   display: -webkit-box;
@@ -910,7 +901,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   background: #FFFFFF;
 }
 
-.c20 {
+.c21 {
   width: 100%;
   position: relative;
   overflow-x: auto;
@@ -927,11 +918,11 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   scrollbar-width: none;
 }
 
-.c20::-webkit-scrollbar {
+.c21::-webkit-scrollbar {
   display: none;
 }
 
-.c24 {
+.c25 {
   position: -webkit-sticky;
   position: sticky;
   -webkit-box-pack: center;
@@ -942,7 +933,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   visibility: hidden;
 }
 
-.c25 {
+.c26 {
   background: #FFEFFF;
   border-radius: 8px;
   width: -webkit-fit-content;
@@ -957,7 +948,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   z-index: 990;
 }
 
-.c5 {
+.c6 {
   padding: 0px 12px;
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -970,11 +961,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   min-height: 64px;
 }
 
-.c21:hover {
-  background: #22222212;
-}
-
-.c6 {
+.c7 {
   border: 1px solid #22222212;
   border-top-right-radius: 20px;
   border-top-left-radius: 20px;
@@ -991,11 +978,11 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   opacity: 0.4;
 }
 
-.c6::-webkit-scrollbar {
+.c7::-webkit-scrollbar {
   display: none;
 }
 
-.c7 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1006,44 +993,21 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   flex-grow: 1;
 }
 
-.c7:last-child {
+.c8:last-child {
   -webkit-box-pack: end;
   -webkit-justify-content: flex-end;
   -ms-flex-pack: end;
   justify-content: flex-end;
 }
 
-.c7:first-child {
+.c8:first-child {
   -webkit-box-flex: 0;
   -webkit-flex-grow: 0;
   -ms-flex-positive: 0;
   flex-grow: 0;
 }
 
-.c9 {
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
-  cursor: pointer;
-  width: 100%;
-  gap: 4px;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition-duration: 125ms;
-  transition-duration: 125ms;
-}
-
-.c9:hover {
-  opacity: 0.6;
-}
-
-.c9:active {
-  opacity: 0.4;
-}
-
-.c10 {
+.c11 {
   height: 16px;
   width: 16px;
   color: #222222;
@@ -1052,11 +1016,11 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   transform: rotate(0deg);
 }
 
-.c12 {
+.c13 {
   color: #222222;
 }
 
-.c14 {
+.c15 {
   -webkit-text-decoration: none;
   text-decoration: none;
   cursor: pointer;
@@ -1070,15 +1034,15 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   gap: 4px;
 }
 
-.c14:hover {
+.c15:hover {
   opacity: 0.6;
 }
 
-.c14:active {
+.c15:active {
   opacity: 0.4;
 }
 
-.c17 {
+.c18 {
   border-radius: 12px;
   border-radius: 12px;
   height: 24px;
@@ -1093,8 +1057,8 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   background-size: 400%;
 }
 
-.c8 {
-  min-width: 164px;
+.c9 {
+  min-width: 120px;
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
@@ -1115,8 +1079,8 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   padding: 12px 8px;
 }
 
-.c13 {
-  min-width: 100px;
+.c14 {
+  min-width: 144px;
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
@@ -1137,7 +1101,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   padding: 12px 8px;
 }
 
-.c16 {
+.c17 {
   min-width: 125px;
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -1159,7 +1123,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   padding: 12px 8px;
 }
 
-.c19 {
+.c20 {
   min-width: 100px;
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -1181,13 +1145,23 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
   padding: 12px 8px;
 }
 
-.c18 {
+.c19 {
   width: 75%;
   height: 16px;
 }
 
-.c15 {
+.c16 {
   position: relative;
+}
+
+.c0 {
+  min-height: 256px;
+}
+
+@media not all and (hover:none) {
+  .c22:hover {
+    background: #22222212;
+  }
 }
 
 <span
@@ -1197,29 +1171,30 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
       class=" t_light _dsp_contents is_Theme"
     >
       <div
+        class="c0"
         data-testid="pool-details-transactions-table"
       >
         <div>
           <div
-            class="c0 c1"
+            class="c1 c2"
           >
             <div
-              class="c2"
+              class="c3"
             >
               <div
-                class="c3 c4 c5 c6"
+                class="c4 c5 c6 c7"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c3 c4 c9"
+                      class="c4 c10"
                     >
                       <svg
-                        class="c10"
+                        class="c11"
                         direction="desc"
                         fill="none"
                         height="24"
@@ -1242,7 +1217,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
                         />
                       </svg>
                       <div
-                        class="c11 c12 css-1urox24"
+                        class="c12 c13 css-1urox24"
                       >
                         Time
                       </div>
@@ -1250,16 +1225,16 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c3 c4 c14"
+                      class="c4 c5 c15"
                     >
                       <svg
-                        class="c15"
+                        class="c16"
                         fill="none"
                         height="17"
                         viewBox="0 0 16 17"
@@ -1276,7 +1251,7 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
                         />
                       </svg>
                       <div
-                        class="c11 css-1urox24"
+                        class="c12 css-1urox24"
                       >
                         Type
                       </div>
@@ -1284,50 +1259,50 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c11 css-1urox24"
+                      class="c12 css-1urox24"
                     >
                       USD
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c11 css-1urox24"
+                      class="c12 css-1urox24"
                     >
                       Wallet
                     </div>
@@ -1336,542 +1311,542 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
               </div>
             </div>
             <div
-              class="c0 c20"
+              class="c1 c21"
             >
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c22"
+                class="c23"
                 data-testid="table-error-modal"
               >
                 <div>
@@ -1904,15 +1879,15 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
                   </svg>
                 </div>
                 <div
-                  class="c0"
+                  class="c1"
                 >
                   <div
-                    class="c23 css-n8z49y"
+                    class="c24 css-n8z49y"
                   >
                     Error loading data
                   </div>
                   <div
-                    class="c11 css-142zc9n"
+                    class="c12 css-142zc9n"
                   >
                     Data is unavailable at the moment; we're working on a fix
                   </div>
@@ -1920,13 +1895,13 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
               </div>
             </div>
             <div
-              class="c3 c4 c24"
+              class="c4 c5 c25"
             >
               <div
-                class="c3 c4 c25"
+                class="c4 c5 c26"
               >
                 <svg
-                  class="c26 c27"
+                  class="c27 c28"
                   fill="none"
                   stroke="#FC72FF"
                   viewBox="0 0 24 24"
@@ -1952,13 +1927,13 @@ exports[`PoolDetailsTransactionsTable renders error state 1`] = `
 
 exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
 <DocumentFragment>
-  .c3 {
+  .c4 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c4 {
+.c5 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -1975,7 +1950,25 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   justify-content: flex-start;
 }
 
-.c11 {
+.c10 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.c12 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -1983,23 +1976,23 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c24 {
+.c25 {
   height: 16px;
   width: 16px;
 }
 
-.c24 path {
+.c25 path {
   stroke: #FC72FF;
   background: #7D7D7D;
   fill: none;
 }
 
-.c25 {
+.c26 {
   -webkit-animation: 2s fvtopB linear infinite;
   animation: 2s fvtopB linear infinite;
 }
 
-.c0 {
+.c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2013,8 +2006,8 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   justify-content: flex-start;
 }
 
-.c1 {
-  max-width: 1200px;
+.c2 {
+  max-width: px;
   max-height: 600px;
   -webkit-box-pack: center;
   -webkit-justify-content: center;
@@ -2027,7 +2020,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   margin: 0px auto 24px auto;
 }
 
-.c2 {
+.c3 {
   width: 100%;
   position: relative;
   display: -webkit-box;
@@ -2044,7 +2037,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   background: #FFFFFF;
 }
 
-.c20 {
+.c21 {
   width: 100%;
   position: relative;
   overflow-x: auto;
@@ -2061,11 +2054,11 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   scrollbar-width: none;
 }
 
-.c20::-webkit-scrollbar {
+.c21::-webkit-scrollbar {
   display: none;
 }
 
-.c22 {
+.c23 {
   position: -webkit-sticky;
   position: sticky;
   -webkit-box-pack: center;
@@ -2076,7 +2069,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   visibility: hidden;
 }
 
-.c23 {
+.c24 {
   background: #FFEFFF;
   border-radius: 8px;
   width: -webkit-fit-content;
@@ -2091,7 +2084,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   z-index: 990;
 }
 
-.c5 {
+.c6 {
   padding: 0px 12px;
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -2104,11 +2097,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   min-height: 64px;
 }
 
-.c21:hover {
-  background: #22222212;
-}
-
-.c6 {
+.c7 {
   border: 1px solid #22222212;
   border-top-right-radius: 20px;
   border-top-left-radius: 20px;
@@ -2124,11 +2113,11 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   overscroll-behavior: none;
 }
 
-.c6::-webkit-scrollbar {
+.c7::-webkit-scrollbar {
   display: none;
 }
 
-.c7 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2139,44 +2128,21 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   flex-grow: 1;
 }
 
-.c7:last-child {
+.c8:last-child {
   -webkit-box-pack: end;
   -webkit-justify-content: flex-end;
   -ms-flex-pack: end;
   justify-content: flex-end;
 }
 
-.c7:first-child {
+.c8:first-child {
   -webkit-box-flex: 0;
   -webkit-flex-grow: 0;
   -ms-flex-positive: 0;
   flex-grow: 0;
 }
 
-.c9 {
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
-  cursor: pointer;
-  width: 100%;
-  gap: 4px;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition-duration: 125ms;
-  transition-duration: 125ms;
-}
-
-.c9:hover {
-  opacity: 0.6;
-}
-
-.c9:active {
-  opacity: 0.4;
-}
-
-.c10 {
+.c11 {
   height: 16px;
   width: 16px;
   color: #222222;
@@ -2185,11 +2151,11 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   transform: rotate(0deg);
 }
 
-.c12 {
+.c13 {
   color: #222222;
 }
 
-.c14 {
+.c15 {
   -webkit-text-decoration: none;
   text-decoration: none;
   cursor: pointer;
@@ -2203,15 +2169,15 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   gap: 4px;
 }
 
-.c14:hover {
+.c15:hover {
   opacity: 0.6;
 }
 
-.c14:active {
+.c15:active {
   opacity: 0.4;
 }
 
-.c17 {
+.c18 {
   border-radius: 12px;
   border-radius: 12px;
   height: 24px;
@@ -2226,8 +2192,8 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   background-size: 400%;
 }
 
-.c8 {
-  min-width: 164px;
+.c9 {
+  min-width: 120px;
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
@@ -2248,8 +2214,8 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   padding: 12px 8px;
 }
 
-.c13 {
-  min-width: 100px;
+.c14 {
+  min-width: 144px;
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
@@ -2270,7 +2236,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   padding: 12px 8px;
 }
 
-.c16 {
+.c17 {
   min-width: 125px;
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -2292,7 +2258,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   padding: 12px 8px;
 }
 
-.c19 {
+.c20 {
   min-width: 100px;
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -2314,13 +2280,23 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
   padding: 12px 8px;
 }
 
-.c18 {
+.c19 {
   width: 75%;
   height: 16px;
 }
 
-.c15 {
+.c16 {
   position: relative;
+}
+
+.c0 {
+  min-height: 256px;
+}
+
+@media not all and (hover:none) {
+  .c22:hover {
+    background: #22222212;
+  }
 }
 
 <span
@@ -2330,29 +2306,30 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
       class=" t_light _dsp_contents is_Theme"
     >
       <div
+        class="c0"
         data-testid="pool-details-transactions-table"
       >
         <div>
           <div
-            class="c0 c1"
+            class="c1 c2"
           >
             <div
-              class="c2"
+              class="c3"
             >
               <div
-                class="c3 c4 c5 c6"
+                class="c4 c5 c6 c7"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c3 c4 c9"
+                      class="c4 c10"
                     >
                       <svg
-                        class="c10"
+                        class="c11"
                         direction="desc"
                         fill="none"
                         height="24"
@@ -2375,7 +2352,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
                         />
                       </svg>
                       <div
-                        class="c11 c12 css-1urox24"
+                        class="c12 c13 css-1urox24"
                       >
                         Time
                       </div>
@@ -2383,16 +2360,16 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c3 c4 c14"
+                      class="c4 c5 c15"
                     >
                       <svg
-                        class="c15"
+                        class="c16"
                         fill="none"
                         height="17"
                         viewBox="0 0 16 17"
@@ -2409,7 +2386,7 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
                         />
                       </svg>
                       <div
-                        class="c11 css-1urox24"
+                        class="c12 css-1urox24"
                       >
                         Type
                       </div>
@@ -2417,50 +2394,50 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c11 css-1urox24"
+                      class="c12 css-1urox24"
                     >
                       USD
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c11 css-1urox24"
+                      class="c12 css-1urox24"
                     >
                       Wallet
                     </div>
@@ -2469,535 +2446,535 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
               </div>
             </div>
             <div
-              class="c0 c20"
+              class="c1 c21"
             >
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
               </div>
               <div
-                class="c3 c4 c5 c21"
+                class="c4 c5 c6 c22"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c8"
+                    class="c9"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c13"
+                    class="c14"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
                 </div>
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c17 c18"
+                      class="c18 c19"
                       data-testid="cell-loading-bubble"
                     />
                   </div>
@@ -3005,13 +2982,13 @@ exports[`PoolDetailsTransactionsTable renders loading state 1`] = `
               </div>
             </div>
             <div
-              class="c3 c4 c22"
+              class="c4 c5 c23"
             >
               <div
-                class="c3 c4 c23"
+                class="c4 c5 c24"
               >
                 <svg
-                  class="c24 c25"
+                  class="c25 c26"
                   fill="none"
                   stroke="#FC72FF"
                   viewBox="0 0 24 24"

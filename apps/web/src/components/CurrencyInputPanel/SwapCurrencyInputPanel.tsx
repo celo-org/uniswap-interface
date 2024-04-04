@@ -21,6 +21,7 @@ import { flexColumnNoWrap, flexRowNoWrap } from 'theme/styles'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 
 import { CurrencySearchFilters } from 'components/SearchModal/CurrencySearch'
+import { Text } from 'ui/src'
 import { ReactComponent as DropDown } from '../../assets/images/dropdown.svg'
 import { useCurrencyBalance } from '../../state/connection/hooks'
 import { ButtonGray } from '../Button'
@@ -57,13 +58,15 @@ const Container = styled.div<{ hideInput: boolean }>`
   width: ${({ hideInput }) => (hideInput ? '100%' : 'initial')};
 `
 
-const CurrencySelect = styled(ButtonGray)<{
+interface CurrencySelectProps {
   visible: boolean
   selected: boolean
   hideInput?: boolean
   disabled?: boolean
   animateShake?: boolean
-}>`
+}
+
+export const CurrencySelect = styled(ButtonGray)<CurrencySelectProps>`
   align-items: center;
   background-color: ${({ selected, theme }) => (selected ? theme.surface1 : theme.accent1)};
   opacity: ${({ disabled }) => (!disabled ? 1 : 0.4)};
@@ -144,6 +147,7 @@ const InputRow = styled.div`
   ${flexRowNoWrap};
   align-items: center;
   justify-content: space-between;
+  margin-top: 4px;
 `
 
 const LabelRow = styled.div`
@@ -293,15 +297,17 @@ const SwapCurrencyInputPanel = forwardRef<HTMLInputElement, SwapCurrencyInputPan
           <FixedContainer>
             <AutoColumn gap="sm" justify="center">
               <Lock />
-              <ThemedText.BodySecondary fontSize="12px" textAlign="center" padding="0 12px">
+              <Text variant="body2" textAlign="center" px="$spacing12">
                 <Trans>The market price is outside your specified price range. Single-asset deposit only.</Trans>
-              </ThemedText.BodySecondary>
+              </Text>
             </AutoColumn>
           </FixedContainer>
         )}
 
         <Container hideInput={hideInput}>
-          <ThemedText.SubHeaderSmall style={{ userSelect: 'none' }}>{label}</ThemedText.SubHeaderSmall>
+          <Text variant="body3" userSelect="none" color="$neutral2">
+            {label}
+          </Text>
           <InputRow style={hideInput ? { padding: '0', borderRadius: '8px' } : {}}>
             {!hideInput && (
               <div style={{ display: 'flex', flexGrow: 1 }} onClick={handleDisabledNumericalInputClick}>
@@ -313,6 +319,7 @@ const SwapCurrencyInputPanel = forwardRef<HTMLInputElement, SwapCurrencyInputPan
                   $loading={loading}
                   id={id}
                   ref={ref}
+                  maxDecimals={currency?.decimals}
                 />
               </div>
             )}

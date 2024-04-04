@@ -19,23 +19,23 @@ import {
   ScrollView,
   Text,
   TouchableArea,
+  getUniconV2Colors,
+  useExtractedColors,
   useIsDarkMode,
   useSporeColors,
   useUniconColors,
-  useUniconV2Colors,
 } from 'ui/src'
 import { ENS_LOGO } from 'ui/src/assets'
-import { iconSizes, imageSizes, spacing } from 'ui/src/theme'
+import { iconSizes, imageSizes } from 'ui/src/theme'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 import { AddressDisplay } from 'wallet/src/components/accounts/AddressDisplay'
 import { useENSDescription, useENSName, useENSTwitterUsername } from 'wallet/src/features/ens/api'
-import { FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
-import { useFeatureFlag } from 'wallet/src/features/experiments/hooks'
 import { selectWatchedAddressSet } from 'wallet/src/features/favorites/selectors'
 import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
 import { useAvatar, useDisplayName } from 'wallet/src/features/wallet/hooks'
 import { DisplayNameType } from 'wallet/src/features/wallet/types'
 import { ElementName, ModalName } from 'wallet/src/telemetry/constants'
-import { useExtractedColors } from 'wallet/src/utils/colors'
 import { openUri } from 'wallet/src/utils/linking'
 
 const HEADER_GRADIENT_HEIGHT = 144
@@ -43,6 +43,13 @@ const HEADER_ICON_SIZE = 72
 
 interface ProfileHeaderProps {
   address: Address
+}
+
+const HEADER_SOLID_COLOR_OPACITY = 0.1
+
+export const solidHeaderProps = {
+  minOpacity: HEADER_SOLID_COLOR_OPACITY,
+  maxOpacity: HEADER_SOLID_COLOR_OPACITY,
 }
 
 export const ProfileHeader = memo(function ProfileHeader({
@@ -70,7 +77,7 @@ export const ProfileHeader = memo(function ProfileHeader({
   const showENSName = primaryENSName && primaryENSName !== displayName?.name
 
   const { colors: avatarColors } = useExtractedColors(avatar)
-  const isUniconsV2Enabled = useFeatureFlag(FEATURE_FLAGS.UniconsV2)
+  const isUniconsV2Enabled = useFeatureFlag(FeatureFlags.UniconsV2)
 
   const hasAvatar = !!avatar && !avatarLoading
 
@@ -79,7 +86,7 @@ export const ProfileHeader = memo(function ProfileHeader({
     useUniconColors(address)
 
   // UniconV2 colors
-  const { color } = useUniconV2Colors(address)
+  const { color } = getUniconV2Colors(address)
 
   // Wait for avatar, then render avatar extracted colors or unicon colors if no avatar
   const fixedGradientColors: [string, string] = useMemo(() => {
@@ -167,9 +174,12 @@ export const ProfileHeader = memo(function ProfileHeader({
           />
         </Flex>
         {hasAvatar && avatarColors?.primary ? (
-          <HeaderRadial color={avatarColors.primary} />
+          <HeaderRadial color={avatarColors.primary} {...solidHeaderProps} />
         ) : (
-          <HeaderRadial color={isUniconsV2Enabled ? color : uniconGradientStart} />
+          <HeaderRadial
+            color={isUniconsV2Enabled ? color : uniconGradientStart}
+            {...solidHeaderProps}
+          />
         )}
       </AnimatedFlex>
 
@@ -205,7 +215,7 @@ export const ProfileHeader = memo(function ProfileHeader({
           {(twitter || showENSName) && (
             <ScrollView
               horizontal
-              contentContainerStyle={{ paddingHorizontal: spacing.spacing24 }}
+              contentContainerStyle={{ px: '$spacing24' }}
               showsHorizontalScrollIndicator={false}>
               <Flex row gap="$spacing16">
                 {twitter ? (
@@ -273,7 +283,7 @@ export const ProfileHeader = memo(function ProfileHeader({
                   color="$neutral2"
                   maxFontSizeMultiplier={1.2}
                   variant="buttonLabel2">
-                  {t('Send')}
+                  {t('common.button.send')}
                 </Text>
               </Flex>
             </TouchableArea>

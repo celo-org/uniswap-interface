@@ -190,13 +190,13 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
   line-height: 44px;
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c2 {
     width: 100%;
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c1 {
     -webkit-flex-direction: row;
     -ms-flex-direction: row;
@@ -220,7 +220,7 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c7 {
     -webkit-flex-direction: column;
     -ms-flex-direction: column;
@@ -228,7 +228,7 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c8 {
     font-size: 20px;
     line-height: 28px;
@@ -236,7 +236,7 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c13 {
     -webkit-flex-direction: column;
     -ms-flex-direction: column;
@@ -249,7 +249,7 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c14 {
     font-size: 20px;
     line-height: 28px;
@@ -317,16 +317,16 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
                 >
                   <img
                     class="c11"
-                    src="https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png"
+                    src="ethereum-logo.png"
                   />
                 </div>
               </div>
               82.5K 
               <a
                 class="c12"
-                href="/explore/tokens/ethereum/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+                href="/explore/tokens/ethereum/NATIVE"
               >
-                WETH
+                ETH
               </a>
             </div>
           </div>
@@ -387,7 +387,7 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
             <div
               class="c14 css-vurnku"
             >
-              $233.4M
+              $194.3M
             </div>
             <div
               class="c15 c16"
@@ -429,7 +429,7 @@ exports[`PoolDetailsStats pool balance chart not visible on mobile 1`] = `
             <div
               class="c14 css-vurnku"
             >
-              $116.7K
+              $97.1K
             </div>
           </div>
         </div>
@@ -615,7 +615,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
 
 .c13 {
   height: 8px;
-  width: 40.698463777008904%;
+  width: 99.99999996483845%;
   background: #FC72FF;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -624,7 +624,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
 
 .c14 {
   height: 8px;
-  width: 59.3015362229911%;
+  width: 3.5161546763980574e-8%;
   background: #4C82FB;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -647,13 +647,13 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
   line-height: 44px;
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c2 {
     width: 100%;
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c1 {
     -webkit-flex-direction: row;
     -ms-flex-direction: row;
@@ -677,7 +677,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c7 {
     -webkit-flex-direction: column;
     -ms-flex-direction: column;
@@ -685,7 +685,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c8 {
     font-size: 20px;
     line-height: 28px;
@@ -693,7 +693,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c15 {
     -webkit-flex-direction: column;
     -ms-flex-direction: column;
@@ -706,7 +706,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
   }
 }
 
-@media (max-width:1023px) {
+@media (max-width:1024px) {
   .c16 {
     font-size: 20px;
     line-height: 28px;
@@ -768,7 +768,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
               82.5K 
               <a
                 class="c9"
-                href="/explore/tokens/ethereum/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+                href="/explore/tokens/ethereum/NATIVE"
               >
                 <div
                   class="c10"
@@ -779,11 +779,11 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
                   >
                     <img
                       class="c12"
-                      src="https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png"
+                      src="ethereum-logo.png"
                     />
                   </div>
                 </div>
-                WETH
+                ETH
               </a>
             </div>
           </div>
@@ -855,7 +855,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
             <div
               class="c16 css-vurnku"
             >
-              $233.4M
+              $194.3M
             </div>
             <div
               class="c17 c18"
@@ -897,7 +897,7 @@ exports[`PoolDetailsStats renders stats text correctly 1`] = `
             <div
               class="c16 css-vurnku"
             >
-              $116.7K
+              $97.1K
             </div>
           </div>
         </div>

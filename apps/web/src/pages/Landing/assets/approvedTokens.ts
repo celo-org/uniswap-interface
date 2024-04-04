@@ -1,5 +1,6 @@
 import ethereumLogo from 'assets/images/ethereum-logo.png'
-import { Chain } from 'graphql/data/__generated__/types-and-hooks'
+import { NATIVE_CHAIN_ID } from 'constants/tokens'
+import { Chain } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 
 export enum TokenStandard {
   ERC20,
@@ -20,7 +21,7 @@ export const approvedERC20: InteractiveToken[] = [
   {
     name: 'Ethereum',
     symbol: 'ETH',
-    address: 'NATIVE',
+    address: NATIVE_CHAIN_ID,
     chain: Chain.Ethereum,
     standard: TokenStandard.ERC20,
     color: '#627EEA',

@@ -644,10 +644,6 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.24):
     - BoringSSL-GRPC/Interface (= 0.0.24)
   - BoringSSL-GRPC/Interface (0.0.24)
-  - Burnt (0.11.4):
-    - ExpoModulesCore
-    - SPAlert
-    - SPIndicator
   - DoubleConversion (1.1.6)
   - EthersRS (0.0.5)
   - EXApplication (5.1.1):
@@ -660,6 +656,8 @@ PODS:
     - ExpoModulesCore
     - ZXingObjC/OneD
     - ZXingObjC/PDF417
+  - EXCamera (13.4.4):
+    - ExpoModulesCore
   - EXFileSystem (15.3.0):
     - ExpoModulesCore
   - EXFont (11.1.1):
@@ -671,7 +669,7 @@ PODS:
     - ExpoModulesCore
   - Expo (48.0.19):
     - ExpoModulesCore
-  - ExpoBlur (12.2.2):
+  - ExpoBlur (12.6.0):
     - ExpoModulesCore
   - ExpoClipboard (4.1.2):
     - ExpoModulesCore
@@ -1132,6 +1130,9 @@ PODS:
   - react-native-appsflyer (6.10.3):
     - AppsFlyerFramework (= 6.10.1)
     - React
+  - react-native-compat (2.11.2):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
   - react-native-context-menu-view (1.6.0):
     - React
   - react-native-get-random-values (1.8.0):
@@ -1285,7 +1286,8 @@ PODS:
     - RNFBApp
   - RNFlashList (1.6.3):
     - React-Core
-  - RNGestureHandler (2.9.0):
+  - RNGestureHandler (2.15.0):
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - RNImageColors (1.5.2):
     - React-Core
@@ -1339,8 +1341,6 @@ PODS:
   - Sentry/HybridSDK (8.7.1):
     - SentryPrivate (= 8.7.1)
   - SentryPrivate (8.7.1)
-  - SPAlert (4.2.0)
-  - SPIndicator (1.6.4)
   - UIImageColors (2.1.0)
   - Yoga (1.14.0)
   - ZXingObjC/Core (3.6.5)
@@ -1354,12 +1354,12 @@ DEPENDENCIES:
   - Apollo (= 1.2.1)
   - Argon2Swift (= 1.0.3)
   - boost (from `../../../node_modules/react-native/third-party-podspecs/boost.podspec`)
-  - Burnt (from `../../../node_modules/burnt/ios`)
   - DoubleConversion (from `../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - "EthersRS (from `../../../node_modules/@uniswap/ethers-rs-mobile`)"
   - EXApplication (from `../../../node_modules/expo-application/ios`)
   - EXAV (from `../../../node_modules/expo-av/ios`)
   - EXBarCodeScanner (from `../../../node_modules/expo-barcode-scanner/ios`)
+  - EXCamera (from `../../../node_modules/expo-camera/ios`)
   - EXFileSystem (from `../../../node_modules/expo-file-system/ios`)
   - EXFont (from `../../../node_modules/expo-font/ios`)
   - EXImageLoader (from `../../../node_modules/expo-image-loader/ios`)
@@ -1401,6 +1401,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../../../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../../../node_modules/react-native/ReactCommon/logger`)
   - react-native-appsflyer (from `../../../node_modules/react-native-appsflyer`)
+  - "react-native-compat (from `../../../node_modules/@walletconnect/react-native-compat`)"
   - react-native-context-menu-view (from `../../../node_modules/react-native-context-menu-view`)
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
@@ -1482,8 +1483,6 @@ SPEC REPOS:
     - SDWebImageWebPCoder
     - Sentry
     - SentryPrivate
-    - SPAlert
-    - SPIndicator
     - UIImageColors
     - ZXingObjC
 
@@ -1492,8 +1491,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@amplitude/analytics-react-native"
   boost:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/boost.podspec"
-  Burnt:
-    :path: "../../../node_modules/burnt/ios"
   DoubleConversion:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EthersRS:
@@ -1504,6 +1501,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/expo-av/ios"
   EXBarCodeScanner:
     :path: "../../../node_modules/expo-barcode-scanner/ios"
+  EXCamera:
+    :path: "../../../node_modules/expo-camera/ios"
   EXFileSystem:
     :path: "../../../node_modules/expo-file-system/ios"
   EXFont:
@@ -1576,6 +1575,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/logger"
   react-native-appsflyer:
     :path: "../../../node_modules/react-native-appsflyer"
+  react-native-compat:
+    :path: "../../../node_modules/@walletconnect/react-native-compat"
   react-native-context-menu-view:
     :path: "../../../node_modules/react-native-context-menu-view"
   react-native-get-random-values:
@@ -1677,18 +1678,18 @@ SPEC CHECKSUMS:
   Argon2Swift: 99482c1b8122a03524b61e41c4903a9548e7c33b
   boost: 0a937fbcfdd646fca221c4f1d9750d7ccfdfc2dc
   BoringSSL-GRPC: 3175b25143e648463a56daeaaa499c6cb86dad33
-  Burnt: 708556f6283e1b81767e6642e088819d85d1ea08
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   EthersRS: 56b70e73d22d4e894b7e762eef1129159bcd3135
   EXApplication: d8f53a7eee90a870a75656280e8d4b85726ea903
   EXAV: f393dfc0b28214d62855a31e06eb21d426d6e2da
   EXBarCodeScanner: 296dd50f6c03928d1d71d37ea17473b304cfdb00
+  EXCamera: 6e6e79bf01a2b8190268d93297d8e79a843d5ede
   EXFileSystem: 0b4a2c08c2dc92146849772145d61c1773144283
   EXFont: 6ea3800df746be7233208d80fe379b8ed74f4272
   EXImageLoader: 03063370bc06ea1825713d3f55fe0455f7c88d04
   EXLocalAuthentication: 78cc5a00b13745b41d16d189ab332b61a01299f9
   Expo: 8448e3a2aa1b295f029c81551e1ab6d986517fdb
-  ExpoBlur: fac3c6318fdf409dd5740afd3313b2bd52a35bac
+  ExpoBlur: 9e6da7c2bd4a0c5de7e57124694d0a380d7962f7
   ExpoClipboard: 9b87df0ad145e3aa841614fab6aea54b7a604850
   ExpoHaptics: 5a56d30a87ea213dd00b09566dc4b441a4dff97f
   ExpoKeepAwake: 69f5f627670d62318410392d03e0b5db0f85759a
@@ -1739,6 +1740,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 7e58fe86c7cc442fd11da0c9d8bef12a8d63f771
   React-logger: a3f6ca0d018749852a2a6f07c154bfc6fcd4195a
   react-native-appsflyer: 153e96b97ecc0c26b14fc79911675e51cfd35b36
+  react-native-compat: e31d4e4ba7db54f2649c4b34b9b594029b51b5e2
   react-native-context-menu-view: d3b3e77985d5b05674a70f8e7eafe404dfa5bbcc
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-image-picker: 1569cfade34b3a011191ce262423e6ce2f8db5a1
@@ -1778,7 +1780,7 @@ SPEC CHECKSUMS:
   RNFBAuth: 553c6e66d3c70e086799104dad4a554c2663c337
   RNFBFirestore: a60e6005e071b31360a5bf651eb403b36c7db7de
   RNFlashList: 4b4b6b093afc0df60ae08f9cbf6ccd4c836c667a
-  RNGestureHandler: 071d7a9ad81e8b83fe7663b303d132406a7d8f39
+  RNGestureHandler: 7909c50383a18f0cb10ce1db7262b9a6da504c03
   RNImageColors: 9ac05083b52d5c350e6972650ae3ba0e556466c1
   RNLocalize: d4b8af4e442d4bcca54e68fc687a2129b4d71a81
   RNPermissions: de7b7c3fe1680d974ac7a85e3e97aa539c0e68ea
@@ -1790,8 +1792,6 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   Sentry: 11776f6a25a128808d793d0d41bb7ad873b5ae4f
   SentryPrivate: b3c448eacdabe9eab7679a2e0af609c608f91572
-  SPAlert: 735da1f16a887e294719217572ce1f936d8c8782
-  SPIndicator: 93e0a4fb23de51294ac48e874c0f081a5e293e4f
   UIImageColors: d2ef3b0877d203cbb06489eeb78ea8b7788caabe
   Yoga: 135109c9b8c5d1a8af3a58d21cd4c7aa7f3bf555
   ZXingObjC: fdbb269f25dd2032da343e06f10224d62f537bdb

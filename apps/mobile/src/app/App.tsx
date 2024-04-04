@@ -3,7 +3,8 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import * as Sentry from '@sentry/react-native'
 import { PerformanceProfiler, RenderPassReport } from '@shopify/react-native-performance'
 import { PropsWithChildren, default as React, StrictMode, useCallback, useEffect } from 'react'
-import { NativeModules, StatusBar } from 'react-native'
+import { I18nextProvider } from 'react-i18next'
+import { LogBox, NativeModules, StatusBar } from 'react-native'
 import appsFlyer from 'react-native-appsflyer'
 import { getUniqueId } from 'react-native-device-info'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -21,6 +22,7 @@ import { persistor, store } from 'src/app/store'
 import Trace from 'src/components/Trace/Trace'
 import { TraceUserProperties } from 'src/components/Trace/TraceUserProperties'
 import { OfflineBanner } from 'src/components/banners/OfflineBanner'
+// eslint-disable-next-line no-restricted-imports
 import { usePersistedApolloClient } from 'src/data/usePersistedApolloClient'
 import { initAppsFlyer } from 'src/features/analytics/appsflyer'
 import { LockScreenContextProvider } from 'src/features/authentication/lockScreenContext'
@@ -38,31 +40,41 @@ import {
   setI18NUserDefaults,
 } from 'src/features/widgets/widgets'
 import { useAppStateTrigger } from 'src/utils/useAppStateTrigger'
-import { getSentryEnvironment, getStatsigEnvironmentTier } from 'src/utils/version'
+import {
+  getSentryEnvironment,
+  getSentryTracesSamplingRate,
+  getStatsigEnvironmentTier,
+} from 'src/utils/version'
 import { Statsig, StatsigProvider } from 'statsig-react-native'
 import { flexStyles, useIsDarkMode } from 'ui/src'
+import { config } from 'uniswap/src/config'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
+import {
+  DUMMY_STATSIG_SDK_KEY,
+  ExperimentsWallet,
+} from 'uniswap/src/features/experiments/constants'
+import { WALLET_FEATURE_FLAG_NAMES } from 'uniswap/src/features/experiments/flags'
+import { UnitagUpdaterContextProvider } from 'uniswap/src/features/unitags/context'
+import i18n from 'uniswap/src/i18n/i18n'
+import { CurrencyId } from 'uniswap/src/types/currency'
+import { isDetoxBuild } from 'utilities/src/environment'
 import { registerConsoleOverrides } from 'utilities/src/logger/console'
 import { logger } from 'utilities/src/logger/logger'
 import { useAsyncData } from 'utilities/src/react/hooks'
 import { AnalyticsNavigationContextProvider } from 'utilities/src/telemetry/trace/AnalyticsNavigationContext'
-import { config } from 'wallet/src/config'
-import { uniswapUrls } from 'wallet/src/constants/urls'
 import { initFirebaseAppCheck } from 'wallet/src/features/appCheck'
 import { useCurrentAppearanceSetting } from 'wallet/src/features/appearance/hooks'
-import { EXPERIMENT_NAMES, FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
 import { selectFavoriteTokens } from 'wallet/src/features/favorites/selectors'
 import { useAppFiatCurrencyInfo } from 'wallet/src/features/fiatCurrency/hooks'
 import { LocalizationContextProvider } from 'wallet/src/features/language/LocalizationContext'
 import { useCurrentLanguageInfo } from 'wallet/src/features/language/hooks'
 import { updateLanguage } from 'wallet/src/features/language/slice'
+import { clearNotificationQueue } from 'wallet/src/features/notifications/slice'
 import { TransactionHistoryUpdater } from 'wallet/src/features/transactions/TransactionHistoryUpdater'
-import { UnitagUpdaterContextProvider } from 'wallet/src/features/unitags/context'
 import { Account } from 'wallet/src/features/wallet/accounts/types'
 import { WalletContextProvider } from 'wallet/src/features/wallet/context'
 import { useAccounts } from 'wallet/src/features/wallet/hooks'
-import { initializeTranslation } from 'wallet/src/i18n/i18n'
 import { SharedProvider } from 'wallet/src/provider'
-import { CurrencyId } from 'wallet/src/utils/currencyId'
 import { beforeSend } from 'wallet/src/utils/sentry'
 
 enableFreeze(true)
@@ -74,18 +86,13 @@ if (__DEV__) {
 // Construct a new instrumentation instance. This is needed to communicate between the integration and React
 const routingInstrumentation = new Sentry.ReactNavigationInstrumentation()
 
-// Dummy key since we use the reverse proxy will handle the real key
-const DUMMY_STATSIG_SDK_KEY = 'client-0000000000000000000000000000000000000000000'
-
-if (!__DEV__) {
+if (!__DEV__ && !isDetoxBuild) {
   Sentry.init({
     environment: getSentryEnvironment(),
     dsn: config.sentryDsn,
     attachViewHierarchy: true,
     enableCaptureFailedRequests: true,
-    tracesSampler: (_) => {
-      return 0.2
-    },
+    tracesSampleRate: getSentryTracesSamplingRate(),
     integrations: [
       new Sentry.ReactNativeTracing({
         enableUserInteractionTracing: true,
@@ -102,10 +109,15 @@ if (!__DEV__) {
   })
 }
 
+// Log boxes on simulators can block detox tap event when they cover buttons placed at
+// the bottom of the screen and cause tests to fail.
+if (isDetoxBuild) {
+  LogBox.ignoreAllLogs()
+}
+
 initOneSignal()
 initAppsFlyer()
 initFirebaseAppCheck()
-initializeTranslation()
 
 function App(): JSX.Element | null {
   // We want to ensure deviceID is used as the identifier to link with analytics
@@ -136,19 +148,21 @@ function App(): JSX.Element | null {
   return (
     <Trace>
       <StrictMode>
-        <StatsigProvider {...statSigOptions}>
-          <SentryTags>
-            <SafeAreaProvider>
-              <SharedProvider reduxStore={store}>
-                <AnalyticsNavigationContextProvider
-                  shouldLogScreen={shouldLogScreen}
-                  useIsPartOfNavigationTree={useIsPartOfNavigationTree}>
-                  <AppOuter />
-                </AnalyticsNavigationContextProvider>
-              </SharedProvider>
-            </SafeAreaProvider>
-          </SentryTags>
-        </StatsigProvider>
+        <I18nextProvider i18n={i18n}>
+          <StatsigProvider {...statSigOptions}>
+            <SentryTags>
+              <SafeAreaProvider>
+                <SharedProvider reduxStore={store}>
+                  <AnalyticsNavigationContextProvider
+                    shouldLogScreen={shouldLogScreen}
+                    useIsPartOfNavigationTree={useIsPartOfNavigationTree}>
+                    <AppOuter />
+                  </AnalyticsNavigationContextProvider>
+                </SharedProvider>
+              </SafeAreaProvider>
+            </SentryTags>
+          </StatsigProvider>
+        </I18nextProvider>
       </StrictMode>
     </Trace>
   )
@@ -156,14 +170,12 @@ function App(): JSX.Element | null {
 
 function SentryTags({ children }: PropsWithChildren): JSX.Element {
   useEffect(() => {
-    Object.entries(FEATURE_FLAGS).map(([_, featureFlagName]) => {
-      Sentry.setTag(
-        `featureFlag.${featureFlagName}`,
-        Statsig.checkGateWithExposureLoggingDisabled(featureFlagName)
-      )
-    })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const [_, flagKey] of WALLET_FEATURE_FLAG_NAMES.entries()) {
+      Sentry.setTag(`featureFlag.${flagKey}`, Statsig.checkGateWithExposureLoggingDisabled(flagKey))
+    }
 
-    Object.entries(EXPERIMENT_NAMES).map(([_, experimentName]) => {
+    Object.entries(ExperimentsWallet).map(([_, experimentName]) => {
       Sentry.setTag(
         `experiment.${experimentName}`,
         Statsig.getExperimentWithExposureLoggingDisabled(experimentName).getGroupName()
@@ -251,6 +263,7 @@ function AppInner(): JSX.Element {
   }, [allowAnalytics])
 
   useEffect(() => {
+    dispatch(clearNotificationQueue()) // clear all in-app toasts on app start
     dispatch(updateLanguage(null))
   }, [dispatch])
 

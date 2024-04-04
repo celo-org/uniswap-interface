@@ -3,14 +3,14 @@ import { Protocol } from '@uniswap/router-sdk'
 import { TradeType } from '@uniswap/sdk-core'
 import { providers } from 'ethers'
 import { Dispatch } from 'react'
+import { TransactionListQuery } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { ChainId } from 'wallet/src/constants/chains'
-import { TransactionListQuery } from 'wallet/src/data/__generated__/types-and-hooks'
 import { AssetType } from 'wallet/src/entities/assets'
-import { MoonpayCurrency } from 'wallet/src/features/fiatOnRamp/types'
+import { FORLogo, MoonpayCurrency } from 'wallet/src/features/fiatOnRamp/types'
 import { GasFeeResult } from 'wallet/src/features/gas/types'
+import { ParsedWarnings } from 'wallet/src/features/transactions/hooks/useParsedTransactionWarnings'
 import { DerivedTransferInfo } from 'wallet/src/features/transactions/transfer/types'
 import { QuoteType } from 'wallet/src/features/transactions/utils'
-import { Warning } from 'wallet/src/features/transactions/WarningModal/types'
 import { DappInfo } from 'wallet/src/features/walletConnect/types'
 
 export enum WrapType {
@@ -61,7 +61,7 @@ export interface TransactionDetails extends TransactionId {
 }
 
 export enum TransactionStatus {
-  Cancelled = 'cancelled',
+  Canceled = 'cancelled',
   Cancelling = 'cancelling',
   FailedCancel = 'failedCancel',
   Success = 'confirmed',
@@ -76,7 +76,7 @@ export enum TransactionStatus {
 export type FinalizedTransactionStatus =
   | TransactionStatus.Success
   | TransactionStatus.Failed
-  | TransactionStatus.Cancelled
+  | TransactionStatus.Canceled
   | TransactionStatus.FailedCancel
 
 export interface FinalizedTransactionDetails extends TransactionDetails {
@@ -217,14 +217,21 @@ export interface FiatPurchaseTransactionInfo extends BaseTransactionInfo {
   explorerUrl?: string
   // code will be used for formatting amounts
   inputCurrency?: Pick<MoonpayCurrency, 'type' | 'code'>
+  inputSymbol?: string
   inputCurrencyAmount?: number
   // metadata will be used to get the output currency
   outputCurrency?: Required<Pick<MoonpayCurrency, 'type' | 'metadata'>>
+  outputSymbol?: string
   // outputCurrencyAmount can be null for failed transactions,
   // cause it's supposed to be set once transaction is complete
   // https://docs.moonpay.com/moonpay/developer-resources/api/client-side-apis/transactions
   outputCurrencyAmount?: number | null
   syncedWithBackend: boolean
+  // only avaible with FOR aggregator
+  serviceProviderLogo?: FORLogo
+  institutionLogoUrl?: string
+  serviceProvider?: string
+  institution?: string
 }
 
 export interface NFTMintTransactionInfo extends BaseTransactionInfo {
@@ -288,7 +295,7 @@ export function isFinalizedTx(
   return (
     tx.status === TransactionStatus.Success ||
     tx.status === TransactionStatus.Failed ||
-    tx.status === TransactionStatus.Cancelled ||
+    tx.status === TransactionStatus.Canceled ||
     tx.status === TransactionStatus.FailedCancel
   )
 }
@@ -310,7 +317,7 @@ export interface TransferFlowProps {
   gasFee: GasFeeResult
   step: TransactionStep
   setStep: (newStep: TransactionStep) => void
-  warnings: Warning[]
+  warnings: ParsedWarnings
   exactValue: string
   isFiatInput?: boolean
   showFiatToggle?: boolean

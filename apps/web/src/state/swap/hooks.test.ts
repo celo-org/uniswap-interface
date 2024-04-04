@@ -1,7 +1,8 @@
 import { Field } from 'components/swap/constants'
 import { parse } from 'qs'
 
-import { queryParametersToCurrencyState, queryParametersToSwapState } from './hooks'
+import { queryParametersToSwapState } from 'state/swap/types'
+import { queryParametersToCurrencyState } from './hooks'
 
 describe('hooks', () => {
   describe('#queryParametersToCurrencyState', () => {
@@ -26,7 +27,7 @@ describe('hooks', () => {
         )
       ).toEqual({
         inputCurrencyId: 'ETH',
-        outputCurrencyId: null,
+        outputCurrencyId: undefined,
       })
     })
 
@@ -37,7 +38,7 @@ describe('hooks', () => {
         )
       ).toEqual({
         outputCurrencyId: 'ETH',
-        inputCurrencyId: null,
+        inputCurrencyId: undefined,
       })
     })
 
@@ -48,7 +49,7 @@ describe('hooks', () => {
         )
       ).toEqual({
         outputCurrencyId: 'ETH',
-        inputCurrencyId: null,
+        inputCurrencyId: undefined,
       })
     })
   })

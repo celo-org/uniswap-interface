@@ -55,6 +55,7 @@ exports[`GenericImportForm renders a placeholder when there is no value 1`] = `
         autoCorrect={false}
         autoFocus={true}
         blurOnSubmit={false}
+        focusVisibleStyle={{}}
         focusable={true}
         maxFontSizeMultiplier={1.4}
         multiline={true}
@@ -98,7 +99,7 @@ exports[`GenericImportForm renders a placeholder when there is no value 1`] = `
             "width": 8,
           }
         }
-        testID="import_account_form/input"
+        testID="import-account-input"
         textAlignVertical="bottom"
       />
     </View>
@@ -159,6 +160,7 @@ exports[`GenericImportForm renders a placeholder when there is no value 1`] = `
       >
         <View
           cancelable={true}
+          disabled={false}
           focusable={true}
           hitSlop={[Function]}
           minPressDuration={0}
@@ -207,7 +209,7 @@ exports[`GenericImportForm renders a placeholder when there is no value 1`] = `
                 {
                   "color": "#FC72FF",
                   "fontFamily": "Basel-Medium",
-                  "fontSize": 13,
+                  "fontSize": 15,
                   "fontWeight": "500",
                   "lineHeight": 16,
                 }

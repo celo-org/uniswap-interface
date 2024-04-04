@@ -1,11 +1,12 @@
-import { impactAsync, ImpactFeedbackStyle, selectionAsync } from 'expo-haptics'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from 'src/app/hooks'
 import { navigate } from 'src/app/navigation/rootNavigation'
 import { openModal } from 'src/features/modals/modalSlice'
+import { setUserProperty } from 'src/features/telemetry'
+import { UserPropertyName } from 'src/features/telemetry/constants'
 import { Screens } from 'src/screens/Screens'
 import { isDevBuild } from 'src/utils/version'
-import { Flex, Icons, Text, TouchableArea } from 'ui/src'
+import { Flex, HapticFeedback, Icons, ImpactFeedbackStyle, Text, TouchableArea } from 'ui/src'
 import { AccountIcon } from 'wallet/src/components/accounts/AccountIcon'
 import { AnimatedUnitagDisplayName } from 'wallet/src/components/accounts/AnimatedUnitagDisplayName'
 import { pushNotification } from 'wallet/src/features/notifications/slice'
@@ -29,6 +30,20 @@ export function AccountHeader(): JSX.Element {
   const { avatar } = useAvatar(activeAddress)
   const displayName = useDisplayName(activeAddress)
 
+  // Log ENS and Unitag ownership for user usage stats
+  useEffect(() => {
+    switch (displayName?.type) {
+      case DisplayNameType.ENS:
+        setUserProperty(UserPropertyName.HasLoadedENS, true)
+        return
+      case DisplayNameType.Unitag:
+        setUserProperty(UserPropertyName.HasLoadedUnitag, true)
+        return
+      default:
+        return
+    }
+  }, [displayName?.type])
+
   const onPressAccountHeader = useCallback(() => {
     dispatch(openModal({ name: ModalName.AccountSwitcher }))
   }, [dispatch])
@@ -39,7 +54,7 @@ export function AccountHeader(): JSX.Element {
 
   const onPressCopyAddress = async (): Promise<void> => {
     if (activeAddress) {
-      await impactAsync()
+      await HapticFeedback.impact()
       await setClipboard(activeAddress)
       dispatch(
         pushNotification({
@@ -54,7 +69,13 @@ export function AccountHeader(): JSX.Element {
   const iconSize = 52
 
   return (
-    <Flex gap="$spacing12" overflow="scroll" pt="$spacing8" testID="account-header" width="100%">
+    <Flex
+      gap="$spacing12"
+      overflow="scroll"
+      pt="$spacing8"
+      px="$spacing12"
+      testID="account-header"
+      width="100%">
       {activeAddress && (
         <Flex alignItems="flex-start" gap="$spacing12" width="100%">
           <Flex row justifyContent="space-between" width="100%">
@@ -67,7 +88,7 @@ export function AccountHeader(): JSX.Element {
               testID={ElementName.Manage}
               onLongPress={async (): Promise<void> => {
                 if (isDevBuild()) {
-                  await selectionAsync()
+                  await HapticFeedback.selection()
                   dispatch(openModal({ name: ModalName.Experiments }))
                 }
               }}
@@ -80,12 +101,21 @@ export function AccountHeader(): JSX.Element {
                 size={iconSize}
               />
             </TouchableArea>
-            <TouchableArea hapticFeedback hitSlop={20} onPress={onPressSettings}>
+            <TouchableArea
+              hapticFeedback
+              hitSlop={20}
+              testID="account-header/settings-button"
+              onPress={onPressSettings}>
               <Icons.Settings color="$neutral2" opacity={0.8} size="$icon.28" />
             </TouchableArea>
           </Flex>
           {walletHasName ? (
-            <Flex row alignItems="center" gap="$spacing8" justifyContent="space-between">
+            <Flex
+              row
+              alignItems="center"
+              gap="$spacing8"
+              justifyContent="space-between"
+              testID="account-header/display-name">
               <TouchableArea
                 hapticFeedback
                 flexShrink={1}
@@ -95,7 +125,11 @@ export function AccountHeader(): JSX.Element {
               </TouchableArea>
             </Flex>
           ) : (
-            <TouchableArea hapticFeedback hitSlop={20} onPress={onPressCopyAddress}>
+            <TouchableArea
+              hapticFeedback
+              hitSlop={20}
+              testID="account-header/address-only"
+              onPress={onPressCopyAddress}>
               <Flex centered row shrink gap="$spacing4">
                 <Text
                   adjustsFontSizeToFit

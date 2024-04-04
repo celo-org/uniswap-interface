@@ -1,11 +1,13 @@
+import { Trans } from '@lingui/macro'
 import { ChartHeader } from 'components/Charts/ChartHeader'
-import { Chart, ChartModel, ChartModelParams } from 'components/Charts/ChartModel'
+import { Chart, ChartHoverData, ChartModel, ChartModelParams } from 'components/Charts/ChartModel'
 import { getCandlestickPriceBounds } from 'components/Charts/PriceChart/utils'
 import { PriceChartType } from 'components/Charts/utils'
+import { RowBetween } from 'components/Row'
 import { DeltaArrow, DeltaText, calculateDelta } from 'components/Tokens/TokenDetails/Delta'
-import { PricePoint } from 'graphql/data/util'
 import {
   AreaData,
+  AreaSeriesPartialOptions,
   BarPrice,
   CandlestickData,
   IPriceLine,
@@ -17,10 +19,12 @@ import {
 } from 'lightweight-charts'
 import { useMemo } from 'react'
 import styled from 'styled-components'
+import { ThemedText } from 'theme/components'
 import { opacify } from 'theme/utils'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
+import { RoundedCandleSeries, RoundedCandleSeriesOptions } from './RoundedCandlestickSeries/rounded-candles-series'
 
-type PriceChartData = CandlestickData<UTCTimestamp> & AreaData<UTCTimestamp>
+export type PriceChartData = CandlestickData<UTCTimestamp> & AreaData<UTCTimestamp>
 
 interface PriceChartModelParams extends ChartModelParams<PriceChartData> {
   type: PriceChartType
@@ -30,7 +34,7 @@ const LOW_PRICE_RANGE_THRESHOLD = 0.2
 const LOW_PRICE_RANGE_SCALE_FACTOR = 1000000000
 
 export class PriceChartModel extends ChartModel<PriceChartData> {
-  protected series: ISeriesApi<'Area' | 'Candlestick'>
+  protected series: ISeriesApi<'Area'> | ISeriesApi<'Custom'>
   private originalData: PriceChartData[]
   private lowPriceRangeScaleFactor = 1
   private type: PriceChartType
@@ -51,7 +55,8 @@ export class PriceChartModel extends ChartModel<PriceChartData> {
     this.max = max
 
     this.type = params.type
-    this.series = this.type === PriceChartType.LINE ? this.api.addAreaSeries() : this.api.addCandlestickSeries()
+    this.series =
+      this.type === PriceChartType.LINE ? this.api.addAreaSeries() : this.api.addCustomSeries(new RoundedCandleSeries())
     this.series.setData(this.data)
     this.updateOptions(params)
     this.fitContent()
@@ -99,8 +104,8 @@ export class PriceChartModel extends ChartModel<PriceChartData> {
         },
       },
       grid: {
-        vertLines: { style: LineStyle.CustomDotGrid, visible: true },
-        horzLines: { style: LineStyle.CustomDotGrid, visible: true },
+        vertLines: { style: LineStyle.CustomDotGrid, color: theme.neutral3 },
+        horzLines: { style: LineStyle.CustomDotGrid, color: theme.neutral3 },
       },
     })
 
@@ -108,7 +113,11 @@ export class PriceChartModel extends ChartModel<PriceChartData> {
     if (this.type !== type) {
       this.type = params.type
       this.api.removeSeries(this.series)
-      this.series = this.type === PriceChartType.LINE ? this.api.addAreaSeries() : this.api.addCandlestickSeries()
+      if (this.type === PriceChartType.CANDLESTICK) {
+        this.series = this.api.addCustomSeries(new RoundedCandleSeries())
+      } else {
+        this.series = this.api.addAreaSeries()
+      }
       this.series.setData(this.data)
     }
     // Handles changes in data, e.g. time period selection
@@ -144,7 +153,7 @@ export class PriceChartModel extends ChartModel<PriceChartData> {
       downColor: theme.critical,
       wickDownColor: theme.critical,
       borderVisible: false,
-    })
+    } as Partial<RoundedCandleSeriesOptions> & AreaSeriesPartialOptions)
 
     this.priceLineOptions = {
       color: theme.surface3,
@@ -157,12 +166,18 @@ export class PriceChartModel extends ChartModel<PriceChartData> {
     this.maxPriceLine?.applyOptions({ price: this.max, ...this.priceLineOptions })
   }
 
-  override onSeriesHover(data: PriceChartData | undefined, index: number | undefined) {
-    // Use original data point for hover functionality rather than scaled data
-    super.onSeriesHover(index !== undefined ? this.originalData[index] : undefined, index)
+  override onSeriesHover(hoverData?: ChartHoverData<CandlestickData>) {
+    if (hoverData) {
+      // Use original data point for hover functionality rather than data that has been scaled by lowPriceRangeScaleFactor
+      const originalItem = this.originalData[hoverData.logicalIndex]
+      const updatedHoverData = { ...hoverData, item: originalItem }
+      super.onSeriesHover(updatedHoverData)
+    } else {
+      super.onSeriesHover(undefined)
+    }
 
     // Hide/display price lines based on hover
-    if (data === undefined) {
+    if (hoverData === undefined) {
       if (this.minPriceLine && this.maxPriceLine) {
         this.series.removePriceLine(this.minPriceLine)
         this.series.removePriceLine(this.maxPriceLine)
@@ -183,35 +198,6 @@ const DeltaContainer = styled.div`
   align-items: center;
   gap: 4px;
 `
-
-export const mockCandlestickData = (prices: PricePoint[] | undefined): PriceChartData[] => {
-  if (!prices) return []
-
-  let minIndex = 0
-  let maxIndex = 0
-
-  const mockedData = prices.map((pricePoint, index) => {
-    const open = index > 0 ? prices[index - 1].value : pricePoint.value * 0.9992
-    const close = pricePoint.value
-    const high = pricePoint.value + Math.abs(open - close) * 0.5
-    const low = pricePoint.value - Math.abs(close - open) * 0.5
-
-    if (prices[minIndex].value > pricePoint.value) {
-      minIndex = index
-    }
-    if (prices[maxIndex].value < pricePoint.value) {
-      maxIndex = index
-    }
-
-    return { value: pricePoint.value, time: pricePoint.timestamp as UTCTimestamp, open, close, high, low }
-  })
-
-  // Fixes extrema on line charts to match the low/high price lines
-  mockedData[minIndex].value = mockedData[minIndex].low
-  mockedData[maxIndex].value = mockedData[maxIndex].high
-
-  return mockedData
-}
 
 interface PriceChartDeltaProps {
   startingPrice: PriceChartData
@@ -234,25 +220,54 @@ export function PriceChartDelta({ startingPrice, endingPrice, noColor }: PriceCh
 interface PriceChartProps {
   type: PriceChartType
   height: number
-  prices?: PricePoint[]
+  data: PriceChartData[]
+  stale: boolean
 }
 
-export function PriceChart({ height, prices, type }: PriceChartProps) {
-  const mockedPrices = useMemo(() => mockCandlestickData(prices), [prices]) // TODO(info) - update to use real candlestick data
-  const params = useMemo(() => ({ data: mockedPrices, type }), [mockedPrices, type])
+const TooltipText = styled(ThemedText.LabelSmall)`
+  color: ${({ theme }) => theme.neutral1};
+  line-height: 20px;
+`
 
-  // TODO(WEB-3430): Add error state for lack of data
-  if (!mockedPrices.length) return null
-
-  const lastPrice = mockedPrices[mockedPrices.length - 1]
+function CandlestickTooltip({ data }: { data: PriceChartData }) {
+  const { formatFiatPrice } = useFormatter()
   return (
-    <Chart Model={PriceChartModel} params={params} height={height}>
+    <>
+      <TooltipText>
+        <RowBetween gap="sm">
+          <Trans>Open</Trans>
+          <div>{formatFiatPrice({ price: data.open })}</div>
+        </RowBetween>
+        <RowBetween gap="sm">
+          <Trans>High</Trans>
+          <div>{formatFiatPrice({ price: data.high })}</div>
+        </RowBetween>
+        <RowBetween gap="sm">
+          <Trans>Low</Trans>
+          <div>{formatFiatPrice({ price: data.low })}</div>
+        </RowBetween>
+        <RowBetween gap="sm">
+          <Trans>Close</Trans>
+          <div>{formatFiatPrice({ price: data.close })}</div>
+        </RowBetween>
+      </TooltipText>
+    </>
+  )
+}
+
+export function PriceChart({ data, height, type, stale }: PriceChartProps) {
+  const lastPrice = data[data.length - 1]
+  return (
+    <Chart
+      Model={PriceChartModel}
+      params={useMemo(() => ({ data, type, stale }), [data, stale, type])}
+      height={height}
+      TooltipBody={type === PriceChartType.CANDLESTICK ? CandlestickTooltip : undefined}
+    >
       {(crosshairData) => (
         <ChartHeader
-          value={(crosshairData ?? lastPrice).value ?? (crosshairData ?? lastPrice).close}
-          additionalFields={
-            <PriceChartDelta startingPrice={mockedPrices[0]} endingPrice={crosshairData ?? lastPrice} />
-          }
+          value={(crosshairData ?? lastPrice)?.value ?? (crosshairData ?? lastPrice)?.close}
+          additionalFields={<PriceChartDelta startingPrice={data?.[0]} endingPrice={crosshairData ?? lastPrice} />}
           valueFormatterType={NumberType.FiatTokenPrice}
           time={crosshairData?.time}
         />

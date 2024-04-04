@@ -1,4 +1,3 @@
-import { impactAsync } from 'expo-haptics'
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import ContextMenu from 'react-native-context-menu-view'
@@ -8,7 +7,7 @@ import { NotificationBadge } from 'src/components/notifications/Badge'
 import { closeModal, openModal } from 'src/features/modals/modalSlice'
 import { Screens } from 'src/screens/Screens'
 import { disableOnPress } from 'src/utils/disableOnPress'
-import { Flex, Text, TouchableArea } from 'ui/src'
+import { Flex, HapticFeedback, Text, TouchableArea } from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
 import { NumberType } from 'utilities/src/format/types'
 import { AddressDisplay } from 'wallet/src/components/accounts/AddressDisplay'
@@ -57,7 +56,7 @@ function PortfolioValue({
   return (
     <Text color="$neutral2" loading={isLoading} variant="subheading2">
       {portfolioValue === undefined
-        ? t('N/A')
+        ? t('common.text.notAvailable')
         : convertFiatAmountFormatted(portfolioValue, NumberType.PortfolioBalance)}
     </Text>
   )
@@ -75,7 +74,7 @@ export function AccountCardItem({
   const dispatch = useAppDispatch()
 
   const onPressCopyAddress = async (): Promise<void> => {
-    await impactAsync()
+    await HapticFeedback.impact()
     await setClipboard(address)
     dispatch(
       pushNotification({
@@ -100,9 +99,9 @@ export function AccountCardItem({
 
   const menuActions = useMemo(() => {
     return [
-      { title: t('Copy wallet address'), systemIcon: 'doc.on.doc' },
-      { title: t('Wallet settings'), systemIcon: 'gearshape' },
-      { title: t('Remove wallet'), systemIcon: 'trash', destructive: true },
+      { title: t('account.wallet.action.copy'), systemIcon: 'doc.on.doc' },
+      { title: t('account.wallet.action.settings'), systemIcon: 'gearshape' },
+      { title: t('account.wallet.button.remove'), systemIcon: 'trash', destructive: true },
     ]
   }, [t])
 
@@ -131,7 +130,7 @@ export function AccountCardItem({
         px="$spacing24"
         onLongPress={disableOnPress}
         onPress={(): void => onPress(address)}>
-        <Flex row alignItems="flex-start" gap="$spacing16" testID={`account_item/${address}`}>
+        <Flex row alignItems="flex-start" gap="$spacing16" testID={`account-item/${address}`}>
           <Flex fill>
             <AddressDisplay
               address={address}

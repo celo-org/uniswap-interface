@@ -1,10 +1,10 @@
-import { impactAsync } from 'expo-haptics'
 import { forwardRef, useCallback, useMemo, useRef } from 'react'
 import { GestureResponderEvent } from 'react-native'
 import { TamaguiElement, YStack } from 'tamagui'
 import { withAnimated } from 'ui/src/components/factories/animated'
 import { TouchableAreaProps } from 'ui/src/components/touchable/types'
 import { defaultHitslopInset } from 'ui/src/theme'
+import { HapticFeedback } from 'ui/src/utils/haptics/HapticFeedback'
 
 /**
  * If you are trying to implement a standard button DO NOT USE this component. Use the Button component instead with the desired size and emphasis.
@@ -59,7 +59,7 @@ export const TouchableArea = forwardRef<TamaguiElement, TouchableAreaProps>(func
       onPress(event)
 
       if (hapticFeedback) {
-        await impactAsync(hapticStyle)
+        await HapticFeedback.impact(hapticStyle)
       }
     },
     [onPress, ignoreDragEvents, hapticFeedback, hapticStyle]
@@ -77,7 +77,10 @@ export const TouchableArea = forwardRef<TamaguiElement, TouchableAreaProps>(func
       // TODO(MOB-2826): tests are picking up weird animationStyle on snapshots...
       {...(process.env.NODE_ENV !== 'test' && {
         animation: '100ms',
+        // TODO(MOB-3059): fixes crash caused by animating shadowOffset, should be fixed in tamagui
+        animateOnly: ['transform', 'opacity'],
       })}
+      cursor="pointer"
       hitSlop={defaultHitslopInset}
       {...restProps}
       pressStyle={{

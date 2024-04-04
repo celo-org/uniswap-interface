@@ -1,5 +1,5 @@
 import { pick } from 'lodash'
-import { ComponentProps } from 'react'
+import { ComponentProps, useEffect, useState } from 'react'
 import { Flex, Sheet, useSporeColors } from 'ui/src'
 import { Trace } from 'utilities/src/telemetry/trace/Trace'
 import { TextInput } from 'wallet/src/components/input/TextInput'
@@ -15,7 +15,7 @@ export type WebBottomSheetProps = Pick<
   | 'backgroundColor'
   | 'isDismissible'
   | 'isModalOpen'
-  | 'isCentered'
+  | 'alignment'
 >
 
 export function BottomSheetModal(props: BottomSheetModalProps): JSX.Element {
@@ -27,7 +27,7 @@ export function BottomSheetModal(props: BottomSheetModalProps): JSX.Element {
     'children',
     'isDismissible',
     'isModalOpen',
-    'isCentered',
+    'alignment',
   ])
 
   return <WebBottomSheetModal {...supportedProps} />
@@ -43,11 +43,13 @@ export function BottomSheetDetachedModal(props: BottomSheetModalProps): JSX.Elem
     'isModalOpen',
     'children',
     'isDismissible',
-    'isCentered',
+    'alignment',
   ])
 
   return <WebBottomSheetModal {...supportedProps} />
 }
+
+const ANIMATION_MS = 200
 
 function WebBottomSheetModal({
   children,
@@ -57,9 +59,30 @@ function WebBottomSheetModal({
   backgroundColor,
   isDismissible = true,
   isModalOpen = true,
-  isCentered = true,
+  alignment = 'center',
 }: WebBottomSheetProps): JSX.Element {
   const colors = useSporeColors()
+  const [fullyClosed, setFullyClosed] = useState(false)
+
+  if (fullyClosed && isModalOpen) {
+    setFullyClosed(false)
+  }
+
+  // Not the greatest, we are syncing 200 here to 200ms animation
+  // TODO(EXT-745): Add Tamagui onFullyClosed callback and replace here
+  useEffect(() => {
+    if (!isModalOpen) {
+      const tm = setTimeout(() => {
+        setFullyClosed(true)
+      }, ANIMATION_MS)
+
+      return () => {
+        clearTimeout(tm)
+      }
+    }
+  }, [isModalOpen])
+
+  const isBottomAligned = alignment === 'bottom'
 
   return (
     <Trace logImpression={isModalOpen} modal={name}>
@@ -67,17 +90,18 @@ function WebBottomSheetModal({
         <Sheet
           disableDrag
           modal
-          animation="200ms"
+          animation={`${ANIMATION_MS}ms`}
           dismissOnOverlayPress={false}
           dismissOnSnapToBottom={false}
           open={isModalOpen}
-          snapPoints={fullScreen || isCentered ? [100] : undefined}
+          snapPoints={fullScreen || !isBottomAligned ? [100] : undefined}
           onOpenChange={(open: boolean): void => {
             !open && onClose?.()
           }}>
           <Sheet.Overlay
-            animation="lazy"
             backgroundColor="$black"
+            enterStyle={{ opacity: 0 }}
+            exitStyle={{ opacity: 0 }}
             height="100%"
             opacity={0.6}
             onPress={(): void => {
@@ -87,15 +111,18 @@ function WebBottomSheetModal({
           <Sheet.Frame
             backgroundColor="$transparent"
             flex={1}
-            height={fullScreen || isCentered ? '100%' : undefined}
-            justifyContent={isCentered ? 'center' : 'flex-end'}
-            padding="$spacing12">
+            height={fullScreen || !isBottomAligned ? '100%' : undefined}
+            justifyContent={
+              alignment === 'center' ? 'center' : alignment === 'top' ? 'flex-start' : 'flex-end'
+            }
+            p="$spacing12">
             <Flex
               borderRadius="$rounded24"
               p="$spacing12"
               style={{ backgroundColor: backgroundColor ?? colors.surface1.val }}
               width="100%">
-              {children}
+              {/* To keep this consistent with how the `BottomSheetModal` works on native mobile, we only mount the children when the modal is open. */}
+              {fullyClosed ? null : children}
             </Flex>
           </Sheet.Frame>
         </Sheet>

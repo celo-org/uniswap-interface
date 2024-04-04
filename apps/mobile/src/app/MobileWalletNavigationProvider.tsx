@@ -6,8 +6,10 @@ import { closeModal, openModal } from 'src/features/modals/modalSlice'
 import { HomeScreenTabIndex } from 'src/screens/HomeScreenTabIndex'
 import { Screens } from 'src/screens/Screens'
 import {
+  NavigateToNftItemArgs,
   NavigateToSwapFlowArgs,
   WalletNavigationProvider,
+  getNavigateToSwapFlowArgsInitialState,
 } from 'wallet/src/contexts/WalletNavigationContext'
 import { useFiatOnRampIpAddressQuery } from 'wallet/src/features/fiatOnRamp/api'
 import { ModalName } from 'wallet/src/telemetry/constants'
@@ -16,6 +18,7 @@ export function MobileWalletNavigationProvider({ children }: PropsWithChildren):
   const navigateToAccountActivityList = useNavigateToHomepageTab(HomeScreenTabIndex.Activity)
   const navigateToAccountTokenList = useNavigateToHomepageTab(HomeScreenTabIndex.Tokens)
   const navigateToBuyOrReceiveWithEmptyWallet = useNavigateToBuyOrReceiveWithEmptyWallet()
+  const navigateToNftDetails = useNavigateToNftDetails()
   const navigateToSwapFlow = useNavigateToSwapFlow()
   const navigateToTokenDetails = useNavigateToTokenDetails()
 
@@ -24,6 +27,7 @@ export function MobileWalletNavigationProvider({ children }: PropsWithChildren):
       navigateToAccountActivityList={navigateToAccountActivityList}
       navigateToAccountTokenList={navigateToAccountTokenList}
       navigateToBuyOrReceiveWithEmptyWallet={navigateToBuyOrReceiveWithEmptyWallet}
+      navigateToNftDetails={navigateToNftDetails}
       navigateToSwapFlow={navigateToSwapFlow}
       navigateToTokenDetails={navigateToTokenDetails}>
       {children}
@@ -44,8 +48,7 @@ function useNavigateToSwapFlow(): (args: NavigateToSwapFlowArgs) => void {
 
   return useCallback(
     (args: NavigateToSwapFlowArgs): void => {
-      const initialState = args?.initialState
-
+      const initialState = getNavigateToSwapFlowArgsInitialState(args)
       dispatch(closeModal({ name: ModalName.Swap }))
       dispatch(openModal({ name: ModalName.Swap, initialState }))
     },
@@ -59,6 +62,23 @@ function useNavigateToTokenDetails(): (currencyId: string) => void {
   return useCallback(
     (currencyId: string): void => {
       navigation.navigate(Screens.TokenDetails, { currencyId })
+    },
+    [navigation]
+  )
+}
+
+function useNavigateToNftDetails(): (args: NavigateToNftItemArgs) => void {
+  const navigation = useAppStackNavigation()
+
+  return useCallback(
+    ({ owner, address, tokenId, isSpam, fallbackData }: NavigateToNftItemArgs): void => {
+      navigation.navigate(Screens.NFTItem, {
+        owner,
+        address,
+        tokenId,
+        isSpam,
+        fallbackData,
+      })
     },
     [navigation]
   )

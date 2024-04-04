@@ -1,10 +1,18 @@
-import { ImpactFeedbackStyle, impactAsync } from 'expo-haptics'
 import { useTranslation } from 'react-i18next'
 import { ScannerModalState } from 'src/components/QRCodeScanner/constants'
 import { TransferInstitutionSelector } from 'src/features/fiatOnRamp/FiatOnRampTransferInstitutionSelector'
 import { FOR_MODAL_SNAP_POINTS } from 'src/features/fiatOnRamp/constants'
 import { closeModal, openModal } from 'src/features/modals/modalSlice'
-import { Flex, Icons, Separator, Text, TouchableArea, useSporeColors } from 'ui/src'
+import {
+  Flex,
+  HapticFeedback,
+  Icons,
+  ImpactFeedbackStyle,
+  Separator,
+  Text,
+  TouchableArea,
+  useSporeColors,
+} from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
 import { AddressDisplay } from 'wallet/src/components/accounts/AddressDisplay'
 import { BottomSheetModal } from 'wallet/src/components/modals/BottomSheetModal'
@@ -24,7 +32,7 @@ function AccountCardItem({ onClose }: { onClose: () => void }): JSX.Element {
   const activeAccountAddress = useActiveAccountAddressWithThrow()
 
   const onPressCopyAddress = async (): Promise<void> => {
-    await impactAsync()
+    await HapticFeedback.impact()
     await setClipboard(activeAccountAddress)
     dispatch(
       pushNotification({
@@ -42,42 +50,42 @@ function AccountCardItem({ onClose }: { onClose: () => void }): JSX.Element {
   }
 
   return (
-    <Flex row alignItems="flex-start" gap="$spacing12" px="$spacing8">
-      <Flex
-        fill
-        row
-        borderColor="$surface3"
-        borderRadius="$rounded20"
-        borderWidth="$spacing1"
-        gap="$spacing12"
-        p="$spacing12">
-        <Flex fill>
-          <AddressDisplay
-            address={activeAccountAddress}
-            captionVariant="body3"
-            gapBetweenLines="$spacing2"
-            size={ACCOUNT_IMAGE_SIZE}
-          />
-        </Flex>
-        <Flex centered row gap="$spacing12" px="$spacing8">
-          <TouchableArea
-            hapticFeedback
-            hapticStyle={ImpactFeedbackStyle.Light}
-            onPress={onPressCopyAddress}>
-            <Flex
-              centered
-              row
-              backgroundColor="$surface3"
-              borderRadius={ICON_BORDER_RADIUS}
-              height={ICON_SIZE}
-              width={ICON_SIZE}>
-              <Icons.CopySheets color="$neutral2" size={iconSizes.icon16} />
-            </Flex>
-          </TouchableArea>
-          <TouchableArea
-            hapticFeedback
-            hapticStyle={ImpactFeedbackStyle.Light}
-            onPress={onPressShowWalletQr}>
+    <TouchableArea
+      hapticFeedback
+      hapticStyle={ImpactFeedbackStyle.Light}
+      onPress={onPressShowWalletQr}>
+      <Flex row alignItems="flex-start" gap="$spacing12" px="$spacing8">
+        <Flex
+          fill
+          row
+          borderColor="$surface3"
+          borderRadius="$rounded20"
+          borderWidth="$spacing1"
+          gap="$spacing12"
+          p="$spacing12">
+          <Flex fill>
+            <AddressDisplay
+              address={activeAccountAddress}
+              captionVariant="body3"
+              gapBetweenLines="$spacing2"
+              size={ACCOUNT_IMAGE_SIZE}
+            />
+          </Flex>
+          <Flex centered row gap="$spacing12" px="$spacing8">
+            <TouchableArea
+              hapticFeedback
+              hapticStyle={ImpactFeedbackStyle.Light}
+              onPress={onPressCopyAddress}>
+              <Flex
+                centered
+                row
+                backgroundColor="$surface3"
+                borderRadius={ICON_BORDER_RADIUS}
+                height={ICON_SIZE}
+                width={ICON_SIZE}>
+                <Icons.CopySheets color="$neutral2" size={iconSizes.icon16} />
+              </Flex>
+            </TouchableArea>
             <Flex
               centered
               row
@@ -87,10 +95,10 @@ function AccountCardItem({ onClose }: { onClose: () => void }): JSX.Element {
               width={ICON_SIZE}>
               <Icons.QrCode color="$neutral2" size={iconSizes.icon16} />
             </Flex>
-          </TouchableArea>
+          </Flex>
         </Flex>
       </Flex>
-    </Flex>
+    </TouchableArea>
   )
 }
 
@@ -116,17 +124,17 @@ export function ReceiveCryptoModal(): JSX.Element {
       <Flex grow gap="$spacing12" px="$spacing16">
         <Flex gap="$spacing4" p="$spacing8">
           <Text color="$neutral1" mt="$spacing2" textAlign="center" variant="subheading1">
-            {t('Receive crypto')}
+            {t('home.upsell.receive.title')}
           </Text>
           <Text color="$neutral2" mt="$spacing2" textAlign="center" variant="body3">
-            {t('Deposit funds from another wallet or an account')}
+            {t('home.upsell.receive.description')}
           </Text>
         </Flex>
         <AccountCardItem onClose={onClose} />
         <Flex centered row shrink gap="$spacing12" py="$spacing8">
           <Separator />
           <Text color="$neutral2" textAlign="center" variant="body3">
-            {t('From an account')}
+            {t('home.upsell.receive.cta')}
           </Text>
           <Separator />
         </Flex>

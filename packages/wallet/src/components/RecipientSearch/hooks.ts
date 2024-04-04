@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useUnitagByNameWithoutFlag } from 'uniswap/src/features/unitags/hooksWithoutFlags'
 import { ChainId } from 'wallet/src/constants/chains'
 import { SearchableRecipient } from 'wallet/src/features/address/types'
 import { uniqueAddressesOnly } from 'wallet/src/features/address/utils'
 import { useENS } from 'wallet/src/features/ens/useENS'
 import { selectWatchedAddressSet } from 'wallet/src/features/favorites/selectors'
+import { DEFAULT_WATCHED_ADDRESSES } from 'wallet/src/features/favorites/slice'
 import { selectRecipientsByRecency } from 'wallet/src/features/transactions/selectors'
-import { useUnitagByName } from 'wallet/src/features/unitags/hooks'
+import { Account, AccountType } from 'wallet/src/features/wallet/accounts/types'
 import { selectInactiveAccounts } from 'wallet/src/features/wallet/selectors'
 import { useAppSelector } from 'wallet/src/state'
 import { getValidAddress } from 'wallet/src/utils/addresses'
@@ -35,7 +37,7 @@ function useValidatedSearchedAddress(searchTerm: string | null): {
     name: ensName,
   } = useENS(ChainId.Mainnet, searchTerm, false)
 
-  const { loading: unitagLoading, unitag } = useUnitagByName(searchTerm ?? undefined)
+  const { loading: unitagLoading, unitag } = useUnitagByNameWithoutFlag(searchTerm ?? undefined)
 
   return useMemo(() => {
     // Check for a valid unitag, ENS address, or literal address
@@ -115,6 +117,21 @@ export function useRecipients(): {
   const [pattern, setPattern] = useState<string | null>(null)
 
   const inactiveLocalAccounts = useAppSelector(selectInactiveAccounts)
+  const { importedWallets, viewOnlyWallets } = useMemo(
+    () =>
+      inactiveLocalAccounts.reduce<{ importedWallets: Account[]; viewOnlyWallets: Account[] }>(
+        (acc, account) => {
+          if (account.type === AccountType.Readonly) {
+            acc.viewOnlyWallets.push(account)
+          } else {
+            acc.importedWallets.push(account)
+          }
+          return acc
+        },
+        { importedWallets: [], viewOnlyWallets: [] }
+      ),
+    [inactiveLocalAccounts]
+  )
   const recentRecipients = useAppSelector(selectRecipientsByRecency).slice(0, MAX_RECENT_RECIPIENTS)
 
   const { recipients: validatedAddressRecipients, loading } = useValidatedSearchedAddress(pattern)
@@ -123,30 +140,42 @@ export function useRecipients(): {
   const sections = useMemo(() => {
     const sectionsArr = []
 
+    // Don't show default favorites as search result for recipient
+    for (const address of DEFAULT_WATCHED_ADDRESSES) {
+      watchedWallets.delete(address)
+    }
+
     if (validatedAddressRecipients.length) {
       sectionsArr.push({
-        title: t('Search results'),
+        title: t('send.recipient.section.search'),
         data: validatedAddressRecipients,
       })
     }
 
     if (recentRecipients.length) {
       sectionsArr.push({
-        title: t('Recent'),
+        title: t('send.recipient.section.recent'),
         data: recentRecipients,
       })
     }
 
-    if (inactiveLocalAccounts.length) {
+    if (importedWallets.length) {
       sectionsArr.push({
-        title: t('Your wallets'),
-        data: inactiveLocalAccounts,
+        title: t('send.recipient.section.yours'),
+        data: importedWallets,
+      })
+    }
+
+    if (viewOnlyWallets.length) {
+      sectionsArr.push({
+        title: t('send.recipient.section.viewOnly'),
+        data: viewOnlyWallets,
       })
     }
 
     if (watchedWallets.size) {
       sectionsArr.push({
-        title: t('Favorite wallets'),
+        title: t('send.recipient.section.favorite'),
         data: Array.from(watchedWallets).map(
           (address) =>
             <SearchableRecipient>{
@@ -157,7 +186,14 @@ export function useRecipients(): {
     }
 
     return sectionsArr
-  }, [validatedAddressRecipients, recentRecipients, t, inactiveLocalAccounts, watchedWallets])
+  }, [
+    validatedAddressRecipients,
+    recentRecipients,
+    t,
+    importedWallets,
+    viewOnlyWallets,
+    watchedWallets,
+  ])
 
   const searchableRecipientOptions = useMemo(
     () =>

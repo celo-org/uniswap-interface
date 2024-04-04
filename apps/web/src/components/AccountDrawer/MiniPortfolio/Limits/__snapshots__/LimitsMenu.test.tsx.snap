@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LimitsMenu should render when there are two open orders 1`] = `
-.c7 {
+.c13 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c8 {
+.c14 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -24,7 +24,7 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   justify-content: flex-start;
 }
 
-.c15 {
+.c18 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -39,7 +39,7 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   -webkit-justify-content: flex-start;
   -ms-flex-pack: start;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 4px;
 }
 
 .c5 {
@@ -50,7 +50,7 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c14 {
+.c9 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -58,83 +58,30 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c16 {
+.c21 {
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
   -ms-letter-spacing: -0.01em;
   letter-spacing: -0.01em;
 }
 
-.c24 {
-  background-color: transparent;
-  bottom: 0;
-  border-radius: inherit;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  -webkit-transition: 150ms ease background-color;
-  transition: 150ms ease background-color;
-  width: 100%;
-}
-
-.c21 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #FF5F52;
-  border-radius: 16px;
-  border: 0;
-  color: #222222;
+.c11 {
+  -webkit-text-decoration: none;
+  text-decoration: none;
   cursor: pointer;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  font-size: 20px;
-  font-weight: 535;
-  gap: 12px;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  line-height: 24px;
-  padding: 16px;
-  position: relative;
-  -webkit-transition: 150ms ease opacity;
-  transition: 150ms ease opacity;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  -webkit-transition-duration: 125ms;
+  transition-duration: 125ms;
+  color: #FC72FF;
+  stroke: #FC72FF;
+  font-weight: 500;
 }
 
-.c21:active .c23 {
-  background-color: #B8C0DC3d;
-}
-
-.c21:focus .c23 {
-  background-color: #B8C0DC3d;
-}
-
-.c21:hover .c23 {
-  background-color: #98A1C014;
-}
-
-.c21:disabled {
-  cursor: default;
+.c11:hover {
   opacity: 0.6;
 }
 
-.c21:disabled:active .c23,
-.c21:disabled:focus .c23,
-.c21:disabled:hover .c23 {
-  background-color: transparent;
+.c11:active {
+  opacity: 0.4;
 }
 
 .c0 {
@@ -151,7 +98,22 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   justify-content: flex-start;
 }
 
-.c13 {
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.c17 {
   display: grid;
   grid-auto-rows: auto;
   -webkit-box-flex: 1;
@@ -160,25 +122,18 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   flex-grow: 1;
 }
 
-.c12 {
-  color: #7D7D7D;
+.c7 {
+  background-color: #F9F9F9;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 12px;
 }
 
-.c11 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  position: relative;
-  top: 0;
-  left: 0;
+.c10 {
+  line-height: 16px;
 }
 
-.c9 {
+.c15 {
   gap: 12px;
   height: 68px;
   padding: 0 16px;
@@ -187,11 +142,11 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   cursor: pointer;
 }
 
-.c9:hover {
+.c15:hover {
   cursor: pointer;
 }
 
-.c17 {
+.c22 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -206,19 +161,32 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   line-height: 1;
 }
 
-.c18 {
-  border-color: #7D7D7D;
+.c24 {
+  border-color: #22222212;
   display: inline-block;
   margin-right: 1px;
   border-radius: 4px;
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   border-style: solid;
-  border-width: 2px;
+  border-width: 1.5px;
   position: relative;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-transition-duration: 125ms;
+  transition-duration: 125ms;
 }
 
-.c19 {
+.c24:hover {
+  opacity: 0.6;
+}
+
+.c24:active {
+  opacity: 0.4;
+}
+
+.c25 {
   position: absolute;
   top: -24px;
   -webkit-clip: rect(0 0 0 0);
@@ -232,18 +200,38 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   width: 1px;
 }
 
-.c20 {
+.c26 {
   display: none;
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   color: white;
   position: absolute;
   right: 1px;
 }
 
-.c10 {
-  padding: 8px 16px;
+.c16 {
+  padding: 8px 0;
   height: unset;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c23 {
+  opacity: 0;
+}
+
+.c19 * {
+  max-width: 40%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c20 {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
 }
 
 .c1 {
@@ -317,15 +305,13 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
   margin-bottom: 20px;
 }
 
-.c6 {
+.c12 {
   height: 100%;
   position: relative;
 }
 
-.c22 {
-  position: absolute;
-  bottom: 16px;
-  width: 100%;
+.c8 {
+  margin-bottom: 24px;
 }
 
 <div>
@@ -375,35 +361,46 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
           </span>
         </div>
         <div
-          class="c0 c6"
+          class="c6 c7 c8"
+        >
+          <div
+            class="c9 c10 css-1m65e73"
+          >
+            Please be aware that the execution for limits may vary based on real-time market fluctuations and Ethereum network congestion. Limits may not execute exactly when tokens reach the specified price.
+          </div>
+          <div
+            class="c9 c10 css-1m65e73"
+          >
+            Canceling a limit has a network cost.
+          </div>
+          <div
+            class="c9 c10 css-1m65e73"
+          >
+            <a
+              class="c11"
+              href="https://support.uniswap.org/hc/en-us/articles/24300813697933"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Learn more
+            </a>
+          </div>
+        </div>
+        <div
+          class="c0 c12"
           data-testid="LimitsMenuContainer"
         >
           <div
-            class="c7 c8"
+            class="c13 c14"
           >
             <div
-              class="c7 c8 c9 c10"
+              class="c13 c14 c15 c16"
             >
               <div
-                class="c0"
+                class="c17"
               >
                 <div
-                  class="c11"
-                >
-                  <svg
-                    class="c12"
-                    height="40px"
-                    width="40px"
-                  >
-                    contract-interaction.svg
-                  </svg>
-                </div>
-              </div>
-              <div
-                class="c13"
-              >
-                <div
-                  class="c14 css-15li2d9"
+                  class="c9 css-15li2d9"
                 >
                   Expires January 26, 2024 at 1:52PM
                 </div>
@@ -411,8 +408,11 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
                   class="c0"
                 >
                   <div
-                    class="c7 c15"
+                    class="c13 c18 c19"
                   >
+                    <img
+                      class="c20"
+                    />
                     <div
                       class="c5 css-n8z49y"
                     >
@@ -441,6 +441,9 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
                         points="12 5 19 12 12 19"
                       />
                     </svg>
+                    <img
+                      class="c20"
+                    />
                     <div
                       class="c5 css-n8z49y"
                     >
@@ -450,7 +453,7 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c16 css-142zc9n"
+                    class="c21 css-142zc9n"
                   >
                     when 0.00042 WETH/DAI
                   </div>
@@ -458,60 +461,50 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
               </div>
             </div>
             <label
-              class="c17"
+              class="c22 c23"
             >
               <span
                 aria-hidden="true"
-                class="c18"
-                size="16"
+                class="c24"
+                size="18"
               />
               <input
-                class="c19"
-                size="16"
+                class="c25"
+                size="18"
                 type="checkbox"
               />
               <svg
-                class="c20"
+                class="c26"
                 fill="none"
-                height="28"
-                size="16"
-                viewBox="0 0 28 28"
-                width="28"
+                height="16"
+                size="18"
+                viewBox="0 0 16 16"
+                width="16"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  d="M13.7464 21.1101C13.3792 21.6796 12.8372 22 12.2076 22C11.5607 22 11.0536 21.733 10.5814 21.1101L6.45464 15.9844C6.15738 15.6107 6 15.2191 6 14.792C6 13.9021 6.66448 13.208 7.52131 13.208C8.0459 13.208 8.46557 13.4038 8.88525 13.9555L12.1377 18.1735L19.0448 6.88988C19.412 6.28476 19.8842 6 20.4087 6C21.2306 6 22 6.58732 22 7.4594C22 7.86874 21.7902 8.29588 21.5628 8.66963L13.7464 21.1101Z"
-                  fill="currentColor"
-                />
+                <g
+                  id="Icon"
+                >
+                  <path
+                    d="M5.99993 11.3333C5.99927 11.3333 5.9986 11.3333 5.99727 11.3333C5.81927 11.3326 5.64993 11.2613 5.52526 11.1346L2.8586 8.42664C2.59993 8.16397 2.60327 7.74197 2.86594 7.48397C3.1286 7.22597 3.54993 7.22863 3.8086 7.4913L6.00393 9.72063L12.1959 3.5293C12.4566 3.26863 12.8779 3.26863 13.1386 3.5293C13.3993 3.7893 13.3993 4.21197 13.1386 4.47197L6.47193 11.1386C6.34659 11.2633 6.1766 11.3333 5.99993 11.3333Z"
+                    fill="white"
+                    id="Vector"
+                  />
+                </g>
               </svg>
             </label>
           </div>
           <div
-            class="c7 c8"
+            class="c13 c14"
           >
             <div
-              class="c7 c8 c9 c10"
+              class="c13 c14 c15 c16"
             >
               <div
-                class="c0"
+                class="c17"
               >
                 <div
-                  class="c11"
-                >
-                  <svg
-                    class="c12"
-                    height="40px"
-                    width="40px"
-                  >
-                    contract-interaction.svg
-                  </svg>
-                </div>
-              </div>
-              <div
-                class="c13"
-              >
-                <div
-                  class="c14 css-15li2d9"
+                  class="c9 css-15li2d9"
                 >
                   Expires January 26, 2024 at 1:52PM
                 </div>
@@ -519,8 +512,11 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
                   class="c0"
                 >
                   <div
-                    class="c7 c15"
+                    class="c13 c18 c19"
                   >
+                    <img
+                      class="c20"
+                    />
                     <div
                       class="c5 css-n8z49y"
                     >
@@ -549,6 +545,9 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
                         points="12 5 19 12 12 19"
                       />
                     </svg>
+                    <img
+                      class="c20"
+                    />
                     <div
                       class="c5 css-n8z49y"
                     >
@@ -558,7 +557,7 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c16 css-142zc9n"
+                    class="c21 css-142zc9n"
                   >
                     when 0.00042 WETH/DAI
                   </div>
@@ -566,44 +565,39 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
               </div>
             </div>
             <label
-              class="c17"
+              class="c22 c23"
             >
               <span
                 aria-hidden="true"
-                class="c18"
-                size="16"
+                class="c24"
+                size="18"
               />
               <input
-                class="c19"
-                size="16"
+                class="c25"
+                size="18"
                 type="checkbox"
               />
               <svg
-                class="c20"
+                class="c26"
                 fill="none"
-                height="28"
-                size="16"
-                viewBox="0 0 28 28"
-                width="28"
+                height="16"
+                size="18"
+                viewBox="0 0 16 16"
+                width="16"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  d="M13.7464 21.1101C13.3792 21.6796 12.8372 22 12.2076 22C11.5607 22 11.0536 21.733 10.5814 21.1101L6.45464 15.9844C6.15738 15.6107 6 15.2191 6 14.792C6 13.9021 6.66448 13.208 7.52131 13.208C8.0459 13.208 8.46557 13.4038 8.88525 13.9555L12.1377 18.1735L19.0448 6.88988C19.412 6.28476 19.8842 6 20.4087 6C21.2306 6 22 6.58732 22 7.4594C22 7.86874 21.7902 8.29588 21.5628 8.66963L13.7464 21.1101Z"
-                  fill="currentColor"
-                />
+                <g
+                  id="Icon"
+                >
+                  <path
+                    d="M5.99993 11.3333C5.99927 11.3333 5.9986 11.3333 5.99727 11.3333C5.81927 11.3326 5.64993 11.2613 5.52526 11.1346L2.8586 8.42664C2.59993 8.16397 2.60327 7.74197 2.86594 7.48397C3.1286 7.22597 3.54993 7.22863 3.8086 7.4913L6.00393 9.72063L12.1959 3.5293C12.4566 3.26863 12.8779 3.26863 13.1386 3.5293C13.3993 3.7893 13.3993 4.21197 13.1386 4.47197L6.47193 11.1386C6.34659 11.2633 6.1766 11.3333 5.99993 11.3333Z"
+                    fill="white"
+                    id="Vector"
+                  />
+                </g>
               </svg>
             </label>
           </div>
-          <button
-            class="c21 c22"
-            disabled=""
-            size="2"
-          >
-            <div
-              class="c23 c24"
-            />
-            Cancel 0 limits
-          </button>
         </div>
       </div>
     </span>
@@ -612,13 +606,13 @@ exports[`LimitsMenu should render when there are two open orders 1`] = `
 `;
 
 exports[`LimitsMenu should render when there is one open order 1`] = `
-.c7 {
+.c13 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c8 {
+.c14 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -635,7 +629,7 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   justify-content: flex-start;
 }
 
-.c15 {
+.c18 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -650,7 +644,7 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   -webkit-justify-content: flex-start;
   -ms-flex-pack: start;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 4px;
 }
 
 .c5 {
@@ -661,7 +655,7 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c14 {
+.c9 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -669,83 +663,30 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   letter-spacing: -0.01em;
 }
 
-.c16 {
+.c21 {
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
   -ms-letter-spacing: -0.01em;
   letter-spacing: -0.01em;
 }
 
-.c24 {
-  background-color: transparent;
-  bottom: 0;
-  border-radius: inherit;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  -webkit-transition: 150ms ease background-color;
-  transition: 150ms ease background-color;
-  width: 100%;
-}
-
-.c21 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #FF5F52;
-  border-radius: 16px;
-  border: 0;
-  color: #222222;
+.c11 {
+  -webkit-text-decoration: none;
+  text-decoration: none;
   cursor: pointer;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  font-size: 20px;
-  font-weight: 535;
-  gap: 12px;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  line-height: 24px;
-  padding: 16px;
-  position: relative;
-  -webkit-transition: 150ms ease opacity;
-  transition: 150ms ease opacity;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  -webkit-transition-duration: 125ms;
+  transition-duration: 125ms;
+  color: #FC72FF;
+  stroke: #FC72FF;
+  font-weight: 500;
 }
 
-.c21:active .c23 {
-  background-color: #B8C0DC3d;
-}
-
-.c21:focus .c23 {
-  background-color: #B8C0DC3d;
-}
-
-.c21:hover .c23 {
-  background-color: #98A1C014;
-}
-
-.c21:disabled {
-  cursor: default;
+.c11:hover {
   opacity: 0.6;
 }
 
-.c21:disabled:active .c23,
-.c21:disabled:focus .c23,
-.c21:disabled:hover .c23 {
-  background-color: transparent;
+.c11:active {
+  opacity: 0.4;
 }
 
 .c0 {
@@ -762,7 +703,22 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   justify-content: flex-start;
 }
 
-.c13 {
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.c17 {
   display: grid;
   grid-auto-rows: auto;
   -webkit-box-flex: 1;
@@ -771,25 +727,18 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   flex-grow: 1;
 }
 
-.c12 {
-  color: #7D7D7D;
+.c7 {
+  background-color: #F9F9F9;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 12px;
 }
 
-.c11 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  position: relative;
-  top: 0;
-  left: 0;
+.c10 {
+  line-height: 16px;
 }
 
-.c9 {
+.c15 {
   gap: 12px;
   height: 68px;
   padding: 0 16px;
@@ -798,11 +747,11 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   cursor: pointer;
 }
 
-.c9:hover {
+.c15:hover {
   cursor: pointer;
 }
 
-.c17 {
+.c22 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -817,19 +766,32 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   line-height: 1;
 }
 
-.c18 {
-  border-color: #7D7D7D;
+.c24 {
+  border-color: #22222212;
   display: inline-block;
   margin-right: 1px;
   border-radius: 4px;
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   border-style: solid;
-  border-width: 2px;
+  border-width: 1.5px;
   position: relative;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-transition-duration: 125ms;
+  transition-duration: 125ms;
 }
 
-.c19 {
+.c24:hover {
+  opacity: 0.6;
+}
+
+.c24:active {
+  opacity: 0.4;
+}
+
+.c25 {
   position: absolute;
   top: -24px;
   -webkit-clip: rect(0 0 0 0);
@@ -843,18 +805,38 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   width: 1px;
 }
 
-.c20 {
+.c26 {
   display: none;
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   color: white;
   position: absolute;
   right: 1px;
 }
 
-.c10 {
-  padding: 8px 16px;
+.c16 {
+  padding: 8px 0;
   height: unset;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c23 {
+  opacity: 0;
+}
+
+.c19 * {
+  max-width: 40%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c20 {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
 }
 
 .c1 {
@@ -928,15 +910,13 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
   margin-bottom: 20px;
 }
 
-.c6 {
+.c12 {
   height: 100%;
   position: relative;
 }
 
-.c22 {
-  position: absolute;
-  bottom: 16px;
-  width: 100%;
+.c8 {
+  margin-bottom: 24px;
 }
 
 <div>
@@ -986,35 +966,46 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
           </span>
         </div>
         <div
-          class="c0 c6"
+          class="c6 c7 c8"
+        >
+          <div
+            class="c9 c10 css-1m65e73"
+          >
+            Please be aware that the execution for limits may vary based on real-time market fluctuations and Ethereum network congestion. Limits may not execute exactly when tokens reach the specified price.
+          </div>
+          <div
+            class="c9 c10 css-1m65e73"
+          >
+            Canceling a limit has a network cost.
+          </div>
+          <div
+            class="c9 c10 css-1m65e73"
+          >
+            <a
+              class="c11"
+              href="https://support.uniswap.org/hc/en-us/articles/24300813697933"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Learn more
+            </a>
+          </div>
+        </div>
+        <div
+          class="c0 c12"
           data-testid="LimitsMenuContainer"
         >
           <div
-            class="c7 c8"
+            class="c13 c14"
           >
             <div
-              class="c7 c8 c9 c10"
+              class="c13 c14 c15 c16"
             >
               <div
-                class="c0"
+                class="c17"
               >
                 <div
-                  class="c11"
-                >
-                  <svg
-                    class="c12"
-                    height="40px"
-                    width="40px"
-                  >
-                    contract-interaction.svg
-                  </svg>
-                </div>
-              </div>
-              <div
-                class="c13"
-              >
-                <div
-                  class="c14 css-15li2d9"
+                  class="c9 css-15li2d9"
                 >
                   Expires January 26, 2024 at 1:52PM
                 </div>
@@ -1022,8 +1013,11 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
                   class="c0"
                 >
                   <div
-                    class="c7 c15"
+                    class="c13 c18 c19"
                   >
+                    <img
+                      class="c20"
+                    />
                     <div
                       class="c5 css-n8z49y"
                     >
@@ -1052,6 +1046,9 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
                         points="12 5 19 12 12 19"
                       />
                     </svg>
+                    <img
+                      class="c20"
+                    />
                     <div
                       class="c5 css-n8z49y"
                     >
@@ -1061,7 +1058,7 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c16 css-142zc9n"
+                    class="c21 css-142zc9n"
                   >
                     when 0.00042 WETH/DAI
                   </div>
@@ -1069,44 +1066,39 @@ exports[`LimitsMenu should render when there is one open order 1`] = `
               </div>
             </div>
             <label
-              class="c17"
+              class="c22 c23"
             >
               <span
                 aria-hidden="true"
-                class="c18"
-                size="16"
+                class="c24"
+                size="18"
               />
               <input
-                class="c19"
-                size="16"
+                class="c25"
+                size="18"
                 type="checkbox"
               />
               <svg
-                class="c20"
+                class="c26"
                 fill="none"
-                height="28"
-                size="16"
-                viewBox="0 0 28 28"
-                width="28"
+                height="16"
+                size="18"
+                viewBox="0 0 16 16"
+                width="16"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  d="M13.7464 21.1101C13.3792 21.6796 12.8372 22 12.2076 22C11.5607 22 11.0536 21.733 10.5814 21.1101L6.45464 15.9844C6.15738 15.6107 6 15.2191 6 14.792C6 13.9021 6.66448 13.208 7.52131 13.208C8.0459 13.208 8.46557 13.4038 8.88525 13.9555L12.1377 18.1735L19.0448 6.88988C19.412 6.28476 19.8842 6 20.4087 6C21.2306 6 22 6.58732 22 7.4594C22 7.86874 21.7902 8.29588 21.5628 8.66963L13.7464 21.1101Z"
-                  fill="currentColor"
-                />
+                <g
+                  id="Icon"
+                >
+                  <path
+                    d="M5.99993 11.3333C5.99927 11.3333 5.9986 11.3333 5.99727 11.3333C5.81927 11.3326 5.64993 11.2613 5.52526 11.1346L2.8586 8.42664C2.59993 8.16397 2.60327 7.74197 2.86594 7.48397C3.1286 7.22597 3.54993 7.22863 3.8086 7.4913L6.00393 9.72063L12.1959 3.5293C12.4566 3.26863 12.8779 3.26863 13.1386 3.5293C13.3993 3.7893 13.3993 4.21197 13.1386 4.47197L6.47193 11.1386C6.34659 11.2633 6.1766 11.3333 5.99993 11.3333Z"
+                    fill="white"
+                    id="Vector"
+                  />
+                </g>
               </svg>
             </label>
           </div>
-          <button
-            class="c21 c22"
-            disabled=""
-            size="2"
-          >
-            <div
-              class="c23 c24"
-            />
-            Cancel 0 limits
-          </button>
         </div>
       </div>
     </span>

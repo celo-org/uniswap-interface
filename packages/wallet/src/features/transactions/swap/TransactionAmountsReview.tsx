@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { isWeb } from 'tamagui'
-import { Button, Flex, Icons, Text, useSporeColors } from 'ui/src'
+import { Button, Flex, Icons, Text, isWeb, useSporeColors } from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
+import { CurrencyInfo } from 'uniswap/src/features/dataApi/types'
 import { NumberType } from 'utilities/src/format/types'
 import { CurrencyLogo } from 'wallet/src/components/CurrencyLogo/CurrencyLogo'
-import { CurrencyInfo } from 'wallet/src/features/dataApi/types'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { DerivedSwapInfo } from 'wallet/src/features/transactions/swap/types'
 import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
@@ -94,7 +93,7 @@ export function TransactionAmountsReview({
       <Flex row alignItems="center">
         <Flex fill>
           <Text color="$neutral2" variant="body2">
-            {t('You’re swapping')}
+            {t('swap.review.summary')}
           </Text>
         </Flex>
         {isWeb && (

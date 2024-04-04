@@ -113,6 +113,13 @@ export function useHideSpamTokensSetting(): boolean {
   return useAppSelector(selectWalletHideSpamTokensSetting)
 }
 
+type DisplayNameOptions = {
+  showShortenedEns?: boolean
+  includeUnitagSuffix?: boolean
+  showLocalName?: boolean
+  overrideDisplayName?: string
+}
+
 /**
  * Displays the ENS name if one is available otherwise displays the local name and if neither are available it shows the address.
  *
@@ -121,14 +128,6 @@ export function useHideSpamTokensSetting(): boolean {
  * @param options.includeUnitagSuffix - Whether to include the unitag suffix (.uni.eth) in returned unitag name
  * @param options.showLocalName - Whether to show the local wallet name
  */
-
-type DisplayNameOptions = {
-  showShortenedEns?: boolean
-  includeUnitagSuffix?: boolean
-  showLocalName?: boolean
-  overrideDisplayName?: string
-}
-
 export function useDisplayName(
   address: Maybe<string>,
   options?: DisplayNameOptions
@@ -198,16 +197,18 @@ export function useAvatar(address: Maybe<string>): {
   avatar: Maybe<string>
   loading: boolean
 } {
-  const { data: avatar } = useENSAvatar(address)
-  const { unitag, loading } = useUnitagByAddress(address || undefined)
+  const { data: ensAvatar, loading: ensLoading } = useENSAvatar(address)
+  const { unitag, loading: unitagLoading } = useUnitagByAddress(address || undefined)
 
-  if (loading) {
-    return { avatar: undefined, loading }
+  const unitagAvatar = unitag?.metadata?.avatar
+
+  if (unitagAvatar) {
+    return { avatar: unitagAvatar, loading: false }
   }
 
-  if (unitag?.metadata?.avatar) {
-    return { avatar: unitag.metadata.avatar, loading: false }
+  if (ensAvatar) {
+    return { avatar: ensAvatar, loading: false }
   }
 
-  return { avatar, loading: false }
+  return { avatar: undefined, loading: ensLoading || unitagLoading }
 }

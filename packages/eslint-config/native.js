@@ -107,6 +107,13 @@ module.exports = {
     // 'react/jsx-uses-react': 'off',
     'react/display-name': 'error',
     'react/react-in-jsx-scope': 'off',
+    'react-hooks/exhaustive-deps': [
+      'error',
+      {
+        // https://docs.swmansion.com/react-native-reanimated/docs/guides/web-support/
+        additionalHooks: '(useAnimatedStyle|useDerivedValue|useAnimatedProps)',
+      },
+    ],
     'no-restricted-imports': [
       'error',
       {
@@ -147,12 +154,17 @@ module.exports = {
             message: 'Use our internal `useDeviceInsets` hook instead.',
           },
           {
+            name: 'react-native',
+            importNames: ['Switch'],
+            message: 'Use our custom Switch component instead.',
+          },
+          {
             name: 'wallet/src/data/__generated__/types-and-hooks',
             importNames: ['usePortfolioBalancesQuery'],
             message: 'Use `usePortfolioBalances` instead.',
           },
           {
-            name: 'wallet/src/data/__generated__/types-and-hooks',
+            name: 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks',
             importNames: ['useAccountListQuery'],
             message: 'Use `useAccountList` instead.',
           },
@@ -173,15 +185,42 @@ module.exports = {
             message:
               'Avoid using due to issue with unsupported locales. Use utilties/src/device/locales.ts getDeviceLocales instead',
           },
+          {
+            name: 'expo-haptics',
+            message: "Use our internal `HapticFeedback` wrapper instead: `import { HapticFeedback } from 'ui/src'`",
+          },
+          {
+            name: 'src/data/usePersistedApolloClient',
+            importNames: ['usePersistedApolloClient'],
+            message:
+              "This hook should only be used once at the App level. You can use `import { useApolloClient } from '@apollo/client'` to get the default apollo client from the provider. If you need access to apollo outside of React, you can use `import { apolloClientRef } from 'src/data/usePersistedApolloClient'`.",
+          },
         ],
       },
     ],
+
     'no-restricted-syntax': [
       'error',
       {
         selector: "NewExpression[callee.name='InMemoryCache']",
         message:
           'Use `createNewInMemoryCache()` instead of `new InMemoryCache()` to correctly support our custom `ttlMs` cache invalidation policy (see `useRestQuery`). See PR #5683 for details.',
+      },
+      {
+        selector:
+          "CallExpression[callee.property.name='addListener'][callee.object.property.name='onMessage'][callee.object.object.property.name='runtime'][callee.object.object.object.name='chrome']",
+        message:
+          'Please use addMessageListener from apps/stretch/src/background/messagePassing/messageUtils.ts instead of chrome.runtime.onMessage.addListener.',
+      },
+      {
+        selector:
+          "CallExpression[callee.property.name='removeListener'][callee.object.property.name='onMessage'][callee.object.object.property.name='runtime'][callee.object.object.object.name='chrome']",
+        message:
+          'Please use removeMessageListener from apps/stretch/src/background/messagePassing/messageUtils.ts instead of chrome.runtime.onMessage.removeListener.',
+      },
+      {
+        selector: "CallExpression[callee.object.name='z'][callee.property.name='any']",
+        message: 'Avoid using z.any() in favor of more precise custom types, unless absolutely necessary.',
       },
     ],
     // React Plugin
@@ -302,6 +341,9 @@ module.exports = {
               'abcabcabc',
               'abc',
               'aaa',
+              'br',
+              'biometrics',
+              'cta',
               'They’re',
               '’s',
               'device’s',
@@ -320,6 +362,7 @@ module.exports = {
               'cancelling',
               'can’t',
               'dapp',
+              'dapps',
               'don’t',
               'eth',
               'etherscan',
@@ -327,11 +370,21 @@ module.exports = {
               'haven’t',
               'isn’t',
               'it’s',
+              'otp',
+              'nd',
+              'nft',
+              'nfts',
               'num',
+              'scantastic',
+              'th',
               'they’ll',
+              'tooltip',
+              'unformatted',
               'unhidden',
               'unhide',
+              'upsell',
               'usd',
+              'uwu',
               'wallet’s',
               'we’re',
               'won’t',
@@ -341,8 +394,6 @@ module.exports = {
               'Arbitrum',
               'blockchain',
               'validators',
-              'Naira',
-              'Hryvnia',
               'customizable',
               'subdomains',
               'unitag',
@@ -352,8 +403,45 @@ module.exports = {
               'yourname',
               'yourusername',
               'Unitags',
+              'unicons',
               'Uw',
               'Passcode',
+
+              // currencies and countries
+              'aud',
+              'brl',
+              'cny',
+              'eur',
+              'gbp',
+              'hkd',
+              'idr',
+              'inr',
+              'jpy',
+              'ngn',
+              'pkr',
+              'sgd',
+              'thb',
+              'uah',
+              'vnd',
+              'spanish',
+              'Latam',
+              'chinese',
+              'english',
+              'hindi',
+              'indonesian',
+              'japanese',
+              'malay',
+              'portuguese',
+              'russian',
+              'spanish',
+              'spanish',
+              'thai',
+              'turkish',
+              'ukrainian',
+              'urdu',
+              'vietnamese',
+              'Naira',
+              'Hryvnia',
             ],
           },
         ],

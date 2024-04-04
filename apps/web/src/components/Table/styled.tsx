@@ -5,24 +5,24 @@ import { ButtonLight } from 'components/Button'
 import Column from 'components/Column'
 import { HideScrollBarStyles } from 'components/Common'
 import Row from 'components/Row'
-import { getLocaleTimeString } from 'components/Table/utils'
-import { MAX_WIDTH_MEDIA_BREAKPOINT } from 'components/Tokens/constants'
+import { getAbbreviatedTimeString } from 'components/Table/utils'
 import { MouseoverTooltip, TooltipSize } from 'components/Tooltip'
-import { OrderDirection, chainIdToBackendName, getTokenDetailsURL } from 'graphql/data/util'
+import { NATIVE_CHAIN_ID, nativeOnChain } from 'constants/tokens'
+import { OrderDirection, getTokenDetailsURL, supportedChainIdFromGQLChain, unwrapToken } from 'graphql/data/util'
 import { OrderDirection as TheGraphOrderDirection } from 'graphql/thegraph/__generated__/types-and-hooks'
-import { useCurrency } from 'hooks/Tokens'
 import { useActiveLocale } from 'hooks/useActiveLocale'
 import { ArrowDown, CornerLeftUp, ExternalLink as ExternalLinkIcon } from 'react-feather'
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { ClickableStyle, ExternalLink, ThemedText } from 'theme/components'
+import { ClickableStyle, EllipsisStyle, ExternalLink, ThemedText } from 'theme/components'
 import { Z_INDEX } from 'theme/zIndex'
+import { Token } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 
 export const SHOW_RETURN_TO_TOP_OFFSET = 500
 export const LOAD_MORE_BOTTOM_OFFSET = 50
 
-export const TableContainer = styled(Column)<{ $maxHeight?: number }>`
-  max-width: ${MAX_WIDTH_MEDIA_BREAKPOINT};
+export const TableContainer = styled(Column)<{ $maxWidth?: number; $maxHeight?: number }>`
+  max-width: ${({ $maxWidth }) => $maxWidth}px;
   max-height: ${({ $maxHeight }) => $maxHeight}px;
   // Center layout
   justify-content: center;
@@ -73,6 +73,9 @@ export const ReturnButtonContainer = styled(Row)<{ $top?: number }>`
   position: absolute;
   justify-content: center;
   top: ${({ $top }) => $top}px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
 `
 export const LoadingIndicatorContainer = styled(Row)<{ show: boolean }>`
   position: sticky;
@@ -101,8 +104,10 @@ const TableRow = styled(Row)`
   min-height: 64px;
 `
 export const DataRow = styled(TableRow)`
-  :hover {
-    background: ${({ theme }) => theme.surface3};
+  @media not all and (hover: none) {
+    :hover {
+      background: ${({ theme }) => theme.surface3};
+    }
   }
 `
 export const NoDataFoundTableRow = styled(TableRow)`
@@ -216,7 +221,7 @@ export const TimestampCell = ({ timestamp, link }: { timestamp: number; link: st
   return (
     <StyledTimestampRow href={link}>
       <MouseoverTooltip text={fullDate} placement="top" size={TooltipSize.Max}>
-        <ThemedText.BodySecondary>{getLocaleTimeString(timestamp * 1000, locale)}</ThemedText.BodySecondary>
+        <ThemedText.BodySecondary>{getAbbreviatedTimeString(timestamp * 1000)}</ThemedText.BodySecondary>
       </MouseoverTooltip>
       <StyledExternalLinkIcon />
     </StyledTimestampRow>
@@ -224,28 +229,33 @@ export const TimestampCell = ({ timestamp, link }: { timestamp: number; link: st
 }
 
 const TokenSymbolText = styled(ThemedText.BodyPrimary)`
-  white-space: nowrap;
-  overflow: hidden;
+  ${EllipsisStyle}
 `
 /**
- * Given a token address and chain displays the Token's Logo and Symbol with a link to its TDP
- * @param tokenAddress: token address
- * @param chainId: chainId of the token
+ * Given a token displays the Token's Logo and Symbol with a link to its TDP
+ * @param token
  * @returns JSX.Element showing the Token's Logo, Chain logo if non-mainnet, and Token Symbol
  */
-export const TokenLinkCell = ({ tokenAddress, chainId }: { tokenAddress: string; chainId: ChainId }) => {
-  const currency = useCurrency(tokenAddress, chainId)
+export const TokenLinkCell = ({ token }: { token: Token }) => {
+  const chainId = supportedChainIdFromGQLChain(token.chain) ?? ChainId.MAINNET
+  const unwrappedToken = unwrapToken(chainId, token)
+  const isNative = unwrappedToken.address === NATIVE_CHAIN_ID
+  const nativeCurrency = nativeOnChain(chainId)
   return (
     <StyledInternalLink
       to={getTokenDetailsURL({
-        address: tokenAddress,
-        chain: chainIdToBackendName(chainId),
-        isInfoExplorePageEnabled: true,
+        address: unwrappedToken.address,
+        chain: token.chain,
       })}
     >
       <Row gap="4px" maxWidth="68px">
-        <PortfolioLogo currencies={[currency]} chainId={chainId} size="16px" />
-        <TokenSymbolText>{currency?.symbol ?? <Trans>UNKNOWN</Trans>}</TokenSymbolText>
+        <PortfolioLogo
+          chainId={chainId}
+          size="16px"
+          images={isNative ? undefined : [token.project?.logo?.url]}
+          currencies={isNative ? [nativeCurrency] : undefined}
+        />
+        <TokenSymbolText>{unwrappedToken?.symbol ?? <Trans>UNKNOWN</Trans>}</TokenSymbolText>
       </Row>
     </StyledInternalLink>
   )

@@ -1,21 +1,19 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Keyboard } from 'react-native'
-import { isWeb } from 'tamagui'
-import { Flex, Icons, Text, TouchableArea, useSporeColors } from 'ui/src'
+import { Flex, isWeb, Text, TouchableArea, useSporeColors } from 'ui/src'
 import EyeIcon from 'ui/src/assets/icons/eye.svg'
 import SettingsIcon from 'ui/src/assets/icons/settings.svg'
 import XIcon from 'ui/src/assets/icons/x.svg'
 import { iconSizes } from 'ui/src/theme'
-import { WarningModal } from 'wallet/src/components/modals/WarningModal/WarningModal'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { useSwapFormContext } from 'wallet/src/features/transactions/contexts/SwapFormContext'
 import { useTransactionModalContext } from 'wallet/src/features/transactions/contexts/TransactionModalContext'
-import { SwapSettingsModal } from 'wallet/src/features/transactions/swap/modals/SwapSettingsModal'
-import { WarningSeverity } from 'wallet/src/features/transactions/WarningModal/types'
+import { SwapSettingsModal } from 'wallet/src/features/transactions/swap/modals/settings/SwapSettingsModal'
+import { ViewOnlyModal } from 'wallet/src/features/transactions/swap/modals/ViewOnlyModal'
 import { AccountType } from 'wallet/src/features/wallet/accounts/types'
 import { useActiveAccountWithThrow } from 'wallet/src/features/wallet/hooks'
-import { ElementName, ModalName } from 'wallet/src/telemetry/constants'
+import { ElementName } from 'wallet/src/telemetry/constants'
 
 export function SwapFormHeader(): JSX.Element {
   const { t } = useTranslation()
@@ -60,13 +58,14 @@ export function SwapFormHeader(): JSX.Element {
         mb={isWeb ? '$spacing24' : '$spacing12'}
         mt={isWeb ? '$spacing4' : '$spacing8'}
         pl={isWeb ? '$spacing4' : '$spacing12'}
-        pr={isWeb ? '$spacing4' : customSlippageTolerance ? '$spacing8' : '$spacing16'}>
+        pr={isWeb ? '$spacing4' : customSlippageTolerance ? '$spacing8' : '$spacing16'}
+        testID={ElementName.SwapFormHeader}>
         {isWeb && (
           <TouchableArea hapticFeedback testID={ElementName.SwapSettings} onPress={onClose}>
             <Flex
               centered
               row
-              backgroundColor="$surface2"
+              backgroundColor={isWeb ? undefined : '$surface2'}
               borderRadius="$roundedFull"
               px="$spacing4"
               py="$spacing4">
@@ -80,7 +79,7 @@ export function SwapFormHeader(): JSX.Element {
         )}
 
         <Text $sm={{ variant: 'subheading1' }} $xs={{ variant: 'subheading2' }}>
-          {t('Swap')}
+          {t('swap.form.header')}
         </Text>
 
         <Flex row gap="$spacing4">
@@ -99,7 +98,7 @@ export function SwapFormHeader(): JSX.Element {
                   width={iconSizes.icon16}
                 />
                 <Text color="$neutral2" variant="buttonLabel3">
-                  {t('View-only')}
+                  {t('swap.header.viewOnly')}
                 </Text>
               </Flex>
             </TouchableArea>
@@ -113,14 +112,14 @@ export function SwapFormHeader(): JSX.Element {
               <Flex
                 centered
                 row
-                backgroundColor={customSlippageTolerance || isWeb ? '$surface2' : '$transparent'}
+                backgroundColor={customSlippageTolerance ? '$surface2' : '$transparent'}
                 borderRadius="$roundedFull"
                 gap="$spacing4"
                 px={customSlippageTolerance ? '$spacing8' : '$spacing4'}
                 py="$spacing4">
                 {customSlippageTolerance ? (
                   <Text color="$neutral2" variant="buttonLabel4">
-                    {t('{{slippageTolerancePercent}} slippage', {
+                    {t('swap.form.slippage', {
                       slippageTolerancePercent: formatPercent(customSlippageTolerance),
                     })}
                   </Text>
@@ -145,21 +144,5 @@ export function SwapFormHeader(): JSX.Element {
       )}
       {showViewOnlyModal && <ViewOnlyModal onDismiss={(): void => setShowViewOnlyModal(false)} />}
     </>
-  )
-}
-
-const ViewOnlyModal = ({ onDismiss }: { onDismiss: () => void }): JSX.Element => {
-  const { t } = useTranslation()
-  return (
-    <WarningModal
-      caption={t('You need to import this wallet via recovery phrase to swap tokens.')}
-      confirmText={t('Dismiss')}
-      icon={<Icons.Eye color="$neutral2" size={iconSizes.icon24} />}
-      modalName={ModalName.SwapWarning}
-      severity={WarningSeverity.Low}
-      title={t('This wallet is view-only')}
-      onClose={onDismiss}
-      onConfirm={onDismiss}
-    />
   )
 }

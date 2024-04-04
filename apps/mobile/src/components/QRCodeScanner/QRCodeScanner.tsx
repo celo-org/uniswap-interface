@@ -1,6 +1,7 @@
-import { BarCodeScanner, BarCodeScannerResult } from 'expo-barcode-scanner'
+import { BarCodeScanner } from 'expo-barcode-scanner'
+import { BarCodeScanningResult, Camera, CameraType } from 'expo-camera'
 import { PermissionStatus } from 'expo-modules-core'
-import React, { memo, useCallback, useMemo, useState } from 'react'
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, LayoutChangeEvent, LayoutRectangle, StyleSheet } from 'react-native'
 import { launchImageLibrary } from 'react-native-image-picker'
@@ -18,7 +19,7 @@ import {
 } from 'ui/src'
 import CameraScan from 'ui/src/assets/icons/camera-scan.svg'
 import { iconSizes, spacing } from 'ui/src/theme'
-import { useAsyncData } from 'utilities/src/react/hooks'
+import { Sentry } from 'utilities/src/logger/Sentry'
 import PasteButton from 'wallet/src/components/buttons/PasteButton'
 import { SpinningLoader } from 'wallet/src/components/loading/SpinningLoader'
 import { openSettings } from 'wallet/src/utils/linking'
@@ -50,7 +51,7 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
   const colors = useSporeColors()
   const dimensions = useDeviceDimensions()
 
-  const [permissionResponse, requestPermissionResponse] = BarCodeScanner.usePermissions()
+  const [permissionResponse, requestPermissionResponse] = Camera.useCameraPermissions()
   const permissionStatus = permissionResponse?.status
 
   const [isReadingImageFile, setIsReadingImageFile] = useState(false)
@@ -59,7 +60,7 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
   const [bottomLayout, setBottomLayout] = useState<LayoutRectangle | null>()
 
   const handleBarCodeScanned = useCallback(
-    (result: BarCodeScannerResult): void => {
+    (result: BarCodeScanningResult): void => {
       if (shouldFreezeCamera) {
         return
       }
@@ -94,7 +95,7 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
     )[0]
 
     if (!result) {
-      Alert.alert(t('No QR code found'))
+      Alert.alert(t('qrScanner.error.none'))
       setIsReadingImageFile(false)
       return
     }
@@ -102,27 +103,29 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
     handleBarCodeScanned(result)
   }, [handleBarCodeScanned, isReadingImageFile, t])
 
-  // Check for camera permissions, handle cases where not granted or undetermined
-  const getPermissionStatuses = useCallback(async (): Promise<void> => {
+  useEffect(() => {
+    Sentry.addBreadCrumb({
+      level: 'info',
+      category: 'camera',
+      message: 'QRCodeScannera camera permission status',
+      data: {
+        permissionStatus,
+      },
+    })
+
     if (permissionStatus === PermissionStatus.UNDETERMINED) {
-      await requestPermissionResponse()
+      requestPermissionResponse().catch(() => {})
     }
 
     if (permissionStatus === PermissionStatus.DENIED) {
-      Alert.alert(
-        t('Camera is disabled'),
-        t('To scan a code, allow Camera access in system settings'),
-        [
-          { text: t('Go to settings'), onPress: openSettings },
-          {
-            text: t('Not now'),
-          },
-        ]
-      )
+      Alert.alert(t('qrScanner.error.camera.title'), t('qrScanner.error.camera.message'), [
+        { text: t('common.navigation.systemSettings'), onPress: openSettings },
+        {
+          text: t('common.button.notNow'),
+        },
+      ])
     }
   }, [permissionStatus, requestPermissionResponse, t])
-
-  useAsyncData(getPermissionStatuses)
 
   const overlayWidth = (overlayLayout?.height ?? 0) / CAMERA_ASPECT_RATIO
   const scannerSize = Math.min(overlayWidth, dimensions.fullWidth) * SCAN_ICON_WIDTH_RATIO
@@ -140,11 +143,13 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
           overflow="hidden"
           width={dimensions.fullWidth}>
           {permissionStatus === PermissionStatus.GRANTED && !isReadingImageFile && (
-            <BarCodeScanner
-              barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+            <Camera
+              barCodeScannerSettings={{
+                barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
+              }}
               style={StyleSheet.absoluteFillObject}
-              type={BarCodeScanner.Constants.Type.back}
-              onBarCodeScanned={shouldFreezeCamera ? undefined : handleBarCodeScanned}
+              type={CameraType.back}
+              onBarCodeScanned={handleBarCodeScanned}
             />
           )}
         </Flex>
@@ -177,7 +182,7 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
             width="100%"
             onLayout={(event: LayoutChangeEvent): void => setInfoLayout(event.nativeEvent.layout)}>
             <Text color="$neutral1" variant="heading3">
-              {t('Scan a QR code')}
+              {t('qrScanner.title')}
             </Text>
           </Flex>
           {!shouldFreezeCamera ? (
@@ -205,7 +210,9 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
                 </Flex>
                 <Flex style={{ marginTop: LOADER_SIZE + spacing.spacing24 }} />
                 <Text color="$neutral1" textAlign="center" variant="body1">
-                  {isWalletConnectModal ? t('Connecting...') : t('Loading...')}
+                  {isWalletConnectModal
+                    ? t('qrScanner.status.connecting')
+                    : t('qrScanner.status.loading')}
                 </Text>
               </Flex>
             </Flex>
@@ -268,11 +275,7 @@ export function QRCodeScanner(props: QRCodeScannerProps | WCScannerProps): JSX.E
                 icon={<Icons.Global color="$neutral2" />}
                 theme="secondary"
                 onPress={props.onPressConnections}>
-                {props.numConnections === 1
-                  ? t('1 app connected')
-                  : t('{{numConnections}} apps connected', {
-                      numConnections: props.numConnections,
-                    })}
+                {t('qrScanner.button.connections', { count: props.numConnections })}
               </Button>
             )}
           </Flex>

@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from 'react'
-import { useTokenProjectsQuery } from 'wallet/src/data/__generated__/types-and-hooks'
-import { CurrencyInfo, GqlResult } from 'wallet/src/features/dataApi/types'
+import { useTokenProjectsQuery } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
+import { GqlResult } from 'uniswap/src/data/types'
+import { CurrencyInfo } from 'uniswap/src/features/dataApi/types'
+import { CurrencyId } from 'uniswap/src/types/currency'
 import {
   currencyIdToContractInput,
   tokenProjectToCurrencyInfos,
 } from 'wallet/src/features/dataApi/utils'
-import { CurrencyId } from 'wallet/src/utils/currencyId'
 
 /**
  * Fetches token information as CurrencyInfo from currencyIds. When used, wrap component
@@ -17,7 +18,7 @@ export function useTokenProjects(currencyIds: CurrencyId[]): GqlResult<CurrencyI
     [currencyIds]
   )
 
-  const { data, loading, refetch } = useTokenProjectsQuery({
+  const { data, loading, error, refetch } = useTokenProjectsQuery({
     variables: { contracts },
   })
 
@@ -31,5 +32,5 @@ export function useTokenProjects(currencyIds: CurrencyId[]): GqlResult<CurrencyI
 
   const retry = useCallback(() => refetch({ contracts }), [contracts, refetch])
 
-  return { data: formattedData, loading, refetch: retry }
+  return { data: formattedData, loading, refetch: retry, error }
 }

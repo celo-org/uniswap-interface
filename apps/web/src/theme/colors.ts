@@ -32,7 +32,8 @@ export const colors = {
   pink700: '#55072A',
   pink800: '#350318',
   pink900: '#2B000B',
-  pinkVibrant: '#F51A70',
+  pinkBase: '#FC74FE',
+  pinkVibrant: '#F50DB4',
   red50: '#FAECEA',
   red100: '#FED5CF',
   red200: '#FEA79B',
@@ -97,6 +98,7 @@ export const colors = {
   networkPolygonSoft: 'rgba(164, 87, 255, 0.16)',
   networkEthereumSoft: 'rgba(98, 126, 234, 0.16)',
   networkBase: '#0052FF',
+  networkBlast: '#fcfc03',
   //NEW COLORS FOR SPORE - need to define light/dark here cause they are root colors now (different system)
   neutral1_dark: '#FFFFFF',
   neutral2_dark: '#9B9B9B',
@@ -122,6 +124,8 @@ export const colors = {
   accent3_light: '#4C82FB',
   success: '#40B66B',
   critical: '#FF5F52',
+  critical2_dark: '#2E0805',
+  critical2_light: '#FFF2F1',
   scrim: 'rgba(0, 0, 0, 0.60)',
 }
 
@@ -151,6 +155,7 @@ const commonTheme = {
   chain_42161_background: colors.blue900,
   chain_84531: colors.networkBase,
   chain_56_background: colors.networkBsc,
+  chain_81457: colors.networkBlast,
   promotional: colors.magenta300,
 
   brandedGradient: 'linear-gradient(139.57deg, #FF79C9 4.35%, #FFB8E2 96.44%);',
@@ -182,6 +187,7 @@ export const darkTheme = {
 
   success: colors.success,
   critical: colors.critical,
+  critical2: colors.critical2_dark,
   scrim: colors.scrim,
 
   warning2: colors.gold200,
@@ -212,6 +218,7 @@ export const lightTheme: ThemeColors = {
 
   success: colors.success,
   critical: colors.critical,
+  critical2: colors.critical2_light,
   scrim: colors.scrim,
 
   warning2: colors.gold200,

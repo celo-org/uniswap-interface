@@ -1,25 +1,26 @@
+/* eslint-disable prettier/prettier */
+// Ordering is intentional and must be preserved: styling, polyfilling, tracing, and then functionality.
 import '@reach/dialog/styles.css'
-import 'connection/eagerlyConnect'
 import 'inter-ui'
 import 'polyfills'
 import 'tracing'
+import 'connection/eagerlyConnect'
+/* eslint-enable prettier/prettier */
 
-import { ApolloProvider } from '@apollo/client'
-import { FeatureFlagsProvider } from 'featureFlags'
-import { apolloClient } from 'graphql/data/apollo'
+import { Provider as ApolloProvider } from 'graphql/data/apollo/Provider'
 import { BlockNumberProvider } from 'lib/hooks/useBlockNumber'
 import { MulticallUpdater } from 'lib/state/multicall'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Helmet } from 'react-helmet'
+import { Helmet, HelmetProvider } from 'react-helmet-async/lib/index'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Provider } from 'react-redux'
 import { BrowserRouter, HashRouter, useLocation } from 'react-router-dom'
 import { SystemThemeUpdater, ThemeColorMetaUpdater } from 'theme/components/ThemeToggle'
 import { TamaguiProvider } from 'theme/tamaguiProvider'
+import { UnitagUpdaterContextProvider } from 'uniswap/src/features/unitags/context'
 import { isBrowserRouterEnabled } from 'utils/env'
 import { getCanonicalUrl } from 'utils/urlRoutes'
-import { UnitagUpdaterContextProvider } from 'wallet/src/features/unitags/context'
 import Web3Provider from './components/Web3Provider'
 import { LanguageProvider } from './i18n'
 import App from './pages/App'
@@ -66,13 +67,13 @@ const Router = isBrowserRouterEnabled() ? BrowserRouter : HashRouter
 
 createRoot(container).render(
   <StrictMode>
-    <Provider store={store}>
-      <FeatureFlagsProvider>
+    <HelmetProvider>
+      <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <Router>
             <LanguageProvider>
               <Web3Provider>
-                <ApolloProvider client={apolloClient}>
+                <ApolloProvider>
                   <BlockNumberProvider>
                     <UnitagUpdaterContextProvider>
                       <Updaters />
@@ -89,11 +90,11 @@ createRoot(container).render(
             </LanguageProvider>
           </Router>
         </QueryClientProvider>
-      </FeatureFlagsProvider>
-    </Provider>
+      </Provider>
+    </HelmetProvider>
   </StrictMode>
 )
 
 if (process.env.REACT_APP_SERVICE_WORKER !== 'false') {
-  serviceWorkerRegistration.register()
+  serviceWorkerRegistration.unregister()
 }

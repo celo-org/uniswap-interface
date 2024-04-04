@@ -22,10 +22,10 @@ import {
   withDelay,
   withTiming,
 } from 'react-native-reanimated'
-import { GradientBackground } from 'src/components/gradients/GradientBackground'
-import { UniconThemedGradient } from 'src/components/gradients/UniconThemedGradient'
 import { QRCodeDisplay } from 'src/components/QRCodeScanner/QRCode'
 import Trace from 'src/components/Trace/Trace'
+import { GradientBackground } from 'src/components/gradients/GradientBackground'
+import { UniconThemedGradient } from 'src/components/gradients/UniconThemedGradient'
 import {
   flashWipeAnimation,
   letsGoButtonFadeIn,
@@ -42,20 +42,20 @@ import {
   Button,
   Flex,
   Text,
+  getUniconV2Colors,
   useIsDarkMode,
   useMedia,
   useSporeColors,
   useUniconColors,
-  useUniconV2Colors,
 } from 'ui/src'
 import { ONBOARDING_QR_ETCHING_VIDEO_DARK, ONBOARDING_QR_ETCHING_VIDEO_LIGHT } from 'ui/src/assets'
 import LockIcon from 'ui/src/assets/icons/lock.svg'
 import { AnimatedFlex, flexStyles } from 'ui/src/components/layout'
 import { fonts, iconSizes, opacify, spacing } from 'ui/src/theme'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 import { AddressDisplay } from 'wallet/src/components/accounts/AddressDisplay'
 import { Arrow } from 'wallet/src/components/icons/Arrow'
-import { FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
-import { useFeatureFlag } from 'wallet/src/features/experiments/hooks'
 import { ElementName } from 'wallet/src/telemetry/constants'
 
 export function QRAnimation({
@@ -171,8 +171,8 @@ export function QRAnimation({
   const UNICON_SIZE = 64
 
   const uniconV1Colors = useUniconColors(activeAddress)
-  const { color: uniconV2Color } = useUniconV2Colors(activeAddress)
-  const isUniconsV2Enabled = useFeatureFlag(FEATURE_FLAGS.UniconsV2)
+  const { color: uniconV2Color } = getUniconV2Colors(activeAddress)
+  const isUniconsV2Enabled = useFeatureFlag(FeatureFlags.UniconsV2)
   const uniconColors = isUniconsV2Enabled
     ? { gradientStart: uniconV2Color, gradientEnd: uniconV2Color, glow: uniconV2Color }
     : uniconV1Colors
@@ -295,7 +295,7 @@ export function QRAnimation({
               pb="$spacing12"
               textAlign="center"
               variant="subheading1">
-              {t('Welcome to your new wallet')}
+              {t('onboarding.wallet.title')}
             </Text>
             <Text
               $short={{ variant: 'body3' }}
@@ -304,10 +304,8 @@ export function QRAnimation({
               textAlign="center"
               variant="body2">
               {isNewWallet
-                ? t('Your personal space for tokens, NFTs, and all your trades.')
-                : t(
-                    'Check out your tokens and NFTs, follow crypto wallets, and stay up to date on the go.'
-                  )}
+                ? t('onboarding.wallet.description.new')
+                : t('onboarding.wallet.description.existing')}
             </Text>
           </AnimatedFlex>
         </Flex>
@@ -328,12 +326,13 @@ export function QRAnimation({
                       />
                     </Flex>
                     <Text color="$sporeWhite" variant="buttonLabel2">
-                      {t('Let’s keep it safe')}
+                      {t('onboarding.wallet.continue')}
                     </Text>
                   </Flex>
                   <Arrow color={colors.sporeWhite.val} direction="e" size={iconSizes.icon24} />
                 </Flex>
               }
+              testID={ElementName.Next}
               onPress={onPressNext}
             />
           </Trace>

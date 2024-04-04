@@ -13,10 +13,10 @@ import {
   useDeviceDimensions,
   useSporeColors,
 } from 'ui/src'
+import { useNftsTabQuery } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
+import { GQLQueries } from 'uniswap/src/data/graphql/uniswap-data-api/queries'
 import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
 import { HiddenNftsRowLeft, HiddenNftsRowRight } from 'wallet/src/components/nfts/NFTHiddenRow'
-import { useNftsTabQuery } from 'wallet/src/data/__generated__/types-and-hooks'
-import { GQLQueries } from 'wallet/src/data/queries'
 import { isError, isNonPollingRequestInFlight } from 'wallet/src/data/utils'
 import {
   EMPTY_NFT_ITEM,
@@ -107,11 +107,7 @@ export const NftsList = forwardRef<FlashList<unknown>, NftsListProps>(function _
     })
   }, [data?.nftBalances?.pageInfo?.endCursor, data?.nftBalances?.pageInfo?.hasNextPage, fetchMore])
 
-  const { nfts, numHidden, numShown } = useGroupNftsByVisibility(
-    nftDataItems,
-    hiddenNftsExpanded,
-    owner
-  )
+  const { nfts, numHidden, numShown } = useGroupNftsByVisibility(nftDataItems, hiddenNftsExpanded)
 
   const onHiddenRowPressed = useCallback((): void => {
     if (hiddenNftsExpanded && footerHeight) {
@@ -171,9 +167,9 @@ export const NftsList = forwardRef<FlashList<unknown>, NftsListProps>(function _
         isError(networkStatus, !!data) ? (
           <Flex centered grow style={errorStateStyle}>
             <BaseCard.ErrorState
-              description={t('Something went wrong.')}
-              retryButtonLabel={t('Retry')}
-              title={t('Couldn’t load NFTs')}
+              description={t('common.error.general')}
+              retryButtonLabel={t('common.button.retry')}
+              title={t('tokens.nfts.list.error.load.title')}
               onRetry={onRetry}
             />
           </Flex>
@@ -181,18 +177,22 @@ export const NftsList = forwardRef<FlashList<unknown>, NftsListProps>(function _
           // empty view
           <Flex centered grow style={emptyStateStyle}>
             <BaseCard.EmptyState
-              buttonLabel={isExternalProfile || !onPressEmptyState ? undefined : t('Receive NFTs')}
+              buttonLabel={
+                isExternalProfile || !onPressEmptyState
+                  ? undefined
+                  : t('tokens.nfts.list.none.button')
+              }
               description={
                 isExternalProfile
-                  ? t('When this wallet buys or receives NFTs, they’ll appear here.')
-                  : t('Transfer NFTs from another wallet to get started.')
+                  ? t('tokens.nfts.list.none.description.external')
+                  : t('tokens.nfts.list.none.description.default')
               }
               icon={
                 <Flex pb="$spacing12">
                   <Icons.EmptyStatePicture color={colors.neutral3.get()} size="$icon.70" />
                 </Flex>
               }
-              title={t('No NFTs yet')}
+              title={t('tokens.nfts.list.none.title')}
               onPress={onPressEmptyState}
             />
           </Flex>

@@ -28,7 +28,7 @@ function prioritizeLogoSources(uris: string[]) {
   parsedUris.forEach((uri) => {
     if (uri.startsWith('https://assets.coingecko')) {
       if (!coingeckoUrl) {
-        coingeckoUrl = uri.replace(/small|thumb/g, 'large')
+        coingeckoUrl = uri.replace(/\/small\/|\/thumb\//g, '/large/')
       }
     } else {
       preferredUris.push(uri)
@@ -60,25 +60,33 @@ export function getInitialUrl(
   }
 }
 
-export default function useAssetLogoSource(
-  address?: string | null,
-  chainId?: number | null,
-  isNative?: boolean,
-  backupImg?: string | null
-): [string | undefined, () => void] {
+export default function useAssetLogoSource({
+  address,
+  chainId,
+  isNative,
+  primaryImg,
+}: {
+  address?: string | null
+  chainId?: number | null
+  isNative?: boolean
+  primaryImg?: string | null
+}): [string | undefined, () => void] {
   const hideLogo = Boolean(address && checkWarning(address, chainId)?.level === WARNING_LEVEL.BLOCKED)
   const [srcIndex, incrementSrcIndex] = useReducer((n: number) => n + 1, 0)
 
   const current = useMemo(() => {
     if (hideLogo) return undefined
 
-    if (srcIndex === 0) {
-      return getInitialUrl(address, chainId, isNative, backupImg)
-    }
+    if (primaryImg && !BAD_SRCS[primaryImg] && !isNative) return primaryImg
+
+    const initialUrl = getInitialUrl(address, chainId, isNative)
+    if (initialUrl && !BAD_SRCS[initialUrl]) return initialUrl
+
     const uris = tokenLogoLookup.getIcons(address, chainId) ?? []
     const fallbackSrcs = prioritizeLogoSources(parseLogoSources(uris))
     return fallbackSrcs.find((src) => !BAD_SRCS[src])
-  }, [address, backupImg, chainId, hideLogo, isNative, srcIndex])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rerun when src index changes, denoting a bad src was marked
+  }, [address, chainId, hideLogo, isNative, primaryImg, srcIndex])
 
   const nextSrc = useCallback(() => {
     if (current) BAD_SRCS[current] = true

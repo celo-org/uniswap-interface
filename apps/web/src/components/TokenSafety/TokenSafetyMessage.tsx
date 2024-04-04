@@ -36,20 +36,26 @@ const DetailsRow = styled.div`
 `
 
 const StyledLink = styled(ExternalLink)`
-  color: ${({ theme }) => theme.accent1};
-
+  color: ${({ theme }) => theme.neutral1};
   font-weight: 535;
 `
 
 type TokenSafetyMessageProps = {
   warning: Warning
   tokenAddress: string
+  plural?: boolean
+  tokenSymbol?: string
 }
 
-export default function TokenSafetyMessage({ warning, tokenAddress }: TokenSafetyMessageProps) {
+export default function TokenSafetyMessage({
+  warning,
+  tokenAddress,
+  plural = false,
+  tokenSymbol,
+}: TokenSafetyMessageProps) {
   const backgroundColor = useTokenWarningColor(warning.level)
   const textColor = useTokenWarningTextColor(warning.level)
-  const { heading, description } = getWarningCopy(warning)
+  const { heading, description } = getWarningCopy(warning, plural, tokenSymbol)
 
   return (
     <Label data-cy="token-safety-message" color={textColor} backgroundColor={backgroundColor}>

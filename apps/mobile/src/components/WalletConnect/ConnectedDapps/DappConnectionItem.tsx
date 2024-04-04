@@ -1,5 +1,4 @@
 import { getSdkError } from '@walletconnect/utils'
-import { ImpactFeedbackStyle } from 'expo-haptics'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { NativeSyntheticEvent, StyleSheet } from 'react-native'
@@ -12,7 +11,7 @@ import { NetworkLogos } from 'src/components/WalletConnect/NetworkLogos'
 import { wcWeb3Wallet } from 'src/features/walletConnect/saga'
 import { WalletConnectSession, removeSession } from 'src/features/walletConnect/walletConnectSlice'
 import { disableOnPress } from 'src/utils/disableOnPress'
-import { AnimatedTouchableArea, Flex, Text, TouchableArea } from 'ui/src'
+import { AnimatedTouchableArea, Flex, ImpactFeedbackStyle, Text, TouchableArea } from 'ui/src'
 import { iconSizes, spacing } from 'ui/src/theme'
 import { logger } from 'utilities/src/logger/logger'
 import { ONE_SECOND_MS } from 'utilities/src/time/time'
@@ -39,10 +38,15 @@ export function DappConnectionItem({
   const onDisconnect = async (): Promise<void> => {
     try {
       dispatch(removeSession({ account: address, sessionId: session.id }))
-      await wcWeb3Wallet.disconnectSession({
-        topic: session.id,
-        reason: getSdkError('USER_DISCONNECTED'),
-      })
+      // Explicitly verify that WalletConnect has this session id as an active session
+      // It's possible that the session was already disconnected on WC but wasn't updated locally in redux
+      const sessions = wcWeb3Wallet.getActiveSessions()
+      if (sessions[session.id]) {
+        await wcWeb3Wallet.disconnectSession({
+          topic: session.id,
+          reason: getSdkError('USER_DISCONNECTED'),
+        })
+      }
       dispatch(
         pushNotification({
           type: AppNotificationType.WalletConnect,
@@ -58,7 +62,9 @@ export function DappConnectionItem({
     }
   }
 
-  const menuActions = [{ title: t('Disconnect'), systemIcon: 'trash', destructive: true }]
+  const menuActions = [
+    { title: t('common.button.disconnect'), systemIcon: 'trash', destructive: true },
+  ]
 
   const onPress = async (e: NativeSyntheticEvent<ContextMenuOnPressNativeEvent>): Promise<void> => {
     if (e.nativeEvent.index === 0) {

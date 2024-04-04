@@ -1,21 +1,18 @@
 import { Currency, TradeType } from '@uniswap/sdk-core'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Flex, Icons, Text, TouchableArea } from 'ui/src'
+import { CurrencyInfo } from 'uniswap/src/features/dataApi/types'
 import { NumberType } from 'utilities/src/format/types'
 import { Trace } from 'utilities/src/telemetry/trace/Trace'
-import { CurrencyInfo } from 'wallet/src/features/dataApi/types'
 import { GasFeeResult } from 'wallet/src/features/gas/types'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
-import { FeeOnTransferInfo } from 'wallet/src/features/transactions/TransactionDetails/FeeOnTransferInfo'
-import { OnShowSwapFeeInfo } from 'wallet/src/features/transactions/TransactionDetails/SwapFee'
+import { FeeOnTransferFeeGroupProps } from 'wallet/src/features/transactions/TransactionDetails/FeeOnTransferFee'
 import { TransactionDetails } from 'wallet/src/features/transactions/TransactionDetails/TransactionDetails'
 import { Warning } from 'wallet/src/features/transactions/WarningModal/types'
-import { useUSDCPrice } from 'wallet/src/features/transactions/swap/trade/hooks/useUSDCPrice'
+import { SwapRateRatio } from 'wallet/src/features/transactions/swap/SwapRateRatio'
 import { Trade } from 'wallet/src/features/transactions/swap/trade/types'
 import { DerivedSwapInfo } from 'wallet/src/features/transactions/swap/types'
-import { getRateToDisplay } from 'wallet/src/features/transactions/swap/utils'
 import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
 import { ElementName } from 'wallet/src/telemetry/constants'
 import { getFormattedCurrencyAmount, getSymbolDisplayText } from 'wallet/src/utils/currency'
@@ -54,11 +51,8 @@ interface SwapDetailsProps {
   outputCurrencyPricePerUnitExact?: string
   warning?: Warning
   onAcceptTrade: () => void
-  onShowNetworkFeeInfo: () => void
-  onShowSwapFeeInfo: OnShowSwapFeeInfo
   onShowWarning?: () => void
   onShowSlippageModal: () => void
-  onShowFOTInfo: () => void
 }
 
 export function SwapDetails({
@@ -71,17 +65,13 @@ export function SwapDetails({
   outputCurrencyPricePerUnitExact,
   warning,
   onAcceptTrade,
-  onShowNetworkFeeInfo,
-  onShowSwapFeeInfo,
   onShowWarning,
   onShowSlippageModal,
-  onShowFOTInfo,
 }: SwapDetailsProps): JSX.Element {
   const { t } = useTranslation()
-  const [showInverseRate, setShowInverseRate] = useState(false)
 
   const formatter = useLocalizationContext()
-  const { convertFiatAmountFormatted } = useLocalizationContext()
+  const { convertFiatAmountFormatted, formatPercent } = formatter
 
   const trade = derivedSwapInfo.trade.trade
   const acceptedTrade = acceptedDerivedSwapInfo.trade.trade
@@ -94,23 +84,13 @@ export function SwapDetails({
     throw new Error('Invalid render of `SwapDetails` with no `acceptedTrade`')
   }
 
-  const latestPrice = trade.executionPrice
-  const latestUSDPrice = useUSDCPrice(
-    showInverseRate ? latestPrice.quoteCurrency : latestPrice.baseCurrency
-  )
-  const latestFiatPriceFormatted = convertFiatAmountFormatted(
-    latestUSDPrice?.toSignificant(),
-    NumberType.FiatTokenPrice
-  )
-  const latestRate = getRateToDisplay(formatter, trade, showInverseRate)
-
   const swapFeeUsd = getFeeAmountUsd(trade, outputCurrencyPricePerUnitExact)
   const swapFeeFiatFormatted = convertFiatAmountFormatted(swapFeeUsd, NumberType.FiatGasPrice)
 
   const swapFeeInfo = trade.swapFee
     ? {
         noFeeCharged: trade.swapFee.percent.equalTo(0),
-        formattedPercent: formatter.formatPercent(trade.swapFee.percent.toFixed()),
+        formattedPercent: formatPercent(trade.swapFee.percent.toFixed()),
         formattedAmount:
           getFormattedCurrencyAmount(trade.outputAmount.currency, trade.swapFee.amount, formatter) +
           getSymbolDisplayText(trade.outputAmount.currency.symbol),
@@ -123,7 +103,7 @@ export function SwapDetails({
     ? acceptedTrade.slippageTolerance > autoSlippageTolerance
     : false
 
-  const feeOnTransferInfo: FeeOnTransferInfo = useMemo(
+  const feeOnTransferProps: FeeOnTransferFeeGroupProps = useMemo(
     () => ({
       inputTokenInfo: {
         fee: acceptedTrade.inputTax,
@@ -133,14 +113,12 @@ export function SwapDetails({
         fee: acceptedTrade.outputTax,
         tokenSymbol: acceptedTrade.outputAmount.currency.symbol ?? 'Token buy',
       },
-      onShowInfo: onShowFOTInfo,
     }),
     [
       acceptedTrade.inputAmount.currency.symbol,
       acceptedTrade.inputTax,
       acceptedTrade.outputAmount.currency.symbol,
       acceptedTrade.outputTax,
-      onShowFOTInfo,
     ]
   )
 
@@ -157,33 +135,26 @@ export function SwapDetails({
         )
       }
       chainId={acceptedTrade.inputAmount.currency.chainId}
-      feeOnTransferInfo={feeOnTransferInfo}
+      feeOnTransferProps={feeOnTransferProps}
       gasFee={gasFee}
       showExpandedChildren={!!customSlippageTolerance}
       showWarning={warning && !newTradeRequiresAcceptance}
       swapFeeInfo={swapFeeInfo}
       warning={warning}
-      onShowNetworkFeeInfo={onShowNetworkFeeInfo}
-      onShowSwapFeeInfo={onShowSwapFeeInfo}
       onShowWarning={onShowWarning}>
       <Flex row alignItems="center" justifyContent="space-between">
         <Text color="$neutral2" variant="body3">
-          {t('Rate')}
+          {t('swap.details.rate')}
         </Text>
         <Flex row shrink justifyContent="flex-end">
-          <TouchableOpacity onPress={(): void => setShowInverseRate(!showInverseRate)}>
-            <Text adjustsFontSizeToFit numberOfLines={1} variant="body3">
-              {latestRate}
-              <Text variant="body3">{latestUSDPrice && ` (${latestFiatPriceFormatted})`}</Text>
-            </Text>
-          </TouchableOpacity>
+          <SwapRateRatio trade={trade} />
         </Flex>
       </Flex>
       <Flex row alignItems="center" gap="$spacing12" justifyContent="space-between">
         <TouchableArea flexShrink={1} onPress={onShowSlippageModal}>
           <Flex row alignItems="center" gap="$spacing4">
             <Text color="$neutral2" numberOfLines={3} variant="body3">
-              {t('Max slippage')}
+              {t('swap.details.slippage')}
               &nbsp;
               <Icons.InfoCircleFilled color="$neutral3" size="$icon.16" />
             </Text>
@@ -198,12 +169,12 @@ export function SwapDetails({
               px="$spacing4"
               py="$spacing2">
               <Text color="$neutral2" variant="buttonLabel4">
-                {t('Auto')}
+                {t('swap.settings.slippage.control.auto')}
               </Text>
             </Flex>
           ) : null}
           <Text color={showSlippageWarning ? '$DEP_accentWarning' : '$neutral1'} variant="body3">
-            {formatter.formatPercent(acceptedTrade.slippageTolerance)}
+            {formatPercent(acceptedTrade.slippageTolerance)}
           </Text>
         </Flex>
       </Flex>
@@ -258,8 +229,8 @@ function AcceptNewQuoteRow({
       <Flex fill>
         <Text color="$neutral2" variant="body3">
           {derivedSwapInfo.exactCurrencyField === CurrencyField.INPUT
-            ? t('New output')
-            : t('New input')}
+            ? t('swap.details.newQuote.output')
+            : t('swap.details.newQuote.input')}
         </Text>
         <Flex row alignItems="center">
           <Text
@@ -282,7 +253,7 @@ function AcceptNewQuoteRow({
             py="$spacing4"
             onPress={onAcceptTrade}>
             <Text color="$accent1" variant="buttonLabel3">
-              {t('Accept')}
+              {t('common.button.accept')}
             </Text>
           </TouchableArea>
         </Trace>

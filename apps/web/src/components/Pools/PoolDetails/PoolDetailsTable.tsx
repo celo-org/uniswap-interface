@@ -6,11 +6,11 @@ import Column from 'components/Column'
 import { PoolDetailsPositionsTable } from 'components/Pools/PoolDetails/PoolDetailsPositionsTable'
 import Row from 'components/Row'
 import { supportedChainIdFromGQLChain, validateUrlChainParam } from 'graphql/data/util'
-import { Token } from 'graphql/thegraph/__generated__/types-and-hooks'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { ClickableStyle, ThemedText } from 'theme/components'
+import { ProtocolVersion, Token } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 
 import { PoolDetailsTransactionsTable } from './PoolDetailsTransactionsTable'
 
@@ -29,10 +29,12 @@ export function PoolDetailsTableTab({
   poolAddress,
   token0,
   token1,
+  protocolVersion,
 }: {
   poolAddress: string
   token0?: Token
   token1?: Token
+  protocolVersion?: ProtocolVersion
 }) {
   const [activeTable, setActiveTable] = useState<PoolDetailsTableTabs>(PoolDetailsTableTabs.TRANSACTIONS)
   const chainName = validateUrlChainParam(useParams<{ chainName?: string }>().chainName)
@@ -69,7 +71,12 @@ export function PoolDetailsTableTab({
         )}
       </Row>
       {activeTable === PoolDetailsTableTabs.TRANSACTIONS ? (
-        <PoolDetailsTransactionsTable poolAddress={poolAddress} token0={token0} token1={token1} />
+        <PoolDetailsTransactionsTable
+          poolAddress={poolAddress}
+          token0={token0}
+          token1={token1}
+          protocolVersion={protocolVersion}
+        />
       ) : (
         <PoolDetailsPositionsTable positions={positionsInThisPool} />
       )}

@@ -11,15 +11,14 @@ ignores: [
     "@typechain/ethers-v5",
     "@vanilla-extract/jest-transform",
     "buffer",
-    "patch-package",
     "swc-loader",
     "postinstall-postinstall",
     "process",
+    "madge",
     # Dependencies that depcheck thinks are missing but are actually present or never used
     ## GraphQL
     "@graphql-codegen/*",
     "get-graphql-schema",
-    "graphql-tag",
     ## React Scripts and subpackages used from within it
     "case-sensitive-paths-webpack-plugin",
     "react-dev-utils",
@@ -41,7 +40,6 @@ ignores: [
     "@walletconnect/ethereum-provider",
     "@testing-library/dom",
     ## Internal packages / workspaces
-    "wallet",
     "utilities",
     "ui",
     ## Top level local file paths

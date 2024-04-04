@@ -5,10 +5,11 @@ import {
   TextInput as NativeTextInput,
   TextInputContentSizeChangeEventData,
 } from 'react-native'
-import { ColorTokens, Flex } from 'ui/src'
+import { ColorTokens, Flex, useSporeColors } from 'ui/src'
 import { spacing } from 'ui/src/theme'
+import { isAndroid } from 'uniswap/src/utils/platform'
 import { TextInput } from 'wallet/src/components/input/TextInput'
-import { isAndroid } from 'wallet/src/utils/platform'
+import { ElementName } from 'wallet/src/telemetry/constants'
 
 interface Props {
   alwaysShowInputSuffix?: boolean
@@ -56,6 +57,7 @@ function Inputs({
   layerType,
   ...inputProps
 }: Props & { layerType?: 'foreground' | 'background' }): JSX.Element {
+  const colors = useSporeColors()
   const [isMultiline, setIsMultiline] = useState(false)
 
   const handleContentSizeChange = useCallback(
@@ -119,9 +121,9 @@ function Inputs({
           py="$none"
           returnKeyType="done"
           scrollEnabled={false}
-          selectionColor="$neutral1"
+          selectionColor={colors.neutral1.val}
           spellCheck={false}
-          testID="import_account_form/input"
+          testID={ElementName.ImportAccountInput}
           textAlign={isInputEmpty ? 'left' : backgroundTextAlignment}
           textAlignVertical="bottom"
           value={value}

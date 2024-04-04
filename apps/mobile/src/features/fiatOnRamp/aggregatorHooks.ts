@@ -11,7 +11,10 @@ import {
   useAppFiatCurrencyInfo,
   useFiatCurrencyInfo,
 } from 'wallet/src/features/fiatCurrency/hooks'
-import { useFiatOnRampAggregatorCryptoQuoteQuery } from 'wallet/src/features/fiatOnRamp/api'
+import {
+  useFiatOnRampAggregatorCryptoQuoteQuery,
+  useFiatOnRampAggregatorSupportedFiatCurrenciesQuery,
+} from 'wallet/src/features/fiatOnRamp/api'
 import { FORQuote } from 'wallet/src/features/fiatOnRamp/types'
 import {
   isFiatOnRampApiError,
@@ -21,10 +24,7 @@ import {
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { useActiveAccountAddress } from 'wallet/src/features/wallet/hooks'
 
-// TODO: https://linear.app/uniswap/issue/MOB-2532/implement-fetching-of-available-fiat-currencies-from-meld
-const MELD_FIAT_CURRENCY_CODES = ['usd', 'eur']
-
-export function useMeldFiatCurrencySupportInfo(): {
+export function useMeldFiatCurrencySupportInfo(countryCode: string): {
   appFiatCurrencySupportedInMeld: boolean
   meldSupportedFiatCurrency: FiatCurrencyInfo
 } {
@@ -33,12 +33,22 @@ export function useMeldFiatCurrencySupportInfo(): {
   const fallbackCurrencyInfo = useFiatCurrencyInfo(FiatCurrency.UnitedStatesDollar)
   const appFiatCurrencyCode = appFiatCurrencyInfo.code.toLowerCase()
 
-  const appFiatCurrencySupported = MELD_FIAT_CURRENCY_CODES.includes(appFiatCurrencyCode)
-  const currency = appFiatCurrencySupported ? appFiatCurrencyInfo : fallbackCurrencyInfo
+  const { data: supportedFiatCurrencies } = useFiatOnRampAggregatorSupportedFiatCurrenciesQuery({
+    countryCode,
+  })
+
+  const appFiatCurrencySupported =
+    !supportedFiatCurrencies ||
+    supportedFiatCurrencies.fiatCurrencies.some(
+      (currency): boolean => appFiatCurrencyCode === currency.fiatCurrencyCode.toLowerCase()
+    )
+  const meldSupportedFiatCurrency = appFiatCurrencySupported
+    ? appFiatCurrencyInfo
+    : fallbackCurrencyInfo
 
   return {
     appFiatCurrencySupportedInMeld: appFiatCurrencySupported,
-    meldSupportedFiatCurrency: currency,
+    meldSupportedFiatCurrency,
   }
 }
 
@@ -50,11 +60,13 @@ export function useFiatOnRampQuotes({
   baseCurrencyCode,
   quoteCurrencyCode,
   countryCode,
+  countryState,
 }: {
   baseCurrencyAmount?: number
   baseCurrencyCode: string | undefined
   quoteCurrencyCode: string | undefined
   countryCode: string | undefined
+  countryState: string | undefined
 }): {
   loading: boolean
   error?: FetchBaseQueryError | SerializedError
@@ -75,6 +87,7 @@ export function useFiatOnRampQuotes({
           destinationCurrencyCode: quoteCurrencyCode,
           countryCode,
           walletAddress: walletAddress ?? '',
+          state: countryState,
         }
       : skipToken,
     {
@@ -105,30 +118,31 @@ export function useParseFiatOnRampError(
   const { formatNumberOrString } = useLocalizationContext()
 
   let errorText, errorColor: ColorTokens | undefined
-
-  if (!isFiatOnRampApiError(error)) {
+  if (!error) {
     return { errorText, errorColor }
   }
 
-  if (isInvalidRequestAmountTooLow(error)) {
-    const formattedAmount = formatNumberOrString({
-      value: error.data.context.minimumAllowed,
-      type: NumberType.FiatStandard,
-      currencyCode,
-    })
-    errorText = t('Minimum {{amount}}', { amount: formattedAmount })
-    errorColor = '$statusCritical'
-  } else if (isInvalidRequestAmountTooHigh(error)) {
-    const formattedAmount = formatNumberOrString({
-      value: error.data.context.maximumAllowed,
-      type: NumberType.FiatStandard,
-      currencyCode,
-    })
-    errorText = t('Maximum {{amount}}', { amount: formattedAmount })
-    errorColor = '$statusCritical'
-  } else {
-    errorText = t('Something went wrong.')
-    errorColor = '$DEP_accentWarning'
+  errorText = t('fiatOnRamp.error.default')
+  errorColor = '$DEP_accentWarning'
+
+  if (isFiatOnRampApiError(error)) {
+    if (isInvalidRequestAmountTooLow(error)) {
+      const formattedAmount = formatNumberOrString({
+        value: error.data.context.minimumAllowed,
+        type: NumberType.FiatStandard,
+        currencyCode,
+      })
+      errorText = t('fiatOnRamp.error.min', { amount: formattedAmount })
+      errorColor = '$statusCritical'
+    } else if (isInvalidRequestAmountTooHigh(error)) {
+      const formattedAmount = formatNumberOrString({
+        value: error.data.context.maximumAllowed,
+        type: NumberType.FiatStandard,
+        currencyCode,
+      })
+      errorText = t('fiatOnRamp.error.max', { amount: formattedAmount })
+      errorColor = '$statusCritical'
+    }
   }
 
   return { errorText, errorColor }

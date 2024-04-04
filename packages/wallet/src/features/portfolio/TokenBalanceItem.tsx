@@ -1,14 +1,13 @@
-import { ImpactFeedbackStyle } from 'expo-haptics'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Flex, Shine, Text, TouchableArea } from 'ui/src'
+import { Flex, ImpactFeedbackStyle, Shine, Text, TouchableArea, isWeb } from 'ui/src'
+import { PortfolioBalance } from 'uniswap/src/features/dataApi/types'
+import { CurrencyId } from 'uniswap/src/types/currency'
 import { NumberType } from 'utilities/src/format/types'
 import { TokenLogo } from 'wallet/src/components/CurrencyLogo/TokenLogo'
 import { RelativeChange } from 'wallet/src/components/text/RelativeChange'
-import { PortfolioBalance } from 'wallet/src/features/dataApi/types'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { getSymbolDisplayText } from 'wallet/src/utils/currency'
-import { CurrencyId } from 'wallet/src/utils/currencyId'
 import { disableOnPress } from 'wallet/src/utils/disableOnPress'
 
 interface TokenBalanceItemProps {
@@ -63,11 +62,11 @@ export const TokenBalanceItem = memo(function _TokenBalanceItem({
           url={currencyInfo.logoUrl ?? undefined}
         />
         <Flex shrink alignItems="flex-start">
-          <Text ellipsizeMode="tail" numberOfLines={1} variant="body1">
+          <Text ellipsizeMode="tail" numberOfLines={1} variant={isWeb ? 'body2' : 'body1'}>
             {currency.name ?? shortenedSymbol}
           </Text>
           <Flex row alignItems="center" gap="$spacing8" minHeight={20}>
-            <Text color="$neutral2" numberOfLines={1} variant="subheading2">
+            <Text color="$neutral2" numberOfLines={1} variant={isWeb ? 'body3' : 'body2'}>
               {`${formatNumberOrString({ value: quantity })}`} {shortenedSymbol}
             </Text>
           </Flex>
@@ -77,11 +76,11 @@ export const TokenBalanceItem = memo(function _TokenBalanceItem({
         <Shine disabled={!isLoading}>
           {!portfolioBalance.balanceUSD ? (
             <Flex centered fill>
-              <Text color="$neutral2">{t('N/A')}</Text>
+              <Text color="$neutral2">{t('common.text.notAvailable')}</Text>
             </Flex>
           ) : (
             <Flex alignItems="flex-end" pl="$spacing8">
-              <Text color="$neutral1" numberOfLines={1} variant="body1">
+              <Text color="$neutral1" numberOfLines={1} variant={isWeb ? 'body2' : 'body1'}>
                 {balance}
               </Text>
               <RelativeChange
@@ -89,7 +88,7 @@ export const TokenBalanceItem = memo(function _TokenBalanceItem({
                 change={relativeChange24 ?? undefined}
                 negativeChangeColor="$statusCritical"
                 positiveChangeColor="$statusSuccess"
-                variant="body2"
+                variant={isWeb ? 'body3' : 'body2'}
               />
             </Flex>
           )}

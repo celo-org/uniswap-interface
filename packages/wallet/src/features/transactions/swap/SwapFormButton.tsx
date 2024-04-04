@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from 'react'
-import { TFunction, useTranslation } from 'react-i18next'
-import { isWeb } from 'tamagui'
-import { Button, Flex, Icons, Text } from 'ui/src'
+/* eslint-disable complexity */
+import { TFunction } from 'i18next'
+import { useCallback, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Button, Flex, Icons, Text, isWeb } from 'ui/src'
 import { Trace } from 'utilities/src/telemetry/trace/Trace'
 import {
   selectHasSubmittedHoldToSwap,
@@ -13,11 +14,12 @@ import {
   useSwapScreenContext,
 } from 'wallet/src/features/transactions/contexts/SwapScreenContext'
 import { useTransactionModalContext } from 'wallet/src/features/transactions/contexts/TransactionModalContext'
-import { useParsedSwapWarnings } from 'wallet/src/features/transactions/hooks/useParsedSwapWarnings'
+import { useParsedSwapWarnings } from 'wallet/src/features/transactions/hooks/useParsedTransactionWarnings'
 import {
   HoldToSwapProgressCircle,
   PROGRESS_CIRCLE_SIZE,
 } from 'wallet/src/features/transactions/swap/HoldToSwapProgressCircle'
+import { ViewOnlyModal } from 'wallet/src/features/transactions/swap/modals/ViewOnlyModal'
 import { isWrapAction } from 'wallet/src/features/transactions/swap/utils'
 import { WrapType } from 'wallet/src/features/transactions/types'
 import { createTransactionId } from 'wallet/src/features/transactions/utils'
@@ -37,6 +39,8 @@ export function SwapFormButton(): JSX.Element {
   const { screen, setScreen } = useSwapScreenContext()
   const { derivedSwapInfo, isSubmitting, updateSwapForm } = useSwapFormContext()
   const { blockingWarning } = useParsedSwapWarnings()
+
+  const [showViewOnlyModal, setShowViewOnlyModal] = useState(false)
 
   const { wrapType, trade } = derivedSwapInfo
 
@@ -58,13 +62,13 @@ export function SwapFormButton(): JSX.Element {
 
   const hasViewedReviewScreen = useAppSelector(selectHasViewedReviewScreen)
   const hasSubmittedHoldToSwap = useAppSelector(selectHasSubmittedHoldToSwap)
-  const showHoldToSwapTip =
-    hasViewedReviewScreen && !hasSubmittedHoldToSwap && activeAccount.type !== AccountType.Readonly
+
+  const isViewOnlyWallet = activeAccount.type === AccountType.Readonly
+  const showHoldToSwapTip = hasViewedReviewScreen && !hasSubmittedHoldToSwap && !isViewOnlyWallet
 
   // Force users to view regular review screen before enabling hold to swap
   // Disable for view only because onSwap action will fail
-  const enableHoldToSwap =
-    !isWeb && hasViewedReviewScreen && activeAccount.type !== AccountType.Readonly
+  const enableHoldToSwap = !isWeb && hasViewedReviewScreen && !isViewOnlyWallet
 
   const onReview = useCallback(
     (nextScreen: SwapScreen) => {
@@ -74,15 +78,21 @@ export function SwapFormButton(): JSX.Element {
     [setScreen, updateSwapForm]
   )
 
-  const onPress = useCallback(() => {
-    onReview(SwapScreen.SwapReview)
-  }, [onReview])
+  const onReviewPress = useCallback(() => {
+    if (isViewOnlyWallet) {
+      setShowViewOnlyModal(true)
+    } else {
+      onReview(SwapScreen.SwapReview)
+    }
+  }, [onReview, isViewOnlyWallet])
 
   const onLongPressHoldToSwap = useCallback(() => {
     if (enableHoldToSwap) {
       onReview(SwapScreen.SwapReviewHoldingToSwap)
+    } else if (isViewOnlyWallet) {
+      setShowViewOnlyModal(true)
     }
-  }, [enableHoldToSwap, onReview])
+  }, [enableHoldToSwap, onReview, isViewOnlyWallet])
 
   const onReleaseHoldToSwap = useCallback(() => {
     if (isHoldToSwapPressed && !isSubmitting) {
@@ -92,6 +102,15 @@ export function SwapFormButton(): JSX.Element {
 
   const holdButtonText = useMemo(() => getHoldButtonActionText(wrapType, t), [t, wrapType])
 
+  const hasButtonWarning = !!blockingWarning?.buttonText
+  const buttonText = blockingWarning?.buttonText ?? t('swap.button.review')
+  const buttonTextColor = hasButtonWarning ? '$neutral2' : '$white'
+  const buttonBgColor = hasButtonWarning
+    ? '$surface3'
+    : isHoldToSwapPressed
+    ? '$accent2'
+    : '$accent1'
+
   return (
     <Flex alignItems="center" gap="$spacing16">
       {!isWeb && !isHoldToSwapPressed && showHoldToSwapTip && <HoldToInstantSwapRow />}
@@ -99,13 +118,15 @@ export function SwapFormButton(): JSX.Element {
       <Trace logPress element={ElementName.SwapReview}>
         <Button
           hapticFeedback
-          backgroundColor={isHoldToSwapPressed ? '$accent2' : '$accent1'}
-          disabled={reviewButtonDisabled && !isHoldToSwapPressed}
+          backgroundColor={buttonBgColor}
+          disabled={reviewButtonDisabled && !isHoldToSwapPressed && !isViewOnlyWallet}
+          // Override opacity only for view only wallets
+          opacity={isViewOnlyWallet ? 0.4 : undefined}
           size="large"
           testID={ElementName.ReviewSwap}
           width="100%"
           onLongPress={onLongPressHoldToSwap}
-          onPress={onPress}
+          onPress={onReviewPress}
           onResponderRelease={onReleaseHoldToSwap}
           onResponderTerminate={onReleaseHoldToSwap}>
           {isHoldToSwapPressed ? (
@@ -122,12 +143,14 @@ export function SwapFormButton(): JSX.Element {
               </Text>
             </Flex>
           ) : (
-            <Text color="$white" variant="buttonLabel1">
-              {t('Review')}
+            <Text color={buttonTextColor} variant="buttonLabel1">
+              {buttonText}
             </Text>
           )}
         </Button>
       </Trace>
+
+      {showViewOnlyModal && <ViewOnlyModal onDismiss={(): void => setShowViewOnlyModal(false)} />}
     </Flex>
   )
 }
@@ -139,22 +162,19 @@ function HoldToInstantSwapRow(): JSX.Element {
     <Flex centered row gap="$spacing4">
       <Icons.GraduationCap color="$neutral3" size="$icon.16" />
       <Text color="$neutral3" variant="body3">
-        {t('Tip: Hold to instant swap')}
+        {t('swap.hold.tip')}
       </Text>
     </Flex>
   )
 }
 
-function getHoldButtonActionText(
-  wrapType: WrapType,
-  t: TFunction<'translation', undefined>
-): string {
+function getHoldButtonActionText(wrapType: WrapType, t: TFunction): string {
   switch (wrapType) {
     case WrapType.Wrap:
-      return t('Hold to wrap')
+      return t('swap.hold.wrap')
     case WrapType.Unwrap:
-      return t('Hold to unwrap')
+      return t('swap.hold.unwrap')
     case WrapType.NotApplicable:
-      return t('Hold to swap')
+      return t('swap.hold.swap')
   }
 }

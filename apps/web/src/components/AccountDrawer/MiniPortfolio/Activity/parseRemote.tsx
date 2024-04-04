@@ -2,9 +2,17 @@ import { t } from '@lingui/macro'
 import { ChainId, Currency, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES, TradeType, UNI_ADDRESSES } from '@uniswap/sdk-core'
 import UniswapXBolt from 'assets/svg/bolt.svg'
 import moonpayLogoSrc from 'assets/svg/moonpay.svg'
-import { nativeOnChain } from 'constants/tokens'
+import { NATIVE_CHAIN_ID, nativeOnChain } from 'constants/tokens'
 import { BigNumber } from 'ethers/lib/ethers'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { gqlToCurrency, logSentryErrorForUnsupportedChain, supportedChainIdFromGQLChain } from 'graphql/data/util'
+import { UniswapXOrderStatus } from 'lib/hooks/orders/types'
+import ms from 'ms'
+import { useEffect, useState } from 'react'
+import store from 'state'
+import { addSignature } from 'state/signatures/reducer'
+import { SignatureType, UniswapXOrderDetails } from 'state/signatures/types'
+import { TransactionType as LocalTransactionType } from 'state/transactions/types'
 import {
   AssetActivityPartsFragment,
   Currency as GQLCurrency,
@@ -13,21 +21,13 @@ import {
   NftTransferPartsFragment,
   SwapOrderDetailsPartsFragment,
   SwapOrderStatus,
+  SwapOrderType,
   TokenApprovalPartsFragment,
   TokenAssetPartsFragment,
   TokenTransferPartsFragment,
   TransactionDetailsPartsFragment,
   TransactionType,
-} from 'graphql/data/__generated__/types-and-hooks'
-import { gqlToCurrency, logSentryErrorForUnsupportedChain, supportedChainIdFromGQLChain } from 'graphql/data/util'
-import { UniswapXOrderStatus } from 'lib/hooks/orders/types'
-import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
-import ms from 'ms'
-import { useEffect, useState } from 'react'
-import store from 'state'
-import { addSignature } from 'state/signatures/reducer'
-import { SignatureType, UniswapXOrderDetails } from 'state/signatures/types'
-import { TransactionType as LocalTransactionType } from 'state/transactions/types'
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { isAddress, isSameAddress } from 'utilities/src/addresses'
 import { currencyId } from 'utils/currencyId'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
@@ -124,12 +124,12 @@ function getSwapTitle(sent: TokenTransferPartsFragment, received: TokenTransferP
     return undefined
   }
   if (
-    sent.tokenStandard === 'NATIVE' &&
+    sent.tokenStandard === NATIVE_CHAIN_ID &&
     isSameAddress(nativeOnChain(supportedSentChain).wrapped.address, received.asset.address)
   )
     return t`Wrapped`
   else if (
-    received.tokenStandard === 'NATIVE' &&
+    received.tokenStandard === NATIVE_CHAIN_ID &&
     isSameAddress(nativeOnChain(supportedReceivedChain).wrapped.address, received.asset.address)
   ) {
     return t`Unwrapped`
@@ -183,12 +183,12 @@ export function parseSwapAmounts(
   const sent = changes.TokenTransfer.find((t) => t.direction === 'OUT')
   // Any leftover native token is refunded on exact_out swaps where the input token is native
   const refund = changes.TokenTransfer.find(
-    (t) => t.direction === 'IN' && t.asset.id === sent?.asset.id && t.asset.standard === 'NATIVE'
+    (t) => t.direction === 'IN' && t.asset.id === sent?.asset.id && t.asset.standard === NATIVE_CHAIN_ID
   )
   const received = changes.TokenTransfer.find((t) => t.direction === 'IN' && t !== refund)
   if (!sent || !received) return undefined
-  const inputCurrencyId = sent.asset.standard === 'NATIVE' ? 'ETH' : sent.asset.address
-  const outputCurrencyId = received.asset.standard === 'NATIVE' ? 'ETH' : received.asset.address
+  const inputCurrencyId = sent.asset.standard === NATIVE_CHAIN_ID ? 'ETH' : sent.asset.address
+  const outputCurrencyId = received.asset.standard === NATIVE_CHAIN_ID ? 'ETH' : received.asset.address
   if (!inputCurrencyId || !outputCurrencyId) return undefined
 
   const sentQuantity = parseUnits(sent.quantity, sent.asset.decimals)
@@ -226,7 +226,7 @@ function parseSwap(changes: TransactionChanges, formatNumberOrString: FormatNumb
 
     return { title, descriptor }
   }
-  // Some swaps may have more than 2 transfers, e.g. swaps with fees on tranfer
+  // Some swaps may have more than 2 transfers, e.g. swaps with fees on transfer
   if (changes.TokenTransfer.length >= 2) {
     const swapAmounts = parseSwapAmounts(changes, formatNumberOrString)
 
@@ -247,7 +247,7 @@ function parseSwap(changes: TransactionChanges, formatNumberOrString: FormatNumb
  * This function parses the transaction changes to determine if the transaction is a wrap/unwrap transaction.
  */
 function parseLend(changes: TransactionChanges, formatNumberOrString: FormatNumberOrStringFunctionType) {
-  const native = changes.TokenTransfer.find((t) => t.tokenStandard === 'NATIVE')?.asset
+  const native = changes.TokenTransfer.find((t) => t.tokenStandard === NATIVE_CHAIN_ID)?.asset
   const erc20 = changes.TokenTransfer.find((t) => t.tokenStandard === 'ERC20')?.asset
   if (native && erc20 && gqlToCurrency(native)?.wrapped.address === gqlToCurrency(erc20)?.wrapped.address) {
     return parseSwap(changes, formatNumberOrString)
@@ -272,8 +272,6 @@ function parseSwapOrder(
   }
 }
 
-// exported for testing
-// eslint-disable-next-line import/no-unused-modules
 export function offchainOrderDetailsFromGraphQLTransactionActivity(
   activity: AssetActivityPartsFragment & { details: TransactionDetailsPartsFragment },
   changes: TransactionChanges,
@@ -295,7 +293,6 @@ export function offchainOrderDetailsFromGraphQLTransactionActivity(
     offerer: activity.details.from,
     txHash: activity.details.hash,
     chainId,
-    type: SignatureType.SIGN_UNISWAPX_ORDER,
     status: UniswapXOrderStatus.FILLED,
     addedTime: activity.timestamp,
     swapInfo: {
@@ -452,6 +449,17 @@ function getLogoSrcs(changes: TransactionChanges): Array<string | undefined> {
   return Array.from(logoSet)
 }
 
+function swapOrderTypeToSignatureType(swapOrderType: SwapOrderType): SignatureType {
+  switch (swapOrderType) {
+    case SwapOrderType.Limit:
+      return SignatureType.SIGN_LIMIT
+    case SwapOrderType.Dutch:
+      return SignatureType.SIGN_UNISWAPX_ORDER
+    case SwapOrderType.DutchV2:
+      return SignatureType.SIGN_UNISWAPX_V2_ORDER
+  }
+}
+
 function parseUniswapXOrder({ details, chain, timestamp }: OrderActivity): Activity | undefined {
   const supportedChain = supportedChainIdFromGQLChain(chain)
   if (!supportedChain) {
@@ -462,17 +470,28 @@ function parseUniswapXOrder({ details, chain, timestamp }: OrderActivity): Activ
     return undefined
   }
 
+  // If the order is open, maybe add it to our local records (if it was initiated on this device, this will be a no-op).
   if (details.orderStatus === SwapOrderStatus.Open) {
     const inputCurrency = gqlToCurrency(details.inputToken)
     const outputCurrency = gqlToCurrency(details.outputToken)
+
+    const inputTokenQuantity = parseUnits(details.inputTokenQuantity, details.inputToken.decimals).toString()
+    const outputTokenQuantity = parseUnits(details.outputTokenQuantity, details.outputToken.decimals).toString()
+
+    if (inputTokenQuantity === '0' || outputTokenQuantity === '0') {
+      // TODO(WEB-3765): This is a temporary mitigation for a bug where the backend sends "0.000000" for small amounts.
+      throw new Error('Invalid activity received from GQL')
+    }
+
     store.dispatch(
       addSignature({
-        type: SignatureType.SIGN_UNISWAPX_ORDER,
+        type: swapOrderTypeToSignatureType(details.swapOrderType),
         offerer: details.offerer,
         id: details.hash,
         chainId: supportedChain,
         orderHash: details.hash,
         expiry: details.expiry,
+        encodedOrder: details.encodedOrder,
         swapInfo: {
           type: LocalTransactionType.SWAP,
           inputCurrencyId: currencyId(inputCurrency),
@@ -480,20 +499,18 @@ function parseUniswapXOrder({ details, chain, timestamp }: OrderActivity): Activ
           isUniswapXOrder: true,
           // This doesn't affect the display, but we don't know this value from the remote activity.
           tradeType: TradeType.EXACT_INPUT,
-          inputCurrencyAmountRaw:
-            tryParseCurrencyAmount(details.inputTokenQuantity, inputCurrency)?.quotient.toString() ?? '0',
-          expectedOutputCurrencyAmountRaw:
-            tryParseCurrencyAmount(details.outputTokenQuantity, outputCurrency)?.quotient.toString() ?? '0',
-          minimumOutputCurrencyAmountRaw:
-            tryParseCurrencyAmount(details.outputTokenQuantity, outputCurrency)?.quotient.toString() ?? '0',
+          inputCurrencyAmountRaw: inputTokenQuantity,
+          expectedOutputCurrencyAmountRaw: outputTokenQuantity,
+          minimumOutputCurrencyAmountRaw: outputTokenQuantity,
         },
         status: UniswapXOrderStatus.OPEN,
-        addedTime: timestamp,
+        addedTime: timestamp * 1000,
       })
     )
     return undefined
   }
 
+  // If the order is not open, render it like any other remote activity.
   const { inputToken, inputTokenQuantity, outputToken, outputTokenQuantity, orderStatus } = details
   const uniswapXOrderStatus = OrderStatusTable[orderStatus]
   const { status, statusMessage, title } = OrderTextTable[uniswapXOrderStatus]
@@ -511,8 +528,8 @@ function parseUniswapXOrder({ details, chain, timestamp }: OrderActivity): Activ
     statusMessage,
     offchainOrderDetails: {
       id: details.id,
-      // TODO(limits): check type from backend and use SignatureType.SIGN_LIMIT here if necessary
-      type: SignatureType.SIGN_UNISWAPX_ORDER,
+      type: swapOrderTypeToSignatureType(details.swapOrderType),
+      encodedOrder: details.encodedOrder,
       txHash: details.hash,
       orderHash: details.hash,
       offerer: details.offerer,
@@ -542,22 +559,27 @@ function parseUniswapXOrder({ details, chain, timestamp }: OrderActivity): Activ
 }
 
 function parseRemoteActivity(
-  assetActivity: AssetActivityPartsFragment,
+  assetActivity: AssetActivityPartsFragment | undefined,
   account: string,
   formatNumberOrString: FormatNumberOrStringFunctionType
 ): Activity | undefined {
   try {
+    if (!assetActivity) {
+      return undefined
+    }
+
     if (assetActivity.details.__typename === 'SwapOrderDetails') {
+      // UniswapX orders are returned as SwapOrderDetails until they are filled onchain, at which point they are returned as TransactionDetails
       return parseUniswapXOrder(assetActivity as OrderActivity)
     }
 
     const changes = assetActivity.details.assetChanges.reduce(
       (acc: TransactionChanges, assetChange) => {
-        if (assetChange.__typename === 'NftApproval') acc.NftApproval.push(assetChange)
-        else if (assetChange.__typename === 'NftApproveForAll') acc.NftApproveForAll.push(assetChange)
-        else if (assetChange.__typename === 'NftTransfer') acc.NftTransfer.push(assetChange)
-        else if (assetChange.__typename === 'TokenTransfer') acc.TokenTransfer.push(assetChange)
-        else if (assetChange.__typename === 'TokenApproval') acc.TokenApproval.push(assetChange)
+        if (assetChange?.__typename === 'NftApproval') acc.NftApproval.push(assetChange)
+        else if (assetChange?.__typename === 'NftApproveForAll') acc.NftApproveForAll.push(assetChange)
+        else if (assetChange?.__typename === 'NftTransfer') acc.NftTransfer.push(assetChange)
+        else if (assetChange?.__typename === 'TokenTransfer') acc.TokenTransfer.push(assetChange)
+        else if (assetChange?.__typename === 'TokenApproval') acc.TokenApproval.push(assetChange)
 
         return acc
       },
@@ -599,7 +621,7 @@ function parseRemoteActivity(
 }
 
 export function parseRemoteActivities(
-  assetActivities: readonly AssetActivityPartsFragment[] | undefined,
+  assetActivities: (AssetActivityPartsFragment | undefined)[] | undefined,
   account: string,
   formatNumberOrString: FormatNumberOrStringFunctionType
 ) {

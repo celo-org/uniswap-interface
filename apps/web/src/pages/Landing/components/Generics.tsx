@@ -60,20 +60,6 @@ export const Body1 = styled.p`
   line-height: 24px; /* 133.333% */
   letter-spacing: -0.01em;
 `
-export const Subheading = styled.p`
-  padding: 0;
-  margin: 0;
-  color: ${(props) => props.color || props.theme.neutral2};
-  text-align: center;
-  /* Subheading/1 */
-  font-family: Basel;
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 24px; /* 133.333% */
-  max-width: 430px;
-  letter-spacing: -0.01em;
-`
 
 export type BoxProps = {
   position?: 'relative' | 'absolute' | 'fixed'

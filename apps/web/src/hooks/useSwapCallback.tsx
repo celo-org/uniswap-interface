@@ -5,7 +5,7 @@ import { useWeb3React } from '@web3-react/core'
 import { BigNumber } from 'ethers/lib/ethers'
 import { PermitSignature } from 'hooks/usePermitAllowance'
 import { useCallback } from 'react'
-import { InterfaceTrade, TradeFillType } from 'state/routing/types'
+import { InterfaceTrade, OffchainOrderType, TradeFillType } from 'state/routing/types'
 import { isClassicTrade, isUniswapXTrade } from 'state/routing/utils'
 import { useAddOrder } from 'state/signatures/hooks'
 import { UniswapXOrderDetails } from 'state/signatures/types'
@@ -17,7 +17,6 @@ import {
   TransactionType,
 } from '../state/transactions/types'
 import { currencyId } from '../utils/currencyId'
-import useTransactionDeadline from './useTransactionDeadline'
 import { useUniswapXSwapCallback } from './useUniswapXSwapCallback'
 import { useUniversalRouterSwapCallback } from './useUniversalRouter'
 
@@ -44,8 +43,6 @@ export function useSwapCallback(
   allowedSlippage: Percent, // in bips
   permitSignature: PermitSignature | undefined
 ) {
-  const deadline = useTransactionDeadline()
-
   const addTransaction = useTransactionAdder()
   const addOrder = useAddOrder()
   const { account, chainId } = useWeb3React()
@@ -61,7 +58,6 @@ export function useSwapCallback(
     fiatValues,
     {
       slippageTolerance: allowedSlippage,
-      deadline,
       permit: permitSignature,
       ...getUniversalRouterFeeFields(trade),
     }
@@ -103,12 +99,12 @@ export function useSwapCallback(
         result.response.deadline,
         swapInfo as UniswapXOrderDetails['swapInfo'],
         result.response.encodedOrder,
-        isUniswapXTrade(trade) ? trade.offchainOrderType : undefined
+        isUniswapXTrade(trade) ? trade.offchainOrderType : OffchainOrderType.DUTCH_AUCTION // satisfying type-checker; isUniswapXTrade should always be true
       )
     } else {
-      addTransaction(result.response, swapInfo, deadline?.toNumber())
+      addTransaction(result.response, swapInfo, result.deadline?.toNumber())
     }
 
     return result
-  }, [account, addOrder, addTransaction, allowedSlippage, chainId, deadline, swapCallback, trade])
+  }, [account, addOrder, addTransaction, allowedSlippage, chainId, swapCallback, trade])
 }

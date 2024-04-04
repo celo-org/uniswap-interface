@@ -1,17 +1,12 @@
-import { ApolloClient, from } from '@apollo/client'
-import { RetryLink } from '@apollo/client/link/retry'
-import { RestLink } from 'apollo-link-rest'
 import axios from 'axios'
-import { ONE_MINUTE_MS } from 'utilities/src/time/time'
-import { uniswapUrls } from 'wallet/src/constants/urls'
-import { createNewInMemoryCache } from 'wallet/src/data/cache'
-import { REQUEST_SOURCE } from 'wallet/src/data/links'
-import { useRestQuery } from 'wallet/src/data/rest'
-import { createSignedRequestBody, createSignedRequestParams } from 'wallet/src/data/utils'
-import { getFirebaseAppCheckToken } from 'wallet/src/features/appCheck'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
+import { REQUEST_SOURCE, getVersionHeader } from 'uniswap/src/data/constants'
+import { useRestQuery } from 'uniswap/src/data/rest'
+import { addQueryParamsToEndpoint, unitagsApolloClient } from 'uniswap/src/features/unitags/api'
 import {
   ProfileMetadata,
   UnitagAddressResponse,
+  UnitagAddressesResponse,
   UnitagChangeUsernameRequestBody,
   UnitagClaimEligibilityParams,
   UnitagClaimEligibilityResponse,
@@ -21,88 +16,28 @@ import {
   UnitagResponse,
   UnitagUpdateMetadataRequestBody,
   UnitagUpdateMetadataResponse,
-  UnitagUsernameResponse,
-} from 'wallet/src/features/unitags/types'
+  UnitagWaitlistPositionResponse,
+} from 'uniswap/src/features/unitags/types'
+import { ONE_MINUTE_MS } from 'utilities/src/time/time'
+import { createSignedRequestBody, createSignedRequestParams } from 'wallet/src/data/utils'
 import { Account } from 'wallet/src/features/wallet/accounts/types'
 import { SignerManager } from 'wallet/src/features/wallet/signing/SignerManager'
 
-const restLink = new RestLink({
-  uri: `${uniswapUrls.unitagsApiUrl}`,
-  headers: {
-    'x-request-source': REQUEST_SOURCE,
-    Origin: uniswapUrls.apiBaseUrl,
-  },
-})
+const BASE_HEADERS = {
+  'x-request-source': REQUEST_SOURCE,
+  'x-app-version': getVersionHeader(),
+  Origin: uniswapUrls.apiBaseUrl,
+}
 
-const retryLink = new RetryLink()
-
-const apolloClient = new ApolloClient({
-  link: from([retryLink, restLink]),
-  cache: createNewInMemoryCache(),
-  defaultOptions: {
-    watchQuery: {
-      // ensures query is returning data even if some fields errored out
-      errorPolicy: 'all',
-      fetchPolicy: 'cache-first',
-    },
-  },
-})
-
-const generateAxiosHeaders = async (signature: string): Promise<Record<string, string>> => {
-  const firebaseAppCheckToken = await getFirebaseAppCheckToken()
-
+const generateAxiosHeaders = async (
+  signature: string,
+  firebaseAppCheckToken?: string
+): Promise<Record<string, string>> => {
   return {
+    ...BASE_HEADERS,
     'x-uni-sig': signature,
-    'x-request-source': REQUEST_SOURCE,
-    'x-firebase-app-check': firebaseAppCheckToken,
-    Origin: uniswapUrls.apiBaseUrl,
+    ...(firebaseAppCheckToken && { 'x-firebase-app-check': firebaseAppCheckToken }),
   }
-}
-
-export function addQueryParamsToEndpoint(
-  endpoint: string,
-  params: Record<string, string | number | boolean | undefined>
-): string {
-  const url = new URL(endpoint, uniswapUrls.appBaseUrl) // dummy base URL, we only need the path with query params
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
-      // only add param if its value is not undefined
-      url.searchParams.append(key, String(value))
-    }
-  })
-  return url.pathname + url.search
-}
-
-export function useUnitagQuery(
-  username?: string
-): ReturnType<typeof useRestQuery<UnitagUsernameResponse>> {
-  return useRestQuery<UnitagUsernameResponse, Record<string, unknown>>(
-    addQueryParamsToEndpoint('/username', { username }),
-    { username }, // dummy body so that cache key is unique per query params
-    ['available', 'requiresEnsMatch', 'username', 'metadata', 'address'], // return all fields
-    {
-      skip: !username, // skip if username is not provided
-      ttlMs: ONE_MINUTE_MS * 2,
-    },
-    'GET',
-    apolloClient
-  )
-}
-
-export function useUnitagByAddressQuery(
-  address?: Address
-): ReturnType<typeof useRestQuery<UnitagAddressResponse>> {
-  return useRestQuery<UnitagAddressResponse, Record<string, unknown>>(
-    addQueryParamsToEndpoint('/address', { address }),
-    { address }, // dummy body so that cache key is unique per query params
-    ['username', 'metadata'], // return all fields
-    {
-      skip: !address, // skip if address is not provided
-      ttlMs: ONE_MINUTE_MS * 2,
-    },
-    'GET',
-    apolloClient
-  )
 }
 
 export function useUnitagClaimEligibilityQuery({
@@ -119,7 +54,7 @@ export function useUnitagClaimEligibilityQuery({
     ['canClaim', 'errorCode', 'message'], // return all fields
     { skip, ttlMs: ONE_MINUTE_MS * 2 },
     'GET',
-    apolloClient
+    unitagsApolloClient
   )
 }
 
@@ -203,12 +138,14 @@ export async function claimUnitag({
   metadata,
   account,
   signerManager,
+  firebaseAppCheckToken,
 }: {
   username: string
   deviceId: string
   metadata: ProfileMetadata
   account: Account
   signerManager: SignerManager
+  firebaseAppCheckToken?: string
 }): ReturnType<typeof axios.post<UnitagResponse>> {
   const claimUnitagUrl = `${uniswapUrls.unitagsApiUrl}/username`
   const { requestBody, signature } = await createSignedRequestBody<UnitagClaimUsernameRequestBody>(
@@ -220,7 +157,7 @@ export async function claimUnitag({
     account,
     signerManager
   )
-  const headers = await generateAxiosHeaders(signature)
+  const headers = await generateAxiosHeaders(signature, firebaseAppCheckToken)
   return await axios.post<UnitagResponse>(claimUnitagUrl, requestBody, {
     headers,
   })
@@ -250,4 +187,66 @@ export async function changeUnitag({
   return await axios.post<UnitagResponse>(changeUnitagUrl, requestBody, {
     headers,
   })
+}
+
+export async function fetchUnitagByAddresses(addresses: Address[]): Promise<{
+  data?: {
+    [address: Address]: UnitagAddressResponse
+  }
+  error?: unknown
+}> {
+  const unitagAddressesUrl = `${uniswapUrls.unitagsApiUrl}/addresses?addresses=${encodeURIComponent(
+    addresses.join(',')
+  )}`
+
+  try {
+    const response = await axios.get<UnitagAddressesResponse>(unitagAddressesUrl, {
+      headers: BASE_HEADERS,
+    })
+    return {
+      data: response.data.usernames,
+    }
+  } catch (error) {
+    return { error }
+  }
+}
+
+export async function fetchExtensionWaitlistEligibity(username: string): Promise<{
+  data?: UnitagWaitlistPositionResponse
+  error?: unknown
+}> {
+  const unitagWaitlistPositionUrl = `${
+    uniswapUrls.unitagsApiUrl
+  }/waitlist/position?username=${encodeURIComponent(username)}`
+
+  try {
+    const response = await axios.get<UnitagWaitlistPositionResponse>(unitagWaitlistPositionUrl, {
+      headers: BASE_HEADERS,
+    })
+    return {
+      data: response.data,
+    }
+  } catch (error) {
+    return { error }
+  }
+}
+
+export async function fetchExtensionEligibityByAddresses(addresses: Address[]): Promise<{
+  data?: UnitagWaitlistPositionResponse
+  error?: unknown
+}> {
+  const unitagWaitlistPositionUrl = `${
+    uniswapUrls.unitagsApiUrl
+  }/waitlist/position?addresses=${encodeURIComponent(addresses.join(','))}`
+
+  try {
+    const response = await axios.get<UnitagWaitlistPositionResponse>(unitagWaitlistPositionUrl, {
+      headers: BASE_HEADERS,
+    })
+    return {
+      data: response.data,
+    }
+  } catch (error) {
+    return { error }
+  }
 }

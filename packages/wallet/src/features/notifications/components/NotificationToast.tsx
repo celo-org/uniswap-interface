@@ -1,3 +1,7 @@
+//! tamagui-ignore
+// TODO(EXT-732): there's some sort of encoding bug that just popped up here in
+// the tamagui optimizer disabling optimization for now on this file
+
 import { useCallback, useEffect } from 'react'
 import {
   Directions,
@@ -6,8 +10,15 @@ import {
   State,
 } from 'react-native-gesture-handler'
 import { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated'
-import { isWeb } from 'tamagui'
-import { AnimatedFlex, Flex, Text, TouchableArea, mediumShadowProps, useDeviceInsets } from 'ui/src'
+import {
+  AnimatedFlex,
+  Flex,
+  Text,
+  TouchableArea,
+  isWeb,
+  mediumShadowProps,
+  useDeviceInsets,
+} from 'ui/src'
 import { borderRadii, spacing } from 'ui/src/theme'
 import { useTimeout } from 'utilities/src/time/timing'
 import { selectActiveAccountNotifications } from 'wallet/src/features/notifications/selectors'

@@ -1,22 +1,25 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { Keyboard, StyleProp, ViewStyle } from 'react-native'
+import { Trans, useTranslation } from 'react-i18next'
+import { Keyboard } from 'react-native'
 import { useAppDispatch } from 'src/app/hooks'
+import { navigate } from 'src/app/navigation/rootNavigation'
 import { openModal } from 'src/features/modals/modalSlice'
-import { Screens } from 'src/screens/Screens'
+import { Screens, UnitagScreens } from 'src/screens/Screens'
 import {
   Flex,
   Image,
   Text,
   TouchableArea,
+  TouchableAreaProps,
   useDeviceDimensions,
   useIsDarkMode,
-  useSporeColors,
 } from 'ui/src'
 import { UNITAGS_BANNER_VERTICAL_DARK, UNITAGS_BANNER_VERTICAL_LIGHT } from 'ui/src/assets'
-import { borderRadii, iconSizes, spacing } from 'ui/src/theme'
+import { iconSizes } from 'ui/src/theme'
+import { selectHasCompletedUnitagsIntroModal } from 'wallet/src/features/behaviorHistory/selectors'
 import { setHasSkippedUnitagPrompt } from 'wallet/src/features/behaviorHistory/slice'
 import { UNITAG_SUFFIX_NO_LEADING_DOT } from 'wallet/src/features/unitags/constants'
+import { useAppSelector } from 'wallet/src/state'
 import { sendWalletAnalyticsEvent } from 'wallet/src/telemetry'
 import { ElementName, ModalName, UnitagEventName } from 'wallet/src/telemetry/constants'
 
@@ -37,7 +40,8 @@ export function UnitagBanner({
   const { t } = useTranslation()
   const { fullWidth } = useDeviceDimensions()
   const isDarkMode = useIsDarkMode()
-  const colors = useSporeColors()
+  const hasCompletedUnitagsIntroModal = useAppSelector(selectHasCompletedUnitagsIntroModal)
+
   const imageWidth = compact
     ? COMPACT_IMAGE_SCREEN_WIDTH_PROPORTION * fullWidth
     : IMAGE_SCREEN_WIDTH_PROPORTION * fullWidth
@@ -50,7 +54,18 @@ export function UnitagBanner({
       action: 'claim',
       entryPoint: analyticsEntryPoint,
     })
-    dispatch(openModal({ name: ModalName.UnitagsIntro, initialState: { address, entryPoint } }))
+
+    if (hasCompletedUnitagsIntroModal) {
+      navigate(Screens.UnitagStack, {
+        screen: UnitagScreens.ClaimUnitag,
+        params: {
+          entryPoint,
+          address,
+        },
+      })
+    } else {
+      dispatch(openModal({ name: ModalName.UnitagsIntro, initialState: { address, entryPoint } }))
+    }
   }
 
   const onPressMaybeLater = (): void => {
@@ -61,13 +76,13 @@ export function UnitagBanner({
     dispatch(setHasSkippedUnitagPrompt(true))
   }
 
-  const baseButtonStyle: StyleProp<ViewStyle> = {
-    backgroundColor: colors.accent1.get(),
-    borderRadius: borderRadii.rounded20,
+  const baseButtonStyle: TouchableAreaProps = {
+    backgroundColor: '$accent1',
+    borderRadius: '$rounded20',
     justifyContent: 'center',
     height: iconSizes.icon36,
-    paddingVertical: spacing.spacing8,
-    paddingHorizontal: spacing.spacing12,
+    py: '$spacing8',
+    px: '$spacing12',
   }
 
   return (
@@ -77,12 +92,12 @@ export function UnitagBanner({
       alignContent="space-between"
       backgroundColor={compact ? '$surface2' : '$background'}
       borderColor="$surface3"
-      borderRadius="$rounded16"
+      borderRadius="$rounded20"
       borderWidth={compact ? undefined : '$spacing1'}
       mt="$spacing12"
       overflow="hidden"
       pl="$spacing16"
-      py="$spacing16"
+      py="$spacing12"
       shadowColor="$neutral3"
       shadowOpacity={0.4}
       shadowRadius="$spacing4">
@@ -94,48 +109,42 @@ export function UnitagBanner({
           justifyContent="space-between"
           onPress={onPressClaimNow}>
           <Text color="$neutral2" variant="subheading2">
-            <Text color="$accent1" variant="buttonLabel3">
-              {t('Claim your {{unitagSuffix}} username', {
-                unitagSuffix: UNITAG_SUFFIX_NO_LEADING_DOT,
-              })}
-            </Text>
-            {t(' and build out your customizable profile.')}
+            <Trans
+              components={{ highlight: <Text color="$accent1" variant="buttonLabel3" /> }}
+              i18nKey="unitags.banner.title.compact"
+              values={{ unitagDomain: UNITAG_SUFFIX_NO_LEADING_DOT }}
+            />
           </Text>
         </Flex>
       ) : (
         <Flex fill gap="$spacing16" justifyContent="space-between">
           <Flex gap="$spacing4">
             <Text variant="subheading2">
-              {t('Claim your {{unitagSuffix}} username', {
-                unitagSuffix: UNITAG_SUFFIX_NO_LEADING_DOT,
+              {t('unitags.banner.title.full', {
+                unitagDomain: UNITAG_SUFFIX_NO_LEADING_DOT,
               })}
             </Text>
             <Text color="$neutral2" variant="body3">
-              {t('Build a personalized web3 profile and easily share your address with friends.')}
+              {t('unitags.banner.subtitle')}
             </Text>
           </Flex>
           <Flex row gap="$spacing2">
             {/* TODO: replace with Button when it's extensible enough to accommodate designs */}
             <TouchableArea
-              style={{
-                ...baseButtonStyle,
-                backgroundColor: colors.accent1.get(),
-              }}
+              {...baseButtonStyle}
               testID={ElementName.Confirm}
               onPress={onPressClaimNow}>
               <Text color="white" variant="buttonLabel4">
-                {t('Claim now')}
+                {t('unitags.banner.button.claim')}
               </Text>
             </TouchableArea>
             <TouchableArea
-              style={{
-                ...baseButtonStyle,
-                backgroundColor: colors.transparent.get(),
-              }}
+              {...baseButtonStyle}
+              backgroundColor="$transparent"
               testID={ElementName.Cancel}
               onPress={onPressMaybeLater}>
-              <Text color="$neutral3" variant="buttonLabel4">
-                {t('Maybe later')}
+              <Text color="$neutral2" variant="buttonLabel4">
+                {t('common.button.later')}
               </Text>
             </TouchableArea>
           </Flex>

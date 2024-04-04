@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useState } from 'react'
+import { forwardRef, useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Keyboard,
@@ -8,7 +8,6 @@ import {
   Platform,
   TextInputFocusEventData,
 } from 'react-native'
-import { isWeb } from 'tamagui'
 import {
   AnimatePresence,
   Button,
@@ -19,12 +18,16 @@ import {
   SpaceTokens,
   Text,
   TouchableArea,
+  isWeb,
+  useComposedRefs,
   useDeviceDimensions,
 } from 'ui/src'
 import { fonts, iconSizes, spacing } from 'ui/src/theme'
 import { SHADOW_OFFSET_SMALL } from 'wallet/src/components/BaseCard/BaseCard'
 import { sendWalletAnalyticsEvent } from 'wallet/src/telemetry'
 import { WalletEventName } from 'wallet/src/telemetry/constants'
+
+const DEFAULT_MIN_HEIGHT = 48
 
 export const springConfig = {
   stiffness: 1000,
@@ -44,6 +47,8 @@ export type SearchTextInputProps = InputProps & {
   showShadow?: boolean
   py?: SpaceTokens
   px?: SpaceTokens
+  hideIcon?: boolean
+  minHeight?: number
 }
 
 export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>(
@@ -66,8 +71,12 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
       px = '$spacing16',
       showShadow,
       value,
+      hideIcon,
+      minHeight = DEFAULT_MIN_HEIGHT,
     } = props
 
+    const inputRef = useRef<Input>(null)
+    const combinedRef = useComposedRefs<Input>(inputRef, ref)
     const showCancelButton = !!onCancel
     const showCloseButton = !!onClose
     const [isFocus, setIsFocus] = useState(false)
@@ -90,6 +99,7 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
     }, [])
 
     const onClear = (): void => {
+      inputRef.current?.clear()
       onChangeText?.('')
       setShowClearButton(false)
     }
@@ -123,7 +133,7 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
           backgroundColor={backgroundColor}
           borderRadius="$roundedFull"
           gap="$spacing8"
-          minHeight={48}
+          minHeight={minHeight}
           mr={showCancelButton && isFocus ? cancelButtonWidth + spacing.spacing12 : 0}
           px={px}
           py={py}
@@ -137,13 +147,15 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
               shadowColor: '$sporeBlack',
             },
           })}>
-          <Flex py="$spacing4">
-            <Icons.Search color="$neutral2" size="$icon.20" />
-          </Flex>
+          {!hideIcon && (
+            <Flex py="$spacing4">
+              <Icons.Search color="$neutral2" size="$icon.20" />
+            </Flex>
+          )}
 
           <Flex grow alignSelf="stretch" mr="$spacing8" overflow="hidden">
             <Input
-              ref={ref}
+              ref={combinedRef}
               autoCapitalize="none"
               autoCorrect={false}
               autoFocus={autoFocus}
@@ -152,6 +164,8 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
               fontFamily="$body"
               height="100%"
               maxFontSizeMultiplier={fonts.body1.maxFontSizeMultiplier}
+              outlineColor="transparent"
+              outlineWidth={0}
               p="$none"
               placeholder={placeholder}
               placeholderTextColor="$neutral3"
@@ -172,6 +186,7 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
               {...(Platform.OS === 'android' && {
                 width: value ? undefined : 9999,
               })}
+              width="100%"
               onChangeText={onChangeTextInput}
               onFocus={onTextInputFocus}
               onSubmitEditing={onTextInputSubmitEditing}
@@ -181,6 +196,8 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
           <AnimatePresence>
             {showClearButton ? (
               <Button
+                // TODO(MOB-3059): tamagui should fix this internally and then we can remove animateOnly
+                animateOnly={['transform', 'opacity']}
                 animation="quick"
                 backgroundColor="$surface3"
                 borderRadius="$roundedFull"
@@ -233,7 +250,7 @@ export const SearchTextInput = forwardRef<NativeTextInput, SearchTextInputProps>
             x={isFocus ? 0 : dimensions.fullWidth}
             onLayout={onCancelButtonLayout}>
             <TouchableArea hitSlop={16} onPress={onPressCancel}>
-              <Text variant="buttonLabel2">{t('Cancel')}</Text>
+              <Text variant="buttonLabel2">{t('common.button.cancel')}</Text>
             </TouchableArea>
           </Flex>
         )}

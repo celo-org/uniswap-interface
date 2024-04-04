@@ -1,21 +1,25 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from 'src/app/hooks'
 import { useBiometricAppSettings, useBiometricPrompt } from 'src/features/biometrics/hooks'
 import { closeAllModals } from 'src/features/modals/modalSlice'
 import { selectModalState } from 'src/features/modals/selectModalState'
 import { Button, Flex, Icons, Text, TouchableArea, useSporeColors } from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
 import { logger } from 'utilities/src/logger/logger'
-import { getDurationRemainingString } from 'utilities/src/time/duration'
 import { ONE_MINUTE_MS, ONE_SECOND_MS } from 'utilities/src/time/time'
 import { useInterval } from 'utilities/src/time/timing'
 import { BottomSheetModal } from 'wallet/src/components/modals/BottomSheetModal'
-import { uniswapUrls } from 'wallet/src/constants/urls'
+import {
+  ExtensionOnboardingState,
+  setExtensionOnboardingState,
+} from 'wallet/src/features/behaviorHistory/slice'
 import { pushNotification } from 'wallet/src/features/notifications/slice'
 import { AppNotificationType } from 'wallet/src/features/notifications/types'
-import { useActiveAccount } from 'wallet/src/features/wallet/hooks'
+import { useNonPendingSignerAccounts } from 'wallet/src/features/wallet/hooks'
 import { ModalName } from 'wallet/src/telemetry/constants'
+import { getOtpDurationString } from 'wallet/src/utils/duration'
 import { getEncryptedMnemonic } from './ScantasticEncryption'
 
 enum OtpState {
@@ -33,22 +37,38 @@ export function ScantasticModal(): JSX.Element | null {
   const colors = useSporeColors()
   const dispatch = useAppDispatch()
 
-  const account = useActiveAccount()
+  // Use the first mnemonic account because zero-balance mnemonic accounts will fail to retrieve the mnemonic from rnEthers
+  const account = useNonPendingSignerAccounts().sort(
+    (account1, account2) => account1.derivationIndex - account2.derivationIndex
+  )[0]
+
+  if (!account) {
+    throw new Error('This should not be accessed with no mnemonic accounts')
+  }
 
   const { initialState } = useAppSelector(selectModalState(ModalName.Scantastic))
+  const params = initialState?.params
+
   const [OTP, setOTP] = useState('')
   // Once a user has scanned a QR they have 6 minutes to correctly input the OTP
   const [expirationTimestamp, setExpirationTimestamp] = useState<number>(
     Date.now() + 6 * ONE_MINUTE_MS
   )
-  const pubKey: JsonWebKey = initialState?.pubKey ? JSON.parse(initialState?.pubKey) : undefined
-  const uuid = initialState?.uuid
-  const device = initialState?.vendor + ' ' + initialState?.model || ''
-  const browser = initialState?.browser || ''
+  const pubKey = params?.publicKey
+  const uuid = params?.uuid
+  const device = (params?.vendor + ' ' + params?.model || '').trim()
+  const browser = params?.browser || ''
 
   const [expired, setExpired] = useState(false)
   const [redeemed, setRedeemed] = useState(false)
+  const [error, setError] = useState('')
+
   const [expiryText, setExpiryText] = useState('')
+  const setExpirationText = useCallback(() => {
+    const expirationString = getOtpDurationString(expirationTimestamp)
+    setExpiryText(expirationString)
+  }, [expirationTimestamp])
+  useInterval(setExpirationText, ONE_SECOND_MS)
 
   if (redeemed) {
     dispatch(
@@ -57,20 +77,14 @@ export function ScantasticModal(): JSX.Element | null {
         hideDelay: 6 * ONE_SECOND_MS,
       })
     )
+    dispatch(setExtensionOnboardingState(ExtensionOnboardingState.Completed))
     dispatch(closeAllModals())
   }
 
   useEffect(() => {
     const interval = setInterval(() => {
       const timeLeft = expirationTimestamp - Date.now()
-      if (timeLeft <= 0) {
-        return setExpiryText(t('Expired'))
-      }
-      return setExpiryText(
-        t('New code in {{duration}}', {
-          duration: getDurationRemainingString(expirationTimestamp),
-        })
-      )
+      setExpired(timeLeft <= 0)
     }, ONE_SECOND_MS)
 
     return () => clearInterval(interval)
@@ -81,16 +95,28 @@ export function ScantasticModal(): JSX.Element | null {
   }, [dispatch])
 
   const onEncryptSeedphrase = async (): Promise<void> => {
-    let encryptedSeedphrase = ''
+    if (!pubKey) {
+      return
+    }
 
+    setError('')
+    let encryptedSeedphrase = ''
+    const { n, e } = pubKey
     try {
-      if (!pubKey.n || !pubKey.e) {
-        throw new Error(t('Invalid public key'))
-      }
-      encryptedSeedphrase = await getEncryptedMnemonic(account?.address || '', pubKey.n, pubKey.e)
-    } catch (e) {
-      // TODO(EXT-485): improve error handling
-      logger.error(e, { tags: { file: 'ScantasticModal', function: 'getEncryptedMnemonic' } })
+      encryptedSeedphrase = await getEncryptedMnemonic(account?.address || '', n, e)
+    } catch (err) {
+      setError(t('scantastic.error.encryption'))
+      logger.error(err, {
+        tags: {
+          file: 'ScantasticModal',
+          function: 'onEncryptSeedphrase->getEncryptedMnemonic',
+        },
+        extra: {
+          address: account?.address,
+          n,
+          e,
+        },
+      })
     }
 
     try {
@@ -108,18 +134,24 @@ export function ScantasticModal(): JSX.Element | null {
         }),
       })
       if (!response.ok) {
-        throw new Error(t('Failed to send.'))
+        throw new Error(`Failed to post blob: ${await response.text()}`)
       }
       const data = await response.json()
       if (!data?.otp) {
-        throw new Error(t('OTP unavailable'))
+        throw new Error('OTP unavailable')
       } else {
         setExpirationTimestamp(Date.now() + ONE_MINUTE_MS * 2)
         setOTP(data.otp)
       }
-    } catch (e) {
-      // TODO(EXT-485): improve error handling
-      logger.error(e, { tags: { file: 'ScantasticModal', function: 'fetch' } })
+    } catch (err) {
+      setError(t('scantastic.error.noCode'))
+      logger.error(err, {
+        tags: {
+          file: 'ScantasticModal',
+          function: `onEncryptSeedphrase->fetch`,
+        },
+        extra: { uuid },
+      })
     }
   }
 
@@ -153,12 +185,12 @@ export function ScantasticModal(): JSX.Element | null {
         }
       )
       if (!response.ok) {
-        return
+        throw new Error(`Failed to check OTP state: ${await response.text()}`)
       }
       const data: OtpStateApiResponse = await response.json()
       const otpState = data.otp
       if (!otpState) {
-        return
+        throw new Error('No OTP state received.')
       }
       if (data.expiresAtInSeconds) {
         setExpirationTimestamp(data.expiresAtInSeconds * ONE_SECOND_MS)
@@ -170,7 +202,13 @@ export function ScantasticModal(): JSX.Element | null {
         setExpired(true)
       }
     } catch (e) {
-      logger.warn('ScanToOnboard.tsx', 'checkOTPState', e as string)
+      logger.error(e, {
+        tags: {
+          file: 'ScantasticModal',
+          function: `checkOTPState`,
+        },
+        extra: { uuid },
+      })
     }
   }, [OTP, uuid])
 
@@ -186,12 +224,12 @@ export function ScantasticModal(): JSX.Element | null {
           <Flex centered backgroundColor="$surface2" borderRadius="$rounded12" p="$spacing12">
             <Icons.LinkBrokenHorizontal color="$neutral2" size={iconSizes.icon24} />
           </Flex>
-          <Text variant="subheading1">{t('Your connection timed out')}</Text>
+          <Text variant="subheading1">{t('scantastic.error.timeout.title')}</Text>
           <Text color="$neutral2" mb="$spacing12" textAlign="center" variant="body3">
-            {t('Scan the QR code on the Uniswap Extension again to continue syncing your wallet.')}
+            {t('scantastic.error.timeout.message')}
           </Text>
           <Button theme="secondary" width="100%" onPress={onClose}>
-            {t('Close')}
+            {t('common.button.close')}
           </Button>
         </Flex>
       </BottomSheetModal>
@@ -208,20 +246,41 @@ export function ScantasticModal(): JSX.Element | null {
           <Flex centered backgroundColor="$accent2" borderRadius="$rounded12" p="$spacing12">
             <Icons.Laptop color="$accent1" size={iconSizes.icon24} />
           </Flex>
-          <Text variant="subheading1">{t('Uniswap one-time code')}</Text>
+          <Text variant="subheading1">{t('scantastic.code.title')}</Text>
           <Text color="$neutral2" textAlign="center" variant="body3">
-            <Trans>
-              Enter this code in the Uniswap Extension. Your recovery phrase will be safely
-              encrypted and transferred.
-            </Trans>
+            {t('scantastic.code.subtitle')}
           </Text>
           <Flex row gap="$spacing20" py="$spacing8">
             <Text variant="heading1">{OTP.substring(0, 3).split('').join(' ')}</Text>
             <Text variant="heading1">{OTP.substring(3).split('').join(' ')}</Text>
           </Flex>
-          <Text color="$neutral3" variant="body3">
+          <Text color="$neutral3" variant="body2">
             {expiryText}
           </Text>
+        </Flex>
+      </BottomSheetModal>
+    )
+  }
+
+  if (error) {
+    return (
+      <BottomSheetModal
+        backgroundColor={colors.surface1.get()}
+        name={ModalName.OtpScanInput}
+        onClose={onClose}>
+        <Flex centered gap="$spacing16" px="$spacing16" py="$spacing12">
+          <Flex centered backgroundColor="$accent2" borderRadius="$rounded12" p="$spacing12">
+            <Icons.AlertTriangle color="$statusCritical" size={iconSizes.icon24} />
+          </Flex>
+          <Text variant="subheading1">{t('common.text.error')}</Text>
+          <Text color="$neutral2" textAlign="center" variant="body3">
+            {error}
+          </Text>
+          <Flex flexDirection="column" gap="$spacing4" mt="$spacing12" width="100%">
+            <Button alignItems="center" theme="secondary" onPress={onClose}>
+              <Text variant="buttonLabel2">{t('common.button.close')}</Text>
+            </Button>
+          </Flex>
         </Flex>
       </BottomSheetModal>
     )
@@ -230,15 +289,15 @@ export function ScantasticModal(): JSX.Element | null {
   return (
     <BottomSheetModal
       backgroundColor={colors.surface1.get()}
-      name={ModalName.RemoveSeedPhraseWarningModal}
+      name={ModalName.Scantastic}
       onClose={onClose}>
       <Flex centered gap="$spacing16" px="$spacing16" py="$spacing12">
         <Flex centered backgroundColor="$accent2" borderRadius="$rounded12" p="$spacing12">
           <Icons.Laptop color="$accent1" size={iconSizes.icon24} />
         </Flex>
-        <Text variant="subheading1">{t('Is this your device?')}</Text>
+        <Text variant="subheading1">{t('scantastic.confirmation.title')}</Text>
         <Text color="$neutral2" textAlign="center" variant="body3">
-          {t('Only continue if you are syncing with the Uniswap Extension on a trusted device.')}
+          {t('scantastic.confirmation.subtitle')}
         </Text>
         <Flex
           borderColor="$surface3"
@@ -250,7 +309,7 @@ export function ScantasticModal(): JSX.Element | null {
           {device && (
             <Flex row px="$spacing8">
               <Text color="$neutral2" flex={1} variant="body3">
-                {t('Device')}
+                {t('scantastic.confirmation.label.device')}
               </Text>
               <Text variant="body3">{device}</Text>
             </Flex>
@@ -258,7 +317,7 @@ export function ScantasticModal(): JSX.Element | null {
           {browser && (
             <Flex row px="$spacing8">
               <Text color="$neutral2" flex={1} variant="body3">
-                {t('Browser')}
+                {t('scantastic.confirmation.label.browser')}
               </Text>
               <Text variant="body3">{browser}</Text>
             </Flex>
@@ -270,11 +329,11 @@ export function ScantasticModal(): JSX.Element | null {
             mb="$spacing4"
             theme="primary"
             onPress={onConfirmSync}>
-            {t('Yes, continue')}
+            {t('scantastic.confirmation.button.continue')}
           </Button>
           <TouchableArea alignItems="center" onPress={onClose}>
             <Text color="$accent1" py="$spacing16" variant="buttonLabel2">
-              {t('Cancel')}
+              {t('common.button.cancel')}
             </Text>
           </TouchableArea>
         </Flex>

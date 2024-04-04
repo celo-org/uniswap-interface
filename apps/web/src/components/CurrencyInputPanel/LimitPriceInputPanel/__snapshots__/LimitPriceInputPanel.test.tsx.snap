@@ -1,27 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LimitPriceInputPanel should render correct subheader with inputCurrency defined, but no price 1`] = `
-.c1 {
+.c2 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c8 {
+.c9 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
   margin-top: 8px;
 }
 
-.c10 {
+.c11 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
   width: unset;
 }
 
-.c2 {
+.c3 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -38,7 +38,7 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   justify-content: space-between;
 }
 
-.c9 {
+.c10 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -56,7 +56,7 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   gap: 8px;
 }
 
-.c11 {
+.c12 {
   width: unset;
   display: -webkit-box;
   display: -webkit-flex;
@@ -74,7 +74,7 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   gap: 1px;
 }
 
-.c3 {
+.c4 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -82,7 +82,14 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   letter-spacing: -0.01em;
 }
 
-.c6 {
+.c14 {
+  -webkit-letter-spacing: -0.01em;
+  -moz-letter-spacing: -0.01em;
+  -ms-letter-spacing: -0.01em;
+  letter-spacing: -0.01em;
+}
+
+.c7 {
   color: #222222;
   pointer-events: none;
   width: 0;
@@ -103,36 +110,36 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   text-align: right;
 }
 
-.c6::-webkit-search-decoration {
+.c7::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
-.c6 [type='number'] {
+.c7 [type='number'] {
   -moz-appearance: textfield;
 }
 
-.c6::-webkit-outer-spin-button,
-.c6::-webkit-inner-spin-button {
+.c7::-webkit-outer-spin-button,
+.c7::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
-.c6::-webkit-input-placeholder {
+.c7::-webkit-input-placeholder {
   color: #CECECE;
 }
 
-.c6::-moz-placeholder {
+.c7::-moz-placeholder {
   color: #CECECE;
 }
 
-.c6:-ms-input-placeholder {
+.c7:-ms-input-placeholder {
   color: #CECECE;
 }
 
-.c6::placeholder {
+.c7::placeholder {
   color: #CECECE;
 }
 
-.c7 {
+.c8 {
   -webkit-filter: none;
   filter: none;
   opacity: 1;
@@ -161,11 +168,10 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   will-change: height;
 }
 
-.c12 {
-  background-color: unset;
+.c13 {
   color: #7D7D7D;
   padding: 2px 8px;
-  height: 24px;
+  height: 28px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,12 +184,16 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  background-color: transparent;
+  background-color: unset;
   border-radius: 999px;
   border: 1px solid #22222212;
 }
 
-.c4 {
+.c1 {
+  gap: 4px;
+}
+
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -199,15 +209,15 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
   transition-duration: 125ms;
 }
 
-.c4:hover {
+.c5:hover {
   opacity: 0.6;
 }
 
-.c4:active {
+.c5:active {
   opacity: 0.4;
 }
 
-.c5 {
+.c6 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -225,19 +235,19 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
     class=" t_light _dsp_contents is_Theme"
   >
     <div
-      class="c0"
+      class="c0 c1"
     >
       <div
-        class="c1 c2"
+        class="c2 c3"
       >
         <div
-          class="c3 css-142zc9n"
+          class="c4 css-142zc9n"
           style="user-select: none;"
         >
           Limit price
         </div>
         <div
-          class="c4"
+          class="c5"
         >
           <svg
             fill="none"
@@ -254,12 +264,12 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
         </div>
       </div>
       <div
-        class="c5"
+        class="c6"
       >
         <input
           autocomplete="off"
           autocorrect="off"
-          class="c6 c7 limit-price-input"
+          class="c7 c8 limit-price-input"
           disabled=""
           inputmode="decimal"
           maxlength="79"
@@ -272,46 +282,50 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
         />
       </div>
       <div
-        class="c8 c2"
+        class="c9 c3"
       >
         <div
-          class="c1 c9"
+          class="c2 c10"
         >
           <div
-            class="c10 c11"
+            class="c11 c12"
             width="unset"
           >
             <button
-              class="c12"
+              class="c13"
             >
-              Current
+              <div
+                class="c14 css-1guhfcl"
+              >
+                Market
+              </div>
             </button>
           </div>
           <button
-            class="c12"
+            class="c13"
           >
             <div
-              class="c3 css-142zc9n"
+              class="c14 css-1guhfcl"
             >
               +
               1%
             </div>
           </button>
           <button
-            class="c12"
+            class="c13"
           >
             <div
-              class="c3 css-142zc9n"
+              class="c14 css-1guhfcl"
             >
               +
               5%
             </div>
           </button>
           <button
-            class="c12"
+            class="c13"
           >
             <div
-              class="c3 css-142zc9n"
+              class="c14 css-1guhfcl"
             >
               +
               10%
@@ -325,27 +339,27 @@ exports[`LimitPriceInputPanel should render correct subheader with inputCurrency
 `;
 
 exports[`LimitPriceInputPanel should render the component with no currencies selected 1`] = `
-.c1 {
+.c2 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
 }
 
-.c8 {
+.c9 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
   margin-top: 8px;
 }
 
-.c10 {
+.c11 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
   width: unset;
 }
 
-.c2 {
+.c3 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -362,7 +376,7 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   justify-content: space-between;
 }
 
-.c9 {
+.c10 {
   width: 100%;
   display: -webkit-box;
   display: -webkit-flex;
@@ -380,7 +394,7 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   gap: 8px;
 }
 
-.c11 {
+.c12 {
   width: unset;
   display: -webkit-box;
   display: -webkit-flex;
@@ -398,7 +412,7 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   gap: 1px;
 }
 
-.c3 {
+.c4 {
   color: #7D7D7D;
   -webkit-letter-spacing: -0.01em;
   -moz-letter-spacing: -0.01em;
@@ -406,7 +420,14 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   letter-spacing: -0.01em;
 }
 
-.c6 {
+.c14 {
+  -webkit-letter-spacing: -0.01em;
+  -moz-letter-spacing: -0.01em;
+  -ms-letter-spacing: -0.01em;
+  letter-spacing: -0.01em;
+}
+
+.c7 {
   color: #222222;
   pointer-events: none;
   width: 0;
@@ -427,36 +448,36 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   text-align: right;
 }
 
-.c6::-webkit-search-decoration {
+.c7::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
-.c6 [type='number'] {
+.c7 [type='number'] {
   -moz-appearance: textfield;
 }
 
-.c6::-webkit-outer-spin-button,
-.c6::-webkit-inner-spin-button {
+.c7::-webkit-outer-spin-button,
+.c7::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
-.c6::-webkit-input-placeholder {
+.c7::-webkit-input-placeholder {
   color: #CECECE;
 }
 
-.c6::-moz-placeholder {
+.c7::-moz-placeholder {
   color: #CECECE;
 }
 
-.c6:-ms-input-placeholder {
+.c7:-ms-input-placeholder {
   color: #CECECE;
 }
 
-.c6::placeholder {
+.c7::placeholder {
   color: #CECECE;
 }
 
-.c7 {
+.c8 {
   -webkit-filter: none;
   filter: none;
   opacity: 1;
@@ -485,11 +506,10 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   will-change: height;
 }
 
-.c12 {
-  background-color: unset;
+.c13 {
   color: #7D7D7D;
   padding: 2px 8px;
-  height: 24px;
+  height: 28px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -502,12 +522,16 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  background-color: transparent;
+  background-color: unset;
   border-radius: 999px;
   border: 1px solid #22222212;
 }
 
-.c4 {
+.c1 {
+  gap: 4px;
+}
+
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -523,15 +547,15 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
   transition-duration: 125ms;
 }
 
-.c4:hover {
+.c5:hover {
   opacity: 0.6;
 }
 
-.c4:active {
+.c5:active {
   opacity: 0.4;
 }
 
-.c5 {
+.c6 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -549,19 +573,19 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
     class=" t_light _dsp_contents is_Theme"
   >
     <div
-      class="c0"
+      class="c0 c1"
     >
       <div
-        class="c1 c2"
+        class="c2 c3"
       >
         <div
-          class="c3 css-142zc9n"
+          class="c4 css-142zc9n"
           style="user-select: none;"
         >
           Limit price
         </div>
         <div
-          class="c4"
+          class="c5"
         >
           <svg
             fill="none"
@@ -578,12 +602,12 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
         </div>
       </div>
       <div
-        class="c5"
+        class="c6"
       >
         <input
           autocomplete="off"
           autocorrect="off"
-          class="c6 c7 limit-price-input"
+          class="c7 c8 limit-price-input"
           disabled=""
           inputmode="decimal"
           maxlength="79"
@@ -596,46 +620,50 @@ exports[`LimitPriceInputPanel should render the component with no currencies sel
         />
       </div>
       <div
-        class="c8 c2"
+        class="c9 c3"
       >
         <div
-          class="c1 c9"
+          class="c2 c10"
         >
           <div
-            class="c10 c11"
+            class="c11 c12"
             width="unset"
           >
             <button
-              class="c12"
+              class="c13"
             >
-              Current
+              <div
+                class="c14 css-1guhfcl"
+              >
+                Market
+              </div>
             </button>
           </div>
           <button
-            class="c12"
+            class="c13"
           >
             <div
-              class="c3 css-142zc9n"
+              class="c14 css-1guhfcl"
             >
               +
               1%
             </div>
           </button>
           <button
-            class="c12"
+            class="c13"
           >
             <div
-              class="c3 css-142zc9n"
+              class="c14 css-1guhfcl"
             >
               +
               5%
             </div>
           </button>
           <button
-            class="c12"
+            class="c13"
           >
             <div
-              class="c3 css-142zc9n"
+              class="c14 css-1guhfcl"
             >
               +
               10%

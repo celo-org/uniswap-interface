@@ -1,6 +1,4 @@
 import { t } from '@lingui/macro'
-import { useInfoExplorePageEnabled } from 'featureFlags/flags/infoExplore'
-import { useInfoPoolPageEnabled } from 'featureFlags/flags/infoPoolPage'
 import { useAtom } from 'jotai'
 import { lazy, ReactNode, Suspense, useMemo } from 'react'
 import { matchPath, Navigate, useLocation } from 'react-router-dom'
@@ -18,7 +16,6 @@ const NftExplore = lazy(() => import('nft/pages/explore'))
 const Collection = lazy(() => import('nft/pages/collection'))
 const Profile = lazy(() => import('nft/pages/profile'))
 const Asset = lazy(() => import('nft/pages/asset/Asset'))
-const Explore = lazy(() => import('pages/Explore'))
 const AddLiquidityWithTokenRedirects = lazy(() => import('pages/AddLiquidity/redirects'))
 const AddLiquidityV2WithTokenRedirects = lazy(() => import('pages/AddLiquidityV2/redirects'))
 const RedirectExplore = lazy(() => import('pages/Explore/redirects'))
@@ -52,8 +49,6 @@ const LazyLoadSpinner = () => (
 interface RouterConfig {
   browserRouterEnabled?: boolean
   hash?: string
-  infoExplorePageEnabled?: boolean
-  infoPoolPageEnabled?: boolean
   shouldDisableNFTRoutes?: boolean
 }
 
@@ -63,18 +58,14 @@ interface RouterConfig {
 export function useRouterConfig(): RouterConfig {
   const browserRouterEnabled = isBrowserRouterEnabled()
   const { hash } = useLocation()
-  const infoPoolPageEnabled = useInfoPoolPageEnabled()
-  const infoExplorePageEnabled = useInfoExplorePageEnabled()
   const [shouldDisableNFTRoutes] = useAtom(shouldDisableNFTRoutesAtom)
   return useMemo(
     () => ({
       browserRouterEnabled,
       hash,
-      infoExplorePageEnabled,
-      infoPoolPageEnabled,
       shouldDisableNFTRoutes: Boolean(shouldDisableNFTRoutes),
     }),
-    [browserRouterEnabled, hash, infoExplorePageEnabled, infoPoolPageEnabled, shouldDisableNFTRoutes]
+    [browserRouterEnabled, hash, shouldDisableNFTRoutes]
   )
 }
 
@@ -99,6 +90,8 @@ function createRouteDefinition(route: Partial<RouteDefinition>): RouteDefinition
   }
 }
 
+const SwapTitle = t`Buy, sell & trade Ethereum and other top tokens on Uniswap`
+
 export const routes: RouteDefinition[] = [
   createRouteDefinition({
     path: '/',
@@ -112,34 +105,26 @@ export const routes: RouteDefinition[] = [
     getTitle: getExploreTitle,
     nestedPaths: [':tab', ':chainName', ':tab/:chainName'],
     getElement: () => <RedirectExplore />,
-    enabled: (args) => Boolean(args.infoExplorePageEnabled),
   }),
   createRouteDefinition({
     path: '/explore/tokens/:chainName/:tokenAddress',
     getTitle: () => t`Buy & sell on Uniswap`,
     getElement: () => <TokenDetails />,
-    enabled: (args) => Boolean(args.infoExplorePageEnabled),
   }),
   createRouteDefinition({
     path: '/tokens',
     getTitle: getDefaultTokensTitle,
-    getElement: (args) => {
-      return args.infoExplorePageEnabled ? <Navigate to="/explore/tokens" replace /> : <Explore />
-    },
+    getElement: () => <Navigate to="/explore/tokens" replace />,
   }),
   createRouteDefinition({
     path: '/tokens/:chainName',
     getTitle: getDefaultTokensTitle,
-    getElement: (args) => {
-      return args.infoExplorePageEnabled ? <RedirectExplore /> : <Explore />
-    },
+    getElement: () => <RedirectExplore />,
   }),
   createRouteDefinition({
     path: '/tokens/:chainName/:tokenAddress',
     getTitle: getDefaultTokensTitle,
-    getElement: (args) => {
-      return args.infoExplorePageEnabled ? <RedirectExplore /> : <TokenDetails />
-    },
+    getElement: () => <RedirectExplore />,
   }),
   createRouteDefinition({
     path: '/explore/pools/:chainName/:poolAddress',
@@ -149,7 +134,6 @@ export const routes: RouteDefinition[] = [
         <PoolDetails />
       </Suspense>
     ),
-    enabled: (args) => Boolean(args.infoExplorePageEnabled && args.infoPoolPageEnabled),
   }),
   createRouteDefinition({
     path: '/vote/*',
@@ -167,12 +151,22 @@ export const routes: RouteDefinition[] = [
   }),
   createRouteDefinition({
     path: '/send',
-    getElement: () => <Navigate to={{ ...location, pathname: '/swap' }} replace />,
+    getElement: () => <Swap />,
+    getTitle: () => t`Send tokens on Uniswap`,
+  }),
+  createRouteDefinition({
+    path: '/limits',
+    getElement: () => <Navigate to="/limit" replace />,
+  }),
+  createRouteDefinition({
+    path: '/limit',
+    getElement: () => <Swap />,
+    getTitle: () => SwapTitle,
   }),
   createRouteDefinition({
     path: '/swap',
     getElement: () => <Swap />,
-    getTitle: () => t`Buy, sell & trade Ethereum and other top tokens on Uniswap`,
+    getTitle: () => SwapTitle,
   }),
   createRouteDefinition({
     path: '/pool/v2/find',
@@ -184,7 +178,11 @@ export const routes: RouteDefinition[] = [
     getElement: () => <PoolV2 />,
     getTitle: () => t`Provide liquidity to pools (v2) on Uniswap`,
   }),
-  createRouteDefinition({ path: '/pool', getElement: () => <Pool /> }),
+  createRouteDefinition({
+    path: '/pool',
+    getElement: () => <Pool />,
+    getTitle: () => t`Manage & provide pool liquidity on Uniswap`,
+  }),
   createRouteDefinition({
     path: '/pool/:tokenId',
     getElement: () => <PositionPage />,

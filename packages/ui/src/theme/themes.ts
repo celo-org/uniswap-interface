@@ -39,12 +39,14 @@ const light = {
   backgroundFocus: colorsLight.surface2,
   borderColor: colorsLight.none,
   borderColorHover: colorsLight.none,
+  borderColorFocus: colorsLight.none,
+  outlineColor: colorsLight.none,
   color: colorsLight.neutral1,
   colorHover: colorsLight.accent1,
   colorPress: colorsLight.accent1,
   colorFocus: colorsLight.accent1,
-  shadowColor: colorsLight.none,
-  shadowColorHover: colorsLight.none,
+  shadowColor: 'rgba(0,0,0,0.15)',
+  shadowColorHover: 'rgba(0,0,0,0.2)',
 }
 
 type BaseTheme = typeof light
@@ -58,12 +60,14 @@ const dark: BaseTheme = {
   backgroundFocus: colorsDark.surface2,
   borderColor: colorsDark.none,
   borderColorHover: colorsDark.none,
+  borderColorFocus: colorsDark.none,
+  outlineColor: colorsDark.none,
   color: colorsDark.neutral1,
   colorHover: colorsDark.accent1,
   colorPress: colorsDark.accent1,
   colorFocus: colorsDark.accent1,
-  shadowColor: colorsDark.none,
-  shadowColorHover: colorsDark.none,
+  shadowColor: 'rgba(0,0,0,0.4)',
+  shadowColorHover: 'rgba(0,0,0,0.5)',
 }
 
 // if you need to add non-token values, use createTheme

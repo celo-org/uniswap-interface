@@ -5,7 +5,10 @@ import { PriceAmount } from 'src/features/nfts/collection/ListPriceCard'
 import { Flex, Icons, Text, TouchableArea, useSporeColors } from 'ui/src'
 import VerifiedIcon from 'ui/src/assets/icons/verified.svg'
 import { iconSizes, imageSizes, spacing } from 'ui/src/theme'
-import { Currency, NftItemScreenQuery } from 'wallet/src/data/__generated__/types-and-hooks'
+import {
+  Currency,
+  NftItemScreenQuery,
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { NFTViewer } from 'wallet/src/features/images/NFTViewer'
 import { NFTItem } from 'wallet/src/features/nfts/types'
 
@@ -75,7 +78,7 @@ export function CollectionPreviewCard({
             {collection?.markets?.[0]?.floorPrice && (
               <Flex row gap="$spacing4">
                 <Text color="$neutral2" numberOfLines={1} variant="subheading2">
-                  {t('Floor')}:
+                  {t('tokens.nfts.collection.label.priceFloor')}:
                 </Text>
                 <PriceAmount
                   iconColor="$neutral2"

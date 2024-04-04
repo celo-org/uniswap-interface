@@ -1,15 +1,15 @@
 import { ChainId, Percent } from '@uniswap/sdk-core'
 import { exploreSearchStringAtom } from 'components/Tokens/state'
 import { BIPS_BASE } from 'constants/misc'
+import { OrderDirection, chainIdToBackendName } from 'graphql/data/util'
+import { useAtomValue } from 'jotai/utils'
+import { useMemo } from 'react'
 import {
   ProtocolVersion,
   Token,
   useTopV2PairsQuery,
   useTopV3PoolsQuery,
-} from 'graphql/data/__generated__/types-and-hooks'
-import { OrderDirection, chainIdToBackendName } from 'graphql/data/util'
-import { useAtomValue } from 'jotai/utils'
-import { useMemo } from 'react'
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 
 export function sortPools(pools: TablePool[], sortState: PoolTableSortState) {
   return pools.sort((a, b) => {
@@ -48,7 +48,7 @@ export function calculateTurnover(volume24h?: number, tvl?: number, feeTier?: nu
   return new Percent(Math.round(volume24h * (feeTier / BIPS_BASE)), Math.round(tvl))
 }
 
-export const V2_BIPS = 300
+export const V2_BIPS = 3000
 
 export interface TablePool {
   hash: string
@@ -64,11 +64,11 @@ export interface TablePool {
 }
 
 export enum PoolSortFields {
-  TVL,
-  Volume24h,
-  VolumeWeek,
-  Turnover,
-  TxCount,
+  TVL = 'TVL',
+  Volume24h = '1 day volume',
+  VolumeWeek = '7 day volume',
+  Turnover = 'Turnover',
+  TxCount = 'Transactions',
 }
 
 export type PoolTableSortState = {
@@ -89,12 +89,15 @@ function useFilteredPools(pools: TablePool[]) {
         const token1IncludesFilterString = pool.token1?.symbol?.toLowerCase().includes(lowercaseFilterString)
         const token0HashIncludesFilterString = pool.token0?.address?.toLowerCase().includes(lowercaseFilterString)
         const token1HashIncludesFilterString = pool.token1?.address?.toLowerCase().includes(lowercaseFilterString)
+        const poolName = `${pool.token0?.symbol}/${pool.token1?.symbol}`.toLowerCase()
+        const poolNameIncludesFilterString = poolName.includes(lowercaseFilterString)
         return (
           token0IncludesFilterString ||
           token1IncludesFilterString ||
           addressIncludesFilterString ||
           token0HashIncludesFilterString ||
-          token1HashIncludesFilterString
+          token1HashIncludesFilterString ||
+          poolNameIncludesFilterString
         )
       }),
     [lowercaseFilterString, pools]
@@ -118,7 +121,6 @@ export function useTopPools(sortState: PoolTableSortState, chainId?: ChainId) {
     skip: chainId !== ChainId.MAINNET,
   })
   const loading = loadingV3 || loadingV2
-  const error = errorV3 || errorV2
 
   const unfilteredPools = useMemo(() => {
     const topV3Pools: TablePool[] =
@@ -156,5 +158,5 @@ export function useTopPools(sortState: PoolTableSortState, chainId?: ChainId) {
   }, [dataV2?.topV2Pairs, dataV3?.topV3Pools, sortState])
 
   const filteredPools = useFilteredPools(unfilteredPools).slice(0, 100)
-  return { topPools: filteredPools, loading, error }
+  return { topPools: filteredPools, loading, errorV3, errorV2 }
 }

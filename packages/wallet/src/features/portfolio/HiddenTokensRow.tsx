@@ -1,8 +1,5 @@
-import { ImpactFeedbackStyle } from 'expo-haptics'
-import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { AnimatedFlex, Flex, Icons, Text, TouchableArea } from 'ui/src'
+import { Flex, Icons, ImpactFeedbackStyle, Text, TouchableArea } from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
 
 export function HiddenTokensRow({
@@ -18,25 +15,12 @@ export function HiddenTokensRow({
 }): JSX.Element {
   const { t } = useTranslation()
 
-  // TODO (EXT-482): make chevron rotation work with Tamagui animation
-  const chevronRotate = useSharedValue(isExpanded ? 180 : 0)
-
-  const chevronAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ rotateZ: `${chevronRotate.value}deg` }],
-    }
-  }, [])
-
-  const onPressRow = useCallback(() => {
-    chevronRotate.value = withTiming(chevronRotate.value === 0 ? 180 : 0, {
-      duration: 150,
-      easing: Easing.ease,
-    })
-    onPress()
-  }, [chevronRotate, onPress])
-
   return (
-    <TouchableArea hapticFeedback hapticStyle={ImpactFeedbackStyle.Light} onPress={onPressRow}>
+    <TouchableArea
+      hapticFeedback
+      activeOpacity={1}
+      hapticStyle={ImpactFeedbackStyle.Light}
+      onPress={onPress}>
       <Flex
         row
         alignItems="center"
@@ -44,28 +28,37 @@ export function HiddenTokensRow({
         px={padded ? '$spacing24' : '$none'}
         py="$spacing12">
         <Text color="$neutral2" variant="subheading2">
-          {t('Hidden ({{numHidden}})', { numHidden })}
+          {t('tokens.hidden.label', { numHidden })}
         </Text>
-        <Flex
-          row
-          alignItems="center"
-          backgroundColor="$surface2"
-          borderRadius="$roundedFull"
-          pl="$spacing12"
-          pr="$spacing8"
-          py="$spacing8">
-          <Text color="$neutral2" variant="buttonLabel3">
-            {isExpanded ? t('Hide') : t('Show')}
-          </Text>
-          <AnimatedFlex style={chevronAnimatedStyle}>
-            <Icons.RotatableChevron
+        {/* just used for opacity styling, the parent TouchableArea handles event */}
+        <TouchableArea hapticFeedback hapticStyle={ImpactFeedbackStyle.Light} onPress={onPress}>
+          <Flex
+            row
+            alignItems="center"
+            backgroundColor="$surface2"
+            borderRadius="$roundedFull"
+            gap="$spacing2"
+            justifyContent="center"
+            pl="$spacing12"
+            pr="$spacing8"
+            py="$spacing8">
+            <Text
+              allowFontScaling={false}
               color="$neutral2"
-              direction="down"
+              textAlign="center"
+              userSelect="none"
+              variant="buttonLabel3">
+              {isExpanded ? t('common.button.hide') : t('common.button.show')}
+            </Text>
+            <Icons.RotatableChevron
+              animation="semiBouncy"
+              color="$neutral2"
+              direction={isExpanded ? 'up' : 'down'}
               height={iconSizes.icon20}
               width={iconSizes.icon20}
             />
-          </AnimatedFlex>
-        </Flex>
+          </Flex>
+        </TouchableArea>
       </Flex>
     </TouchableArea>
   )

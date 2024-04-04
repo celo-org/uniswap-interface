@@ -1,4 +1,3 @@
-import { impactAsync } from 'expo-haptics'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -12,8 +11,18 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { useFormatExactCurrencyAmount } from 'src/features/fiatOnRamp/hooks'
 import { FiatOnRampCurrency } from 'src/features/fiatOnRamp/types'
-import { AnimatedFlex, ColorTokens, Flex, Icons, Text, TouchableArea, useSporeColors } from 'ui/src'
+import {
+  AnimatedFlex,
+  ColorTokens,
+  Flex,
+  HapticFeedback,
+  Icons,
+  Text,
+  TouchableArea,
+  useSporeColors,
+} from 'ui/src'
 import { fonts, iconSizes, spacing } from 'ui/src/theme'
+import { CurrencyInfo } from 'uniswap/src/features/dataApi/types'
 import { NumberType } from 'utilities/src/format/types'
 import { usePrevious } from 'utilities/src/react/hooks'
 import { DEFAULT_DELAY, useDebounce } from 'utilities/src/time/timing'
@@ -21,7 +30,6 @@ import { CurrencyLogo } from 'wallet/src/components/CurrencyLogo/CurrencyLogo'
 import { AmountInput } from 'wallet/src/components/input/AmountInput'
 import { SpinningLoader } from 'wallet/src/components/loading/SpinningLoader'
 import { Pill } from 'wallet/src/components/text/Pill'
-import { CurrencyInfo } from 'wallet/src/features/dataApi/types'
 import { FiatCurrencyInfo } from 'wallet/src/features/fiatCurrency/hooks'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { ElementName } from 'wallet/src/telemetry/constants'
@@ -116,7 +124,7 @@ export function FiatOnRampAmountSection({
   useEffect(() => {
     async function shake(): Promise<void> {
       inputShakeX.value = errorShakeAnimation(inputShakeX)
-      await impactAsync()
+      await HapticFeedback.impact()
     }
     if (errorText && prevErrorText !== errorText) {
       shake().catch(() => undefined)
@@ -200,7 +208,7 @@ export function FiatOnRampAmountSection({
         {!appFiatCurrencySupported ? (
           <Flex centered>
             <Text color="$neutral3" variant="body3">
-              {t('Only available to purchase in USD')}
+              {t('fiatOnRamp.error.usd')}
             </Text>
           </Flex>
         ) : null}
@@ -283,7 +291,7 @@ function PredefinedAmount({
   return (
     <TouchableOpacity
       onPress={async (): Promise<void> => {
-        await impactAsync()
+        await HapticFeedback.impact()
         onPress(amount.toString())
       }}>
       <Pill

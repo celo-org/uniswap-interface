@@ -1,7 +1,8 @@
+/* eslint-disable max-lines */
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { ADDRESS_ZERO } from '@uniswap/v3-sdk'
 import { default as React, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { ActivityIndicator, Keyboard } from 'react-native'
 import { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
 import { navigate } from 'src/app/navigation/rootNavigation'
@@ -23,17 +24,20 @@ import {
   useSporeColors,
 } from 'ui/src'
 import { ENS_LOGO } from 'ui/src/assets'
-import InfoCircle from 'ui/src/assets/icons/info-circle.svg'
 import { fonts, iconSizes, imageSizes, spacing } from 'ui/src/theme'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
 import { logger } from 'utilities/src/logger/logger'
 import { ONE_SECOND_MS } from 'utilities/src/time/time'
 import { TextInput } from 'wallet/src/components/input/TextInput'
 import { WarningModal } from 'wallet/src/components/modals/WarningModal/WarningModal'
 import { LearnMoreLink } from 'wallet/src/components/text/LearnMoreLink'
 import { Pill } from 'wallet/src/components/text/Pill'
-import { uniswapUrls } from 'wallet/src/constants/urls'
 import { ImportType, OnboardingEntryPoint } from 'wallet/src/features/onboarding/types'
-import { UNITAG_SUFFIX, UNITAG_SUFFIX_NO_LEADING_DOT } from 'wallet/src/features/unitags/constants'
+import {
+  UNITAG_SUFFIX,
+  UNITAG_SUFFIX_NO_LEADING_DOT,
+  UNITAG_VALID_REGEX,
+} from 'wallet/src/features/unitags/constants'
 import { useCanClaimUnitagName } from 'wallet/src/features/unitags/hooks'
 import { usePendingAccounts } from 'wallet/src/features/wallet/hooks'
 import { sendWalletAnalyticsEvent } from 'wallet/src/telemetry'
@@ -51,7 +55,6 @@ const FIXED_INFO_PILL_WIDTH = 128
 
 // Used in dynamic font size width calculation to ignore `.` characters
 const UNITAG_SUFFIX_CHARS_ONLY = UNITAG_SUFFIX.replaceAll('.', '')
-const TEXT_INPUT_PLACEHOLDER = 'yourname'
 
 // Accounts for height of image, gap between image and name, and spacing from top of titles
 const UNITAG_NAME_ANIMATE_DISTANCE_Y = imageSizes.image100 + spacing.spacing48 + spacing.spacing24
@@ -64,6 +67,8 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
   useAddBackButton(navigation)
   const { t } = useTranslation()
   const colors = useSporeColors()
+
+  const inputPlaceholder = getYourNameString(t('unitags.claim.username.default'))
 
   // In onboarding flow, delete pending accounts and create account actions happen right before navigation
   // So pendingAccountAddress must be fetched in this component and can't be passed in params
@@ -139,14 +144,14 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
       }
 
       if (text.length === 0) {
-        onSetFontSize(TEXT_INPUT_PLACEHOLDER + UNITAG_SUFFIX_CHARS_ONLY)
+        onSetFontSize(inputPlaceholder + UNITAG_SUFFIX_CHARS_ONLY)
       } else {
         onSetFontSize(text + UNITAG_SUFFIX_CHARS_ONLY)
       }
 
-      setUnitagInputValue(text?.trim().toLowerCase())
+      setUnitagInputValue(text?.trim())
     },
-    [onSetFontSize, setUnitagInputValue]
+    [inputPlaceholder, onSetFontSize]
   )
 
   const onPressAddressTooltip = (): void => {
@@ -245,18 +250,20 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
     setShowClaimPeriodInfoModal(true)
   }
 
-  const title = entryPoint === Screens.Home ? t('Claim your username') : t('Choose your username')
+  const title =
+    entryPoint === Screens.Home
+      ? t('unitags.onboarding.claim.title.claim')
+      : t('unitags.onboarding.claim.title.choose')
 
   return (
-    <SafeKeyboardOnboardingScreen
-      subtitle={t('This is your unique name that anyone can send crypto to.')}
-      title={title}>
+    <SafeKeyboardOnboardingScreen subtitle={t('unitags.onboarding.claim.subtitle')} title={title}>
       <Flex
         centered
         gap="$spacing16"
+        mt="$spacing24"
         onLayout={(event): void => {
           onLayout(event)
-          onSetFontSize(TEXT_INPUT_PLACEHOLDER + UNITAG_SUFFIX_CHARS_ONLY)
+          onSetFontSize(inputPlaceholder + UNITAG_SUFFIX_CHARS_ONLY)
         }}>
         {/* Fixed text that animates in when TextInput is animated out */}
         <AnimatedFlex
@@ -293,9 +300,10 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
                   fontWeight="$large"
                   numberOfLines={1}
                   p="$none"
-                  placeholder={TEXT_INPUT_PLACEHOLDER}
+                  placeholder={inputPlaceholder}
                   placeholderTextColor="$neutral3"
                   returnKeyType="done"
+                  testID={ElementName.WalletNameInput}
                   textAlign="left"
                   value={unitagInputValue}
                   onChangeText={onChangeTextInput}
@@ -330,7 +338,7 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
               Keyboard.dismiss()
               setShowInfoModal(true)
             }}>
-            <InfoCircle color={colors.neutral2.get()} height={20} width={20} />
+            <Icons.InfoCircleFilled color={colors.neutral3.get()} size="$icon.20" />
           </TouchableArea>
         </AnimatedFlex>
         {canClaimUnitagNameError && unitagToCheck === unitagInputValue && (
@@ -339,13 +347,21 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
               color={requiresENSMatch ? '$neutral2' : '$statusCritical'}
               textAlign="center"
               variant="body2">
-              {canClaimUnitagNameError} {requiresENSMatch && t('Learn more about our')}{' '}
+              {canClaimUnitagNameError}{' '}
               {requiresENSMatch && (
-                <Text color="$DEP_blue300" onPress={onPressClaimPeriodLearnMore}>
-                  {t('claim period')}
-                </Text>
+                <Trans
+                  components={{
+                    highlight: (
+                      <Text
+                        color="$DEP_blue300"
+                        variant="body2"
+                        onPress={onPressClaimPeriodLearnMore}
+                      />
+                    ),
+                  }}
+                  i18nKey="unitags.onboarding.claimPeriod.link"
+                />
               )}
-              {requiresENSMatch && '.'}
             </Text>
           </Flex>
         )}
@@ -353,9 +369,9 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
       <Flex gap="$spacing24" justifyContent="flex-end">
         {entryPoint === OnboardingScreens.Landing && (
           <Trace logPress element={ElementName.Skip}>
-            <TouchableArea onPress={onPressMaybeLater}>
+            <TouchableArea testID={ElementName.Skip} onPress={onPressMaybeLater}>
               <Text color="$accent1" textAlign="center" variant="buttonLabel2">
-                {t('Maybe later')}
+                {t('common.button.later')}
               </Text>
             </TouchableArea>
           </Trace>
@@ -363,6 +379,7 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
         <Button
           disabled={!unitagInputValue || isCheckingUnitag || shouldBlockContinue}
           size="medium"
+          testID={ElementName.Continue}
           theme="primary"
           onPress={onPressContinue}>
           {isCheckingUnitag ? (
@@ -370,7 +387,7 @@ export function ClaimUnitagScreen({ navigation, route }: Props): JSX.Element {
               <ActivityIndicator color={colors.sporeWhite.val} />
             </Flex>
           ) : (
-            t('Continue')
+            t('common.button.continue')
           )}
         </Button>
       </Flex>
@@ -396,15 +413,15 @@ const InfoModal = ({
 }): JSX.Element => {
   const colors = useSporeColors()
   const { t } = useTranslation()
+  const usernamePlaceholder = getYourNameString(t('unitags.claim.username.default'))
 
   return (
     <WarningModal
       backgroundIconColor={colors.surface1.get()}
-      caption={t(
-        `Usernames transform complex 0x addresses into readable names. By claiming a {{unitagSuffix}} username, you can easily send and receive crypto and build out a public web3 profile.`,
-        { unitagSuffix: UNITAG_SUFFIX_NO_LEADING_DOT }
-      )}
-      closeText={t('Close')}
+      caption={t('unitags.onboarding.info.description', {
+        unitagDomain: UNITAG_SUFFIX_NO_LEADING_DOT,
+      })}
+      closeText={t('common.button.close')}
       icon={
         <Flex centered row gap="$spacing4">
           <Pill
@@ -429,7 +446,7 @@ const InfoModal = ({
             shadowOpacity={0.4}
             shadowRadius="$spacing4">
             <Text color="$accent1" variant="buttonLabel4">
-              {TEXT_INPUT_PLACEHOLDER}
+              {usernamePlaceholder}
               <Text color="$neutral2" variant="buttonLabel4">
                 {UNITAG_SUFFIX}
               </Text>
@@ -438,7 +455,7 @@ const InfoModal = ({
         </Flex>
       }
       modalName={ModalName.TooltipContent}
-      title={t('A simplified address')}
+      title={t('unitags.onboarding.info.title')}
       onClose={onClose}
     />
   )
@@ -457,11 +474,8 @@ const ClaimPeriodInfoModal = ({
   return (
     <WarningModal
       backgroundIconColor={colors.surface1.get()}
-      caption={t(
-        `For a limited time, the username {{username}} is reserved. Import the wallet that owns {{username}}.eth ENS to claim this username or try again after the claim period.`,
-        { username }
-      )}
-      closeText={t('Close')}
+      caption={t('unitags.onboarding.claimPeriod.description', { username })}
+      closeText={t('common.button.close')}
       icon={
         <Image
           height={imageSizes.image48}
@@ -471,9 +485,20 @@ const ClaimPeriodInfoModal = ({
         />
       }
       modalName={ModalName.ENSClaimPeriod}
-      title={t('ENS claim period')}
+      title={t('unitags.onboarding.claimPeriod.title')}
       onClose={onClose}>
       <LearnMoreLink url={uniswapUrls.helpArticleUrls.unitagClaimPeriod} />
     </WarningModal>
   )
+}
+
+// Util to handle translations of `yourname`
+// If translated string only contains valid Unitag characters, return it lowercased and without spaces
+// Otherwise, return 'yourname'
+const getYourNameString = (yourname: string): string => {
+  const noSpacesLowercase = yourname.replaceAll(' ', '').toLowerCase()
+  if (UNITAG_VALID_REGEX.test(noSpacesLowercase)) {
+    return noSpacesLowercase
+  }
+  return 'yourname'
 }

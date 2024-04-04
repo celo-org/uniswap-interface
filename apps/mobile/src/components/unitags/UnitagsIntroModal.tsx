@@ -12,6 +12,7 @@ import { Button, Flex, GeneratedIcon, Icons, Image, Text, useIsDarkMode } from '
 import { UNITAGS_INTRO_BANNER_DARK, UNITAGS_INTRO_BANNER_LIGHT } from 'ui/src/assets'
 import { iconSizes } from 'ui/src/theme'
 import { BottomSheetModal } from 'wallet/src/components/modals/BottomSheetModal'
+import { setHasCompletedUnitagsIntroModal } from 'wallet/src/features/behaviorHistory/slice'
 import { sendWalletAnalyticsEvent } from 'wallet/src/telemetry'
 import { ModalName } from 'wallet/src/telemetry/constants'
 
@@ -31,6 +32,8 @@ export function UnitagsIntroModal(): JSX.Element {
     if (!entryPoint) {
       throw new Error('Missing entry point in UnitagsIntroModal')
     }
+
+    appDispatch(setHasCompletedUnitagsIntroModal(true))
     navigate(Screens.UnitagStack, {
       screen: UnitagScreens.ClaimUnitag,
       params: {
@@ -48,28 +51,26 @@ export function UnitagsIntroModal(): JSX.Element {
     <BottomSheetModal name={ModalName.UnitagsIntro} onClose={onClose}>
       <Flex gap="$spacing24" px="$spacing24" py="$spacing16">
         <Flex alignItems="center" gap="$spacing12">
-          <Text variant="subheading1">{t('Introducing usernames')}</Text>
-          <Text color="$neutral2" textAlign="center" variant="body3">
-            {t(
-              'Say goodbye to 0x addresses. Usernames are readable names that make it easier to send and receive crypto.'
-            )}
+          <Text variant="subheading1">{t('unitags.intro.title')}</Text>
+          <Text color="$neutral2" textAlign="center" variant="body2">
+            {t('unitags.intro.subtitle')}
           </Text>
         </Flex>
-        <Flex alignItems="center" maxHeight={100}>
+        <Flex alignItems="center" maxHeight={105}>
           <Image
-            maxHeight={100}
+            maxHeight={105}
             resizeMode="contain"
             source={isDarkMode ? UNITAGS_INTRO_BANNER_DARK : UNITAGS_INTRO_BANNER_LIGHT}
           />
         </Flex>
         <Flex gap="$spacing16" px="$spacing20">
-          <BodyItem Icon={Icons.UserSquare} title={t('Customizable profiles')} />
-          <BodyItem Icon={Icons.Ticket} title={t('Free to claim')} />
-          <BodyItem Icon={Icons.Lightning} title={t('Powered by ENS subdomains')} />
+          <BodyItem Icon={Icons.UserSquare} title={t('unitags.intro.features.profile')} />
+          <BodyItem Icon={Icons.Ticket} title={t('unitags.intro.features.free')} />
+          <BodyItem Icon={Icons.Lightning} title={t('unitags.intro.features.ens')} />
         </Flex>
         <Flex gap="$spacing8">
           <Button size="medium" theme="primary" onPress={onPressClaimOneNow}>
-            {t('Continue')}
+            {t('common.button.continue')}
           </Button>
         </Flex>
         <Flex $short={{ py: '$none', mx: '$spacing12' }} mx="$spacing24">

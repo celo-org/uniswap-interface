@@ -63,9 +63,10 @@ def reactNativeArchitectures() {
 }
 
 boolean isCI = System.getenv('CI') != null
+boolean isDetox = System.getenv('DETOX_MODE') != null
 boolean sentryPropertiesAvailable = System.getenv('SENTRY_AUTH_TOKEN') != null && System.getenv('SENTRY_PROJECT') != null && System.getenv('SENTRY_ORG') != null
 
-if (isCI && sentryPropertiesAvailable) {
+if (isCI && sentryPropertiesAvailable && !isDetox) {
   project.ext.sentryCli = [
     logLevel: "info",
   ]
@@ -95,6 +96,8 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+        testBuildType System.getProperty('testBuildType', 'debug')
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     splits {
         abi {
@@ -103,6 +106,9 @@ android {
             universalApk false  // If true, also generate a universal APK
             include (*reactNativeArchitectures())
         }
+    }
+    lintOptions {
+      abortOnError false
     }
     signingConfigs {
         debug {
@@ -125,17 +131,17 @@ android {
       dev {
         isDefault(true)
         applicationIdSuffix ".dev"
-        versionName "1.22"
+        versionName "1.25"
         dimension "variant"
       }
       beta {
         applicationIdSuffix ".beta"
-        versionName "1.22"
+        versionName "1.25"
         dimension "variant"
       }
       prod {
         dimension "variant"
-        versionName "1.22"
+        versionName "1.25"
       }
     }
 
@@ -168,6 +174,10 @@ android {
 
     packagingOptions {
       resources.excludes.add("META-INF/*")
+      pickFirst 'lib/x86/libc++_shared.so'
+      pickFirst 'lib/x86_64/libc++_shared.so'
+      pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+      pickFirst 'lib/arm64-v8a/libc++_shared.so'
     }
     buildFeatures {
         compose true
@@ -198,6 +208,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle"
 
     implementation 'com.google.android.play:integrity:1.2.0'
+
+    // Firebase App Check: Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
 
     // Guava
     implementation "com.google.guava:guava:24.1-jre"
@@ -245,6 +259,9 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+    androidTestImplementation('com.wix:detox:+') {
+      exclude module: "protobuf-lite"
     }
 }
 

@@ -1,5 +1,5 @@
 import { ChartHeaderProtocolInfo } from 'components/Charts/ChartHeader'
-import { PriceSource } from 'graphql/data/__generated__/types-and-hooks'
+import { PriceSource } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 
 import { CustomHistogramData, StackedHistogramData } from './renderer'
 
@@ -177,10 +177,12 @@ export function calculateColumnPositionsInPlace(
   endIndex: number
 ): void {
   const common = columnCommon(barSpacingMedia, horizontalPixelRatio)
-  let previous: ColumnPosition | undefined = undefined
+  let previous: ColumnPositionItem | undefined = undefined
   for (let i = startIndex; i < Math.min(endIndex, items.length); i++) {
-    items[i].column = calculateColumnPosition(items[i].x, common, previous)
-    previous = items[i].column
+    // Modification fix: is possible for previous column to not be directly behind the current column, i.e. if whitespace in between
+    if (previous?.x && items[i].x - previous?.x > barSpacingMedia) previous = undefined
+    items[i].column = calculateColumnPosition(items[i].x, common, previous?.column)
+    previous = items[i]
   }
   const minColumnWidth = (items as ColumnPositionItem[]).reduce(
     (smallest: number, item: ColumnPositionItem, index: number) => {

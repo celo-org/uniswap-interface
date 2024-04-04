@@ -15,10 +15,9 @@ import { useToggleAccountDrawer } from 'components/AccountDrawer/MiniPortfolio/h
 import { ButtonError, ButtonLight, ButtonPrimary } from 'components/Button'
 import { GrayCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
-import ConfirmSwapModalV2 from 'components/ConfirmSwapModalV2'
+import { ConfirmSwapModal } from 'components/ConfirmSwapModal'
 import SwapCurrencyInputPanel from 'components/CurrencyInputPanel/SwapCurrencyInputPanel'
 import confirmPriceImpactWithoutFee from 'components/swap/confirmPriceImpactWithoutFee'
-import ConfirmSwapModal from 'components/swap/ConfirmSwapModal'
 import { Field } from 'components/swap/constants'
 import PriceImpactModal from 'components/swap/PriceImpactModal'
 import PriceImpactWarning from 'components/swap/PriceImpactWarning'
@@ -29,7 +28,6 @@ import { useConnectionReady } from 'connection/eagerlyConnect'
 import { getChainInfo } from 'constants/chainInfo'
 import { asSupportedChain, isSupportedChain } from 'constants/chains'
 import { TOKEN_SHORTHANDS } from 'constants/tokens'
-import { useNewSwapFlow } from 'featureFlags/flags/progressIndicatorV2'
 import { useCurrency, useDefaultActiveTokens } from 'hooks/Tokens'
 import { useIsSwapUnsupported } from 'hooks/useIsSwapUnsupported'
 import { useMaxAmountIn } from 'hooks/useMaxAmountIn'
@@ -49,8 +47,12 @@ import { Text } from 'rebass'
 import { useAppSelector } from 'state/hooks'
 import { InterfaceTrade, TradeState } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
-import { queryParametersToCurrencyState, useSwapActionHandlers } from 'state/swap/hooks'
-import { CurrencyState, useSwapAndLimitContext, useSwapContext } from 'state/swap/SwapContext'
+import {
+  queryParametersToCurrencyState,
+  useSwapActionHandlers,
+  useSwapAndLimitContext,
+  useSwapContext,
+} from 'state/swap/hooks'
 import { useTheme } from 'styled-components'
 import { ThemedText } from 'theme/components'
 import { maybeLogFirstSwapAction } from 'tracing/swapFlowLoggers'
@@ -62,6 +64,7 @@ import { largerPercentValue } from 'utils/percent'
 import { computeRealizedPriceImpact, warningSeverity } from 'utils/prices'
 import { didUserReject } from 'utils/swapErrorToUserReadableMessage'
 
+import { CurrencyState } from 'state/swap/types'
 import { getIsReviewableQuote } from '.'
 import { OutputTaxTooltipBody } from './TaxTooltipBody'
 
@@ -480,8 +483,6 @@ export function SwapForm({ disableTokenInputs = false, onCurrencyChange }: SwapF
   const switchChain = useSwitchChain()
   const switchingChain = useAppSelector((state) => state.wallets.switchingChain)
 
-  const isNewSwapFlowEnabled = useNewSwapFlow()
-
   return (
     <>
       <TokenSafetyModal
@@ -492,25 +493,7 @@ export function SwapForm({ disableTokenInputs = false, onCurrencyChange }: SwapF
         onCancel={handleDismissTokenWarning}
         showCancel={true}
       />
-      {trade && showConfirm && isNewSwapFlowEnabled && (
-        <ConfirmSwapModalV2
-          trade={trade}
-          inputCurrency={inputCurrency}
-          originalTrade={tradeToConfirm}
-          onAcceptChanges={handleAcceptChanges}
-          onCurrencySelection={onCurrencySelection}
-          swapResult={swapResult}
-          allowedSlippage={allowedSlippage}
-          clearSwapState={clearSwapState}
-          onConfirm={handleSwap}
-          allowance={allowance}
-          swapError={swapError}
-          onDismiss={handleConfirmDismiss}
-          fiatValueInput={fiatValueTradeInput}
-          fiatValueOutput={fiatValueTradeOutput}
-        />
-      )}
-      {trade && showConfirm && !isNewSwapFlowEnabled && (
+      {trade && showConfirm && (
         <ConfirmSwapModal
           trade={trade}
           inputCurrency={inputCurrency}

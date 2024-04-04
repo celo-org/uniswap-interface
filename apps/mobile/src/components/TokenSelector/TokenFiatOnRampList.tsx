@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { ListRenderItemInfo } from 'react-native'
 import { FiatOnRampCurrency } from 'src/features/fiatOnRamp/types'
 import { Flex, Inset, Loader } from 'ui/src'
+import { CurrencyId } from 'uniswap/src/types/currency'
 import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
 import { TokenOptionItem } from 'wallet/src/components/TokenSelector/TokenOptionItem'
 import { useBottomSheetFocusHook } from 'wallet/src/components/modals/hooks'
 import { ChainId } from 'wallet/src/constants/chains'
-import { CurrencyId } from 'wallet/src/utils/currencyId'
 
 interface Props {
   onSelectCurrency: (currency: FiatOnRampCurrency) => void
@@ -71,8 +71,8 @@ function _TokenFiatOnRampList({
     return (
       <Flex centered grow>
         <BaseCard.ErrorState
-          retryButtonLabel="Retry"
-          title={t('Couldn’t load tokens to buy')}
+          retryButtonLabel={t('common.button.retry')}
+          title={t('fiatOnRamp.error.load')}
           onRetry={onRetry}
         />
       </Flex>

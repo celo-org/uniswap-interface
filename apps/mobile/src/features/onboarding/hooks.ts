@@ -4,10 +4,13 @@ import { OnboardingStackBaseParams, useOnboardingStackNavigation } from 'src/app
 import { sendMobileAnalyticsEvent } from 'src/features/telemetry'
 import { MobileEventName } from 'src/features/telemetry/constants'
 import { Screens } from 'src/screens/Screens'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 import { useTrace } from 'utilities/src/telemetry/trace/TraceContext'
-import { setHasSkippedUnitagPrompt } from 'wallet/src/features/behaviorHistory/slice'
-import { FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
-import { useFeatureFlag } from 'wallet/src/features/experiments/hooks'
+import {
+  setHasSkippedUnitagPrompt,
+  setHasViewedUniconV2IntroModal,
+} from 'wallet/src/features/behaviorHistory/slice'
 import { pushNotification } from 'wallet/src/features/notifications/slice'
 import { AppNotificationType } from 'wallet/src/features/notifications/types'
 import { ImportType, OnboardingEntryPoint } from 'wallet/src/features/onboarding/types'
@@ -40,8 +43,10 @@ export function useCompleteOnboardingCallback({
   const parentTrace = useTrace()
   const navigation = useOnboardingStackNavigation()
 
-  const unitagsFeatureFlagEnabled = useFeatureFlag(FEATURE_FLAGS.Unitags)
+  const unitagsFeatureFlagEnabled = useFeatureFlag(FeatureFlags.Unitags)
   const claimUnitag = useClaimUnitag()
+
+  const uniconsV2Enabled = useFeatureFlag(FeatureFlags.UniconsV2)
 
   return async () => {
     sendMobileAnalyticsEvent(
@@ -90,6 +95,11 @@ export function useCompleteOnboardingCallback({
     // - the onboarding method prompts for unitags (create new)
     if (unitagsFeatureFlagEnabled && importType === ImportType.CreateNew) {
       dispatch(setHasSkippedUnitagPrompt(true))
+    }
+
+    if (uniconsV2Enabled) {
+      // Don't show Unicon V2 intro modal to new users
+      dispatch(setHasViewedUniconV2IntroModal(true))
     }
 
     // Exit flow

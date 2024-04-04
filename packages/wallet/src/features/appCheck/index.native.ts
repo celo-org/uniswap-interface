@@ -1,6 +1,6 @@
 import appCheck from '@react-native-firebase/app-check'
+import { config } from 'uniswap/src/config'
 import { logger } from 'utilities/src/logger/logger'
-import { config } from 'wallet/src/config'
 
 export function initFirebaseAppCheck(): void {
   // Configure app check for device attestation
@@ -30,13 +30,12 @@ export function initFirebaseAppCheck(): void {
     })
 }
 
-export async function getFirebaseAppCheckToken(): Promise<string> {
+export async function getFirebaseAppCheckToken(): Promise<string | null> {
   try {
     const { token } = await appCheck().getToken(true)
     return token
   } catch (error) {
     logger.error(error, { tags: { file: 'firebase/utils', function: 'getFirebaseAppCheckToken' } })
-    // return empty string to let the API request fail
-    return ''
+    return null
   }
 }

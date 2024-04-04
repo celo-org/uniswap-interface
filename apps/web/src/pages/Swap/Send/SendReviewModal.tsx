@@ -16,7 +16,10 @@ import { ReactNode } from 'react'
 import { useSendContext } from 'state/send/SendContext'
 import styled from 'styled-components'
 import { ClickableStyle, CloseIcon, Separator, ThemedText } from 'theme/components'
-import { Icons } from 'ui/src'
+import { Icons, UniconV2 } from 'ui/src'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
+import { useUnitagByNameWithoutFlag } from 'uniswap/src/features/unitags/hooksWithoutFlags'
 import { shortenAddress } from 'utilities/src/addresses'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 
@@ -71,6 +74,7 @@ export function SendReviewModal({ onConfirm, onDismiss }: { onConfirm: () => voi
     sendState: { inputCurrency, inputInFiat, exactAmountFiat },
     derivedSendInfo: { parsedTokenAmount, exactAmountOut, gasFeeCurrencyAmount, recipientData },
   } = useSendContext()
+  const { unitag: recipientUnitag } = useUnitagByNameWithoutFlag(recipientData?.unitag, Boolean(recipientData?.unitag))
 
   const { formatConvertedFiatNumberOrString, formatCurrencyAmount } = useFormatter()
   const formattedInputAmount = formatCurrencyAmount({
@@ -93,6 +97,8 @@ export function SendReviewModal({ onConfirm, onDismiss }: { onConfirm: () => voi
   const [primaryInputView, secondaryInputView] = inputInFiat
     ? [formattedFiatInputAmount, currencySymbolAmount]
     : [currencySymbolAmount, formattedFiatInputAmount]
+
+  const uniconsV2Enabled = useFeatureFlag(FeatureFlags.UniconsV2)
 
   return (
     <Modal $scrollOverlay isOpen onDismiss={onDismiss} maxHeight={90}>
@@ -120,9 +126,9 @@ export function SendReviewModal({ onConfirm, onDismiss }: { onConfirm: () => voi
               label={<Trans>To</Trans>}
               header={
                 recipientData?.unitag || recipientData?.ensName ? (
-                  <Row gap="sm">
+                  <Row gap="xs">
                     <ThemedText.HeadlineLarge>{recipientData.unitag ?? recipientData.ensName}</ThemedText.HeadlineLarge>
-                    {recipientData?.unitag && <Icons.Unitag size={36} />}
+                    {recipientData?.unitag && <Icons.Unitag size={18} />}
                   </Row>
                 ) : (
                   shortenAddress(recipientData?.address)
@@ -130,10 +136,12 @@ export function SendReviewModal({ onConfirm, onDismiss }: { onConfirm: () => voi
               }
               subheader={(recipientData?.unitag || recipientData?.ensName) && shortenAddress(recipientData.address)}
               image={
-                recipientData?.unitag ? (
-                  <UniTagProfilePicture account={recipientData.address} size={36} />
+                recipientUnitag?.metadata?.avatar ? (
+                  <UniTagProfilePicture account={recipientData?.address ?? ''} size={36} />
                 ) : recipientData?.ensName ? (
                   <Identicon account={recipientData.address} size={36} />
+                ) : uniconsV2Enabled ? (
+                  <UniconV2 address={recipientData?.address ?? ''} size={36} />
                 ) : (
                   <Unicon address={recipientData?.address ?? ''} size={36} />
                 )

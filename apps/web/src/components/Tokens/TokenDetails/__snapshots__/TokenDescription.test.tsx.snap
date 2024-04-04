@@ -98,7 +98,7 @@ exports[`TokenDescription no description or social buttons shown when not availa
   padding: 8px 12px;
   border-radius: 20px;
   color: #222222;
-  background-color: #22222212;
+  background-color: #F9F9F9;
   font-size: 14px;
   font-weight: 535;
   line-height: 16px;
@@ -150,6 +150,7 @@ exports[`TokenDescription no description or social buttons shown when not availa
     >
       <div
         class="c0 c1"
+        data-testid="token-details-info-section"
       >
         <div
           class="c2 c3 css-1jyz67g"
@@ -158,6 +159,7 @@ exports[`TokenDescription no description or social buttons shown when not availa
         </div>
         <div
           class="c4 c5 c6 c7"
+          data-testid="token-details-info-links"
         >
           <div
             class="c8"
@@ -341,7 +343,7 @@ exports[`TokenDescription renders token information correctly with defaults 1`] 
   padding: 8px 12px;
   border-radius: 20px;
   color: #222222;
-  background-color: #22222212;
+  background-color: #F9F9F9;
   font-size: 14px;
   font-weight: 535;
   line-height: 16px;
@@ -401,6 +403,7 @@ exports[`TokenDescription renders token information correctly with defaults 1`] 
     >
       <div
         class="c0 c1"
+        data-testid="token-details-info-section"
       >
         <div
           class="c2 c3 css-1jyz67g"
@@ -409,6 +412,7 @@ exports[`TokenDescription renders token information correctly with defaults 1`] 
         </div>
         <div
           class="c4 c5 c6 c7"
+          data-testid="token-details-info-links"
         >
           <div
             class="c8"
@@ -535,7 +539,7 @@ exports[`TokenDescription renders token information correctly with defaults 1`] 
             class="c13"
             data-testid="token-description-truncated"
           >
-            USDC is a fully collateralized US dollar stablecoin. USDC is the bridge...
+            USDC is a fully collateralized US dollar stablecoin. USDC is the bridge between dollars and trading on cryptocurrency exchanges. The technology behind CENTRE makes it possible to exchange value...
           </p>
           <div
             class="c14"
@@ -655,7 +659,7 @@ exports[`TokenDescription truncates description and shows more 1`] = `
   padding: 8px 12px;
   border-radius: 20px;
   color: #222222;
-  background-color: #22222212;
+  background-color: #F9F9F9;
   font-size: 14px;
   font-weight: 535;
   line-height: 16px;
@@ -715,6 +719,7 @@ exports[`TokenDescription truncates description and shows more 1`] = `
     >
       <div
         class="c0 c1"
+        data-testid="token-details-info-section"
       >
         <div
           class="c2 c3 css-1jyz67g"
@@ -723,6 +728,7 @@ exports[`TokenDescription truncates description and shows more 1`] = `
         </div>
         <div
           class="c4 c5 c6 c7"
+          data-testid="token-details-info-links"
         >
           <div
             class="c8"
@@ -849,7 +855,7 @@ exports[`TokenDescription truncates description and shows more 1`] = `
             class="c13"
             data-testid="token-description-truncated"
           >
-            USDC is a fully collateralized US dollar stablecoin. USDC is the bridge...
+            USDC is a fully collateralized US dollar stablecoin. USDC is the bridge between dollars and trading on cryptocurrency exchanges. The technology behind CENTRE makes it possible to exchange value...
           </p>
           <div
             class="c14"

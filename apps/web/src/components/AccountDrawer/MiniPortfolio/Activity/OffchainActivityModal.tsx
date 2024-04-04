@@ -21,17 +21,20 @@ import { UniswapXOrderStatus } from 'lib/hooks/orders/types'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { ArrowDown, X } from 'react-feather'
 import { useOrder } from 'state/signatures/hooks'
-import { UniswapXOrderDetails } from 'state/signatures/types'
+import { SignatureType, UniswapXOrderDetails } from 'state/signatures/types'
 import styled, { useTheme } from 'styled-components'
 import { Divider, ThemedText } from 'theme/components'
 import { ExplorerDataType, getExplorerLink } from 'utils/getExplorerLink'
 
 import { PERMIT2_ADDRESS } from '@uniswap/permit2-sdk'
-import { cancelUniswapXOrder } from 'components/AccountDrawer/MiniPortfolio/Activity/utils'
+import { sendAnalyticsEvent } from 'analytics'
+import { cancelMultipleUniswapXOrders } from 'components/AccountDrawer/MiniPortfolio/Activity/utils'
+import AlertTriangleFilled from 'components/Icons/AlertTriangleFilled'
+import { LimitDisclaimer } from 'components/swap/LimitDisclaimer'
 import { ContractTransaction } from 'ethers/lib/ethers'
 import { useContract } from 'hooks/useContract'
-import PERMIT2_ABI from 'wallet/src/abis/permit2.json'
-import { Permit2 } from 'wallet/src/abis/types/Permit2'
+import PERMIT2_ABI from 'uniswap/src/abis/permit2.json'
+import { Permit2 } from 'uniswap/src/abis/types/Permit2'
 import { PortfolioLogo } from '../PortfolioLogo'
 import { OffchainOrderLineItem, OffchainOrderLineItemProps, OffchainOrderLineItemType } from './OffchainOrderLineItem'
 
@@ -52,14 +55,20 @@ export function useOpenOffchainActivityModal() {
   const setSelectedOrder = useUpdateAtom(selectedOrderAtom)
 
   return useCallback(
-    (order: UniswapXOrderDetails, logos?: Logos) => setSelectedOrder({ order, logos, modalOpen: true }),
+    (order: UniswapXOrderDetails, logos?: Logos) => {
+      sendAnalyticsEvent('UniswapX Order Details Sheet Opened', {
+        order: order.orderHash,
+      })
+      setSelectedOrder({ order, logos, modalOpen: true })
+    },
     [setSelectedOrder]
   )
 }
 
 const Wrapper = styled(AutoColumn).attrs({ gap: 'md', grow: true })`
-  padding: 12px 20px;
+  padding: 12px 20px 20px 20px;
   width: 100%;
+  background-color: ${({ theme }) => theme.surface1};
 `
 
 const StyledXButton = styled(X)`
@@ -76,6 +85,28 @@ const OffchainModalDivider = styled(Divider)`
 
 const OffchainModalBottomButton = styled(ThemeButton)`
   margin-top: 16px;
+  border-radius: 12px;
+`
+
+const InsufficientFundsCopyContainer = styled(Row)`
+  margin-top: 16px;
+  padding: 12px;
+  border: 1.3px solid ${({ theme }) => theme.surface3};
+  border-radius: 20px;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+`
+
+const AlertIconContainer = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  background-color: #1f1e02;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
 `
 
 export function useOrderAmounts(order?: UniswapXOrderDetails):
@@ -84,8 +115,8 @@ export function useOrderAmounts(order?: UniswapXOrderDetails):
       outputAmount: CurrencyAmount<Currency>
     }
   | undefined {
-  const inputCurrency = useCurrency(order?.swapInfo?.inputCurrencyId, order?.chainId)
-  const outputCurrency = useCurrency(order?.swapInfo?.outputCurrencyId, order?.chainId)
+  const inputCurrency = useCurrency(order?.swapInfo?.inputCurrencyId || 'ETH', order?.chainId)
+  const outputCurrency = useCurrency(order?.swapInfo?.outputCurrencyId || 'ETH', order?.chainId)
 
   if (!order || !order?.swapInfo) return undefined
 
@@ -112,28 +143,30 @@ export function useOrderAmounts(order?: UniswapXOrderDetails):
   }
 }
 
-function getOrderTitle(status: UniswapXOrderStatus): ReactNode {
-  switch (status) {
+function getOrderTitle(order: UniswapXOrderDetails): ReactNode {
+  const isLimit = order.type === SignatureType.SIGN_LIMIT
+  switch (order.status) {
     case UniswapXOrderStatus.OPEN:
-      return <Trans>Order pending</Trans>
+      return isLimit ? <Trans>Limit pending</Trans> : <Trans>Order pending</Trans>
     case UniswapXOrderStatus.EXPIRED:
-      return <Trans>Order expired</Trans>
+      return isLimit ? <Trans>Limit expired</Trans> : <Trans>Order expired</Trans>
+    case UniswapXOrderStatus.INSUFFICIENT_FUNDS:
     case UniswapXOrderStatus.CANCELLED:
-      return <Trans>Order cancelled</Trans>
+      return isLimit ? <Trans>Limit cancelled</Trans> : <Trans>Order cancelled</Trans>
     case UniswapXOrderStatus.FILLED:
-      return <Trans>Order executed</Trans>
+      return isLimit ? <Trans>Limit executed</Trans> : <Trans>Order executed</Trans>
     default:
       return null
   }
 }
 
-function useCancelOrder(order?: UniswapXOrderDetails): () => Promise<ContractTransaction | undefined> {
+function useCancelOrder(order?: UniswapXOrderDetails): () => Promise<ContractTransaction[] | undefined> {
   const { provider } = useWeb3React()
   const permit2 = useContract<Permit2>(PERMIT2_ADDRESS, PERMIT2_ABI, true)
   return useCallback(async () => {
     if (!order) return undefined
-    return await cancelUniswapXOrder({
-      encodedOrder: order.encodedOrder as string,
+    return await cancelMultipleUniswapXOrders({
+      orders: [{ encodedOrder: order.encodedOrder as string, type: order.type as SignatureType }],
       chainId: order.chainId,
       provider,
       permit2,
@@ -203,7 +236,7 @@ export function OrderContent({
           images={[logos?.inputLogo, logos?.outputLogo]}
         />
         <Column>
-          <ThemedText.SubHeader fontWeight={500}>{getOrderTitle(order.status)}</ThemedText.SubHeader>
+          <ThemedText.SubHeader fontWeight={500}>{getOrderTitle(order)}</ThemedText.SubHeader>
           <ThemedText.BodySmall color="neutral2" fontWeight={500}>
             {createdAt}
           </ThemedText.BodySmall>
@@ -218,6 +251,7 @@ export function OrderContent({
           currency={amounts.inputAmount.currency}
           usdAmount={fiatValueInput.data}
           isLoading={false}
+          headerTextProps={{ fontSize: '24px', lineHeight: '32px' }}
         />
         <ArrowDown color={theme.neutral3} />
         <SwapModalHeaderAmount
@@ -227,6 +261,7 @@ export function OrderContent({
           currency={amounts.outputAmount.currency}
           usdAmount={fiatValueOutput.data}
           isLoading={false}
+          headerTextProps={{ fontSize: '24px', lineHeight: '32px' }}
         />
       </Column>
       <OffchainModalDivider />
@@ -236,9 +271,26 @@ export function OrderContent({
         ))}
       </Column>
       {Boolean(order.status === UniswapXOrderStatus.OPEN && order.encodedOrder) && (
-        <OffchainModalBottomButton emphasis={ButtonEmphasis.failure} onClick={onCancel} size={ButtonSize.large}>
-          <Trans>Cancel</Trans>
+        <OffchainModalBottomButton emphasis={ButtonEmphasis.medium} onClick={onCancel} size={ButtonSize.medium}>
+          {order.type === SignatureType.SIGN_LIMIT ? <Trans>Cancel limit</Trans> : <Trans>Cancel order</Trans>}
         </OffchainModalBottomButton>
+      )}
+      {order.status === UniswapXOrderStatus.INSUFFICIENT_FUNDS ? (
+        <InsufficientFundsCopyContainer>
+          <AlertIconContainer>
+            <AlertTriangleFilled size="20px" />
+          </AlertIconContainer>
+          <Column>
+            <ThemedText.SubHeader lineHeight="24px">
+              <Trans>Insufficient balance</Trans>
+            </ThemedText.SubHeader>
+            <ThemedText.SubHeaderSmall lineHeight="20px">
+              <Trans>This order was canceled because your balance went below the input amount.</Trans>
+            </ThemedText.SubHeaderSmall>
+          </Column>
+        </InsufficientFundsCopyContainer>
+      ) : (
+        <LimitDisclaimer />
       )}
     </Column>
   )
@@ -274,6 +326,7 @@ function useSyncedSelectedOrder(): UniswapXOrderDetails | undefined {
 export function OffchainActivityModal() {
   const selectedOrderAtomValue = useAtomValue(selectedOrderAtom)
   const [cancelState, setCancelState] = useState(CancellationState.NOT_STARTED)
+  const [cancelTxHash, setCancelTxHash] = useState<string | undefined>()
 
   const syncedSelectedOrder = useSyncedSelectedOrder()
   const setSelectedOrder = useUpdateAtom(selectedOrderAtom)
@@ -286,17 +339,34 @@ export function OffchainActivityModal() {
 
   return (
     <>
-      {syncedSelectedOrder && (
+      {syncedSelectedOrder && selectedOrderAtomValue?.modalOpen && (
         <CancelLimitsDialog
           isVisible={cancelState !== CancellationState.NOT_STARTED}
           orders={[syncedSelectedOrder]}
-          onCancel={() => setCancelState(CancellationState.NOT_STARTED)}
-          onConfirm={async () => {
-            setCancelState(CancellationState.CANCELLING)
-            await cancelOrder()
-            setCancelState(CancellationState.REVIEWING_CANCELLATION)
+          onCancel={() => {
+            setCancelState(CancellationState.NOT_STARTED)
+            if (cancelState !== CancellationState.REVIEWING_CANCELLATION) {
+              reset()
+            }
           }}
-          cancelling={cancelState === CancellationState.CANCELLING}
+          onConfirm={async () => {
+            setCancelState(CancellationState.PENDING_SIGNATURE)
+            const transactions = await cancelOrder()
+            if (transactions && transactions.length > 0) {
+              setCancelState(CancellationState.PENDING_CONFIRMATION)
+              setCancelTxHash(transactions[0].hash)
+              try {
+                await transactions[0].wait(1)
+              } catch {
+                setCancelState(CancellationState.REVIEWING_CANCELLATION)
+              }
+              setCancelState(CancellationState.CANCELLED)
+            } else {
+              setCancelState(CancellationState.REVIEWING_CANCELLATION)
+            }
+          }}
+          cancelState={cancelState}
+          cancelTxHash={cancelTxHash}
         />
       )}
       <Modal

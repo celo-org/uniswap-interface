@@ -21,6 +21,7 @@ import {
 } from 'wallet/src/features/transactions/types'
 import { useActiveAccountAddressWithThrow } from 'wallet/src/features/wallet/hooks'
 import { useAppDispatch, useAppSelector } from 'wallet/src/state'
+import { ensureLeading0x } from 'wallet/src/utils/addresses'
 import { areCurrencyIdsEqual, buildCurrencyId } from 'wallet/src/utils/currencyId'
 
 export function usePendingTransactions(
@@ -139,36 +140,35 @@ export function useMergeLocalAndRemoteTransactions(
     }
 
     const txHashes = new Set<string>()
-    const fiatOnRampTxs: TransactionDetails[] = []
+    const offChainFiatOnRampTxs: TransactionDetails[] = []
 
     const remoteTxMap: Map<string, TransactionDetails> = new Map()
     remoteTransactions.forEach((tx) => {
       if (tx.hash) {
-        const txHash = tx.hash.toLowerCase()
+        const txHash = ensureLeading0x(tx.hash.toLowerCase())
         remoteTxMap.set(txHash, tx)
         txHashes.add(txHash)
       } else {
-        fiatOnRampTxs.push(tx)
+        offChainFiatOnRampTxs.push(tx)
       }
     })
 
     const localTxMap: Map<string, TransactionDetails> = new Map()
     localTransactions.forEach((tx) => {
       if (tx.hash) {
-        const txHash = tx.hash.toLowerCase()
+        const txHash = ensureLeading0x(tx.hash.toLowerCase())
         localTxMap.set(txHash, tx)
         txHashes.add(txHash)
       } else {
-        fiatOnRampTxs.push(tx)
+        offChainFiatOnRampTxs.push(tx)
       }
     })
 
-    const deDupedTxs: TransactionDetails[] = [...fiatOnRampTxs]
+    const deDupedTxs: TransactionDetails[] = [...offChainFiatOnRampTxs]
 
     for (const txHash of [...txHashes]) {
       const remoteTx = remoteTxMap.get(txHash)
       const localTx = localTxMap.get(txHash)
-
       if (!localTx) {
         if (!remoteTx) {
           throw new Error('No local or remote tx, which is not possible')
@@ -203,6 +203,12 @@ export function useMergeLocalAndRemoteTransactions(
         const externalDappInfo = { ...localTx.typeInfo.dapp }
         const mergedTx = { ...remoteTx, typeInfo: { ...remoteTx.typeInfo, externalDappInfo } }
         deDupedTxs.push(mergedTx)
+        continue
+      }
+
+      // If the tx is FiatPurchase and it's already on-chain, then use locally stored data, which comes from FOR provider API
+      if (localTx.typeInfo.type === TransactionType.FiatPurchase) {
+        deDupedTxs.push(localTx)
         continue
       }
 

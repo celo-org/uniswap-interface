@@ -1,11 +1,15 @@
 import { NATIVE_CHAIN_ID, nativeOnChain } from 'constants/tokens'
 import { SearchToken } from 'graphql/data/SearchTokens'
-import { Chain, NftCollection, useRecentlySearchedAssetsQuery } from 'graphql/data/__generated__/types-and-hooks'
 import { logSentryErrorForUnsupportedChain, supportedChainIdFromGQLChain } from 'graphql/data/util'
 import { useAtom } from 'jotai'
 import { atomWithStorage, useAtomValue } from 'jotai/utils'
 import { GenieCollection } from 'nft/types'
 import { useCallback, useMemo } from 'react'
+import {
+  Chain,
+  NftCollection,
+  useRecentlySearchedAssetsQuery,
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { getNativeTokenDBAddress } from 'utils/nativeTokens'
 
 type RecentlySearchedAsset = {
@@ -78,12 +82,14 @@ export function useRecentlySearchedAssets() {
     )
     collections?.forEach((collection) => (resultsMap[collection.address] = collection))
     queryData.tokens?.filter(Boolean).forEach((token) => {
-      resultsMap[token.address ?? `NATIVE-${token.chain}`] = token
+      if (token) {
+        resultsMap[token.address ?? `NATIVE-${token.chain}`] = token
+      }
     })
 
     const data: (SearchToken | GenieCollection)[] = []
     shortenedHistory.forEach((asset) => {
-      if (asset.address === 'NATIVE') {
+      if (asset.address === NATIVE_CHAIN_ID) {
         // Handles special case where wMATIC data needs to be used for MATIC
         const chain = supportedChainIdFromGQLChain(asset.chain)
         if (!chain) {
@@ -96,7 +102,7 @@ export function useRecentlySearchedAssets() {
         const native = nativeOnChain(chain)
         const queryAddress = getQueryAddress(asset.chain)?.toLowerCase() ?? `NATIVE-${asset.chain}`
         const result = resultsMap[queryAddress]
-        if (result) data.push({ ...result, address: 'NATIVE', ...native })
+        if (result) data.push({ ...result, address: NATIVE_CHAIN_ID, ...native })
       } else {
         const result = resultsMap[asset.address]
         if (result) data.push(result)

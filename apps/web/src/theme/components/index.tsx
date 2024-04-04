@@ -1,6 +1,5 @@
 import { Trans } from '@lingui/macro'
 import { outboundLink } from 'components/analytics'
-import { MOBILE_MEDIA_BREAKPOINT } from 'components/Tokens/constants'
 import useCopyClipboard from 'hooks/useCopyClipboard'
 import React, {
   forwardRef,
@@ -23,11 +22,6 @@ import { anonymizeLink } from '../../utils/anonymizeLink'
 // TODO: Break this file into a components folder
 
 export { ThemedText } from './text'
-
-export const CloseIcon = styled(X)<{ onClick: () => void }>`
-  color: ${({ theme }) => theme.neutral1};
-  cursor: pointer;
-`
 
 export const ButtonText = styled.button`
   outline: none;
@@ -67,6 +61,12 @@ export const ClickableStyle = css`
   :active {
     opacity: ${({ theme }) => theme.opacity.click};
   }
+`
+
+export const CloseIcon = styled(X)<{ onClick: () => void }>`
+  color: ${({ theme }) => theme.neutral1};
+  cursor: pointer;
+  ${ClickableStyle}
 `
 
 const LinkStyle = css`
@@ -185,7 +185,7 @@ function Tooltip({ isCopyContractTooltip, tooltipX }: { isCopyContractTooltip: b
   return (
     <ToolTipWrapper isCopyContractTooltip={isCopyContractTooltip} tooltipX={tooltipX}>
       <StyledTooltipTriangle />
-      <CopiedTooltip isCopyContractTooltip={isCopyContractTooltip}>Copied!</CopiedTooltip>
+      <CopiedTooltip isCopyContractTooltip={isCopyContractTooltip}>Copied</CopiedTooltip>
     </ToolTipWrapper>
   )
 }
@@ -216,68 +216,6 @@ export function CopyLinkIcon({ toCopy }: { toCopy: string }) {
     <CopyToClipboard toCopy={toCopy}>
       <CopyIcon />
     </CopyToClipboard>
-  )
-}
-
-const FullAddress = styled.span<{ showTruncated?: boolean }>`
-  ${({ showTruncated }) => showTruncated && 'display: none;'}
-  @media only screen and (max-width: ${MOBILE_MEDIA_BREAKPOINT}) {
-    display: none;
-  }
-`
-const TruncatedAddress = styled.span<{ showTruncated?: boolean }>`
-  display: ${({ showTruncated }) => (showTruncated ? 'flex' : 'none')};
-  @media only screen and (max-width: ${MOBILE_MEDIA_BREAKPOINT}) {
-    display: flex;
-  }
-`
-
-const CopyAddressRow = styled.div<{ isClicked: boolean }>`
-  ${ClickableStyle}
-  color: inherit;
-  stroke: inherit;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  gap: 6px;
-  ${({ theme, isClicked }) => isClicked && `opacity: ${theme.opacity.click} !important`}
-`
-
-const CopyContractAddressWrapper = styled.div`
-  align-items: center;
-  justify-content: center;
-  display: flex;
-`
-
-export function CopyContractAddress({
-  address,
-  showTruncatedOnly,
-  truncatedAddress,
-}: {
-  address: string
-  showTruncatedOnly?: boolean
-  truncatedAddress?: string
-}) {
-  const [isCopied, setCopied] = useCopyClipboard()
-  const [tooltipX, setTooltipX] = useState<number | undefined>()
-  const copy = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      setTooltipX(e.clientX)
-      setCopied(address)
-    },
-    [address, setCopied]
-  )
-
-  return (
-    <CopyContractAddressWrapper onClick={copy}>
-      <CopyAddressRow isClicked={isCopied}>
-        <FullAddress showTruncated={showTruncatedOnly}>{address}</FullAddress>
-        <TruncatedAddress showTruncated={showTruncatedOnly}>{truncatedAddress}</TruncatedAddress>
-        <Copy size={14} />
-      </CopyAddressRow>
-      {isCopied && <Tooltip isCopyContractTooltip tooltipX={tooltipX} />}
-    </CopyContractAddressWrapper>
   )
 }
 
@@ -318,7 +256,7 @@ interface CopyHelperProps {
   children: ReactNode
 }
 
-export type CopyHelperRefType = { forceCopy: () => void }
+type CopyHelperRefType = { forceCopy: () => void }
 export const CopyHelper = forwardRef<CopyHelperRefType, CopyHelperProps>(
   (
     {

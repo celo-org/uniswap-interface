@@ -1,6 +1,5 @@
 ignores: [
     # Dependencies that depcheck thinks are unused but are actually used
-    "@typechain/ethers-v5",
     "jest-presets",
     # Dependencies that depcheck thinks are missing but are actually present or never used
     ## Internal packages / workspaces
@@ -9,7 +8,4 @@ ignores: [
     "tsconfig",
     # types
     "@types/chrome",
-    ## GraphQL
-    "@graphql-codegen/*",
-    "get-graphql-schema",
   ]

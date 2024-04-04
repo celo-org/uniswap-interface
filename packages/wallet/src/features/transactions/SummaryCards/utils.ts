@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { createElement, useMemo, useState } from 'react'
 import { AppTFunction } from 'ui/src/i18n/types'
 import { TXN_HISTORY_LOADER_ICON_SIZE } from 'ui/src/loading/TransactionLoader'
@@ -56,7 +57,7 @@ export function generateActivityItemRenderer(
     }
     // if it's a section header, render it differently
     if (isSectionHeader(item)) {
-      return createElement(sectionHeaderElement, { title: item.title })
+      return createElement(sectionHeaderElement, { title: item.title, key: item.title })
     }
     // item is a transaction
     let SummaryItem
@@ -96,6 +97,7 @@ export function generateActivityItemRenderer(
     }
 
     return createElement(SummaryItem as React.FunctionComponent<SummaryItemProps>, {
+      key: item.id,
       authTrigger,
       transaction: item,
       layoutElement,
@@ -114,42 +116,162 @@ export function generateActivityItemRenderer(
 function getTransactionTypeVerbs(
   typeInfo: TransactionDetails['typeInfo'],
   t: AppTFunction
-): [string, string?, string?] {
+): {
+  success: string
+  pending?: string
+  failed?: string
+  canceling?: string
+  canceled?: string
+} {
+  const externalDappName = typeInfo.externalDappInfo?.name
+
   switch (typeInfo.type) {
     case TransactionType.Swap:
-      return [t('Swapped'), t('Swapping'), t('swap')]
+      return {
+        success: externalDappName
+          ? t('transaction.status.swap.successDapp', { externalDappName })
+          : t('transaction.status.swap.success'),
+        pending: t('transaction.status.swap.pending'),
+        failed: t('transaction.status.swap.failed'),
+        canceling: t('transaction.status.swap.canceling'),
+        canceled: t('transaction.status.swap.canceled'),
+      }
     case TransactionType.Receive:
-      return [t('Received')]
+      return {
+        success: externalDappName
+          ? t('transaction.status.receive.successDapp', { externalDappName })
+          : t('transaction.status.receive.success'),
+      }
     case TransactionType.Send:
-      return [t('Sent'), t('Sending'), t('send')]
+      return {
+        success: externalDappName
+          ? t('transaction.status.send.successDapp', { externalDappName })
+          : t('transaction.status.send.success'),
+        pending: t('transaction.status.send.pending'),
+        failed: t('transaction.status.send.failed'),
+        canceling: t('transaction.status.send.canceling'),
+        canceled: t('transaction.status.send.canceled'),
+      }
     case TransactionType.Wrap:
       if (typeInfo.unwrapped) {
-        return [t('Unwrapped'), t('Unwrapping'), t('unwrap')]
+        return {
+          success: externalDappName
+            ? t('transaction.status.unwrap.successDapp', { externalDappName })
+            : t('transaction.status.unwrap.success'),
+          pending: t('transaction.status.unwrap.pending'),
+          failed: t('transaction.status.unwrap.failed'),
+          canceling: t('transaction.status.unwrap.canceling'),
+          canceled: t('transaction.status.unwrap.canceled'),
+        }
       } else {
-        return [t('Wrapped'), t('Wrapping'), t('wrap')]
+        return {
+          success: externalDappName
+            ? t('transaction.status.wrap.successDapp', { externalDappName })
+            : t('transaction.status.wrap.success'),
+          pending: t('transaction.status.wrap.pending'),
+          failed: t('transaction.status.wrap.failed'),
+          canceling: t('transaction.status.wrap.canceling'),
+          canceled: t('transaction.status.wrap.canceled'),
+        }
       }
     case TransactionType.Approve:
       if (typeInfo.approvalAmount === '0.0') {
-        return [t('Revoked'), t('Revoking'), t('revoke')]
+        return {
+          success: externalDappName
+            ? t('transaction.status.revoke.successDapp', { externalDappName })
+            : t('transaction.status.revoke.success'),
+          pending: t('transaction.status.revoke.pending'),
+          failed: t('transaction.status.revoke.failed'),
+          canceling: t('transaction.status.revoke.canceling'),
+          canceled: t('transaction.status.revoke.canceled'),
+        }
       } else {
-        return [t('Approved'), t('Approving'), t('approve')]
+        return {
+          success: externalDappName
+            ? t('transaction.status.approve.successDapp', { externalDappName })
+            : t('transaction.status.approve.success'),
+          pending: t('transaction.status.approve.pending'),
+          failed: t('transaction.status.approve.failed'),
+          canceling: t('transaction.status.approve.canceling'),
+          canceled: t('transaction.status.approve.canceled'),
+        }
       }
     case TransactionType.NFTApprove:
-      return [t('Approved'), t('Approving'), t('approve')]
+      return {
+        success: externalDappName
+          ? t('transaction.status.approve.successDapp', { externalDappName })
+          : t('transaction.status.approve.success'),
+        pending: t('transaction.status.approve.pending'),
+        failed: t('transaction.status.approve.failed'),
+        canceling: t('transaction.status.approve.canceling'),
+        canceled: t('transaction.status.approve.canceled'),
+      }
     case TransactionType.NFTMint:
-      return [t('Minted'), t('Minting'), t('mint')]
+      return {
+        success: externalDappName
+          ? t('transaction.status.mint.successDapp', { externalDappName })
+          : t('transaction.status.mint.success'),
+        pending: t('transaction.status.mint.pending'),
+        failed: t('transaction.status.mint.failed'),
+        canceling: t('transaction.status.mint.canceling'),
+        canceled: t('transaction.status.mint.canceled'),
+      }
     case TransactionType.NFTTrade:
       if (typeInfo.tradeType === NFTTradeType.BUY) {
-        return [t('Bought'), t('Buying'), t('buy')]
+        return {
+          success: externalDappName
+            ? t('transaction.status.buy.successDapp', { externalDappName })
+            : t('transaction.status.buy.success'),
+          pending: t('transaction.status.buy.pending'),
+          failed: t('transaction.status.buy.failed'),
+          canceling: t('transaction.status.buy.canceling'),
+          canceled: t('transaction.status.buy.canceled'),
+        }
       } else {
-        return [t('Sold'), t('Selling'), t('sell')]
+        return {
+          success: externalDappName
+            ? t('transaction.status.sell.successDapp', { externalDappName })
+            : t('transaction.status.sell.success'),
+          pending: t('transaction.status.sell.pending'),
+          failed: t('transaction.status.sell.failed'),
+          canceling: t('transaction.status.sell.canceling'),
+          canceled: t('transaction.status.sell.canceled'),
+        }
       }
     case TransactionType.FiatPurchase:
-      return [t('Purchased'), t('Purchasing'), t('purchase')]
+      if (typeInfo.inputSymbol && typeInfo.inputSymbol === typeInfo.outputSymbol) {
+        return {
+          success: externalDappName
+            ? t('transaction.status.receive.successDapp', { externalDappName })
+            : t('transaction.status.receive.success'),
+          pending: t('transaction.status.receive.pending'),
+          failed: t('transaction.status.receive.failed'),
+          canceling: t('transaction.status.receive.canceling'),
+          canceled: t('transaction.status.receive.canceled'),
+        }
+      } else {
+        return {
+          success: externalDappName
+            ? t('transaction.status.purchase.successDapp', { externalDappName })
+            : t('transaction.status.purchase.success'),
+          pending: t('transaction.status.purchase.pending'),
+          failed: t('transaction.status.purchase.failed'),
+          canceling: t('transaction.status.purchase.canceling'),
+          canceled: t('transaction.status.purchase.canceled'),
+        }
+      }
     case TransactionType.Unknown:
     case TransactionType.WCConfirm:
     default:
-      return [t('Transaction confirmed'), t('Transaction in progress'), t('confirm')]
+      return {
+        success: externalDappName
+          ? t('transaction.status.confirm.successDapp', { externalDappName })
+          : t('transaction.status.confirm.success'),
+        pending: t('transaction.status.confirm.pending'),
+        failed: t('transaction.status.confirm.failed'),
+        canceling: t('transaction.status.confirm.canceling'),
+        canceled: t('transaction.status.confirm.canceled'),
+      }
   }
 }
 
@@ -157,22 +279,19 @@ export function getTransactionSummaryTitle(
   tx: TransactionDetails,
   t: AppTFunction
 ): string | undefined {
-  const [completed, inProgress, action] = getTransactionTypeVerbs(tx.typeInfo, t)
-  const externalDappName = tx.typeInfo.externalDappInfo?.name
+  const { success, pending, failed, canceling, canceled } = getTransactionTypeVerbs(tx.typeInfo, t)
+
   switch (tx.status) {
     case TransactionStatus.Pending:
-      return inProgress
+      return pending
     case TransactionStatus.Cancelling:
-      return t('Cancelling {{action}}', { action })
-    case TransactionStatus.Cancelled:
-      return t('Cancelled {{action}}', { action })
+      return canceling
+    case TransactionStatus.Canceled:
+      return canceled
     case TransactionStatus.Failed:
-      return t('Failed to {{action}}', { action })
+      return failed
     case TransactionStatus.Success:
-      if (externalDappName) {
-        return t('{{completed}} on {{externalDappName}}', { completed, externalDappName })
-      }
-      return completed
+      return success
     default:
       return undefined
   }

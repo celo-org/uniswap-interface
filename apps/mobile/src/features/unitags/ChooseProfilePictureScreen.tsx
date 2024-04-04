@@ -9,13 +9,14 @@ import { UnitagProfilePicture } from 'src/components/unitags/UnitagProfilePictur
 import { SafeKeyboardOnboardingScreen } from 'src/features/onboarding/SafeKeyboardOnboardingScreen'
 import { UnitagName } from 'src/features/unitags/UnitagName'
 import { OnboardingScreens, Screens, UnitagScreens } from 'src/screens/Screens'
-import { Button, Flex, Icons, Text, useSporeColors } from 'ui/src'
+import { Button, Flex, Icons, Text, useIsDarkMode, useSporeColors } from 'ui/src'
 import { fonts, iconSizes, imageSizes, spacing } from 'ui/src/theme'
+import { UnitagClaimSource } from 'uniswap/src/features/unitags/types'
 import { ChainId } from 'wallet/src/constants/chains'
 import { useENSName } from 'wallet/src/features/ens/api'
 import { ImportType, OnboardingEntryPoint } from 'wallet/src/features/onboarding/types'
 import { useClaimUnitag } from 'wallet/src/features/unitags/hooks'
-import { UnitagClaimSource } from 'wallet/src/features/unitags/types'
+import { ElementName } from 'wallet/src/telemetry/constants'
 
 function convertEntryPointToAnalyticsSource(entryPoint: UnitagEntryPoint): UnitagClaimSource {
   switch (entryPoint) {
@@ -39,6 +40,7 @@ export function ChooseProfilePictureScreen({
   const colors = useSporeColors()
   const { data: ensName } = useENSName(address, ChainId.Mainnet)
   const claimUnitag = useClaimUnitag()
+  const isDarkMode = useIsDarkMode()
 
   const [imageUri, setImageUri] = useState<string>()
   const [showModal, setShowModal] = useState(false)
@@ -112,28 +114,26 @@ export function ChooseProfilePictureScreen({
 
   return (
     <SafeKeyboardOnboardingScreen
-      subtitle={t(
-        'Upload your own or stick with your unique Unicon. You can always change this later.'
-      )}
-      title={t('Choose a profile photo')}>
-      <Flex centered gap="$spacing20" mt="$spacing48">
-        <Flex onPress={avatarSelectionHandler}>
+      subtitle={t('unitags.onboarding.profile.subtitle')}
+      title={t('unitags.onboarding.profile.title')}>
+      <Flex centered gap="$spacing20" mt="$spacing24">
+        <Flex mt="$spacing48" onPress={avatarSelectionHandler}>
           <Flex px="$spacing4">
             <ProfilePicture address={address} imageUri={imageUri} />
           </Flex>
           <Flex
             backgroundColor="$surface1"
             borderRadius="$roundedFull"
-            bottom={-spacing.spacing4}
+            bottom={-spacing.spacing2}
+            p="$spacing4"
             position="absolute"
-            right={-spacing.spacing4}>
+            right={-spacing.spacing2}
+            testID={ElementName.Edit}>
             <Flex
-              backgroundColor="$neutral2"
-              borderColor="$surface1"
+              backgroundColor={isDarkMode ? '$neutral3' : '$neutral2'}
               borderRadius="$roundedFull"
-              borderWidth="$spacing4"
-              p="$spacing8">
-              <Icons.PencilDetailed color="$surface1" size={iconSizes.icon16} />
+              p={8}>
+              <Icons.Pen color={isDarkMode ? '$neutral1' : '$surface1'} size={iconSizes.icon16} />
             </Flex>
           </Flex>
         </Flex>
@@ -147,6 +147,7 @@ export function ChooseProfilePictureScreen({
       <Button
         disabled={!!claimError || isClaiming}
         size="medium"
+        testID={ElementName.Continue}
         theme="primary"
         onPress={onPressContinue}>
         {isClaiming ? (
@@ -154,7 +155,7 @@ export function ChooseProfilePictureScreen({
             <ActivityIndicator color={colors.sporeWhite.val} />
           </Flex>
         ) : (
-          t('Continue')
+          t('common.button.continue')
         )}
       </Button>
       {showModal && (

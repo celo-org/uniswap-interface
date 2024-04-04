@@ -1,17 +1,16 @@
 /* eslint-disable complexity */
 import { ApolloQueryResult } from '@apollo/client'
 import { isAddress } from 'ethers/lib/utils'
-import { impactAsync } from 'expo-haptics'
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StatusBar, StyleSheet, TouchableOpacity } from 'react-native'
 import ContextMenu from 'react-native-context-menu-view'
 import { useAppDispatch, useAppSelector } from 'src/app/hooks'
 import { AppStackScreenProp, useAppStackNavigation } from 'src/app/navigation/types'
+import Trace from 'src/components/Trace/Trace'
 import { HeaderScrollScreen } from 'src/components/layout/screens/HeaderScrollScreen'
 import { Loader } from 'src/components/loading'
 import { LongMarkdownText } from 'src/components/text/LongMarkdownText'
-import Trace from 'src/components/Trace/Trace'
 import { selectModalState } from 'src/features/modals/selectModalState'
 import { PriceAmount } from 'src/features/nfts/collection/ListPriceCard'
 import { useNFTMenu } from 'src/features/nfts/hooks'
@@ -20,18 +19,28 @@ import { CollectionPreviewCard } from 'src/features/nfts/item/CollectionPreviewC
 import { NFTTraitList } from 'src/features/nfts/item/traits'
 import { ExploreModalAwareView } from 'src/screens/ModalAwareView'
 import { Screens } from 'src/screens/Screens'
-import { Flex, getTokenValue, Text, Theme, TouchableArea, useSporeColors } from 'ui/src'
+import {
+  Flex,
+  HapticFeedback,
+  Text,
+  Theme,
+  TouchableArea,
+  getTokenValue,
+  passesContrast,
+  useSporeColors,
+} from 'ui/src'
 import EllipsisIcon from 'ui/src/assets/icons/ellipsis.svg'
 import ShareIcon from 'ui/src/assets/icons/share.svg'
 import { colorsDark, fonts, iconSizes } from 'ui/src/theme'
-import { AddressDisplay } from 'wallet/src/components/accounts/AddressDisplay'
-import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
-import { PollingInterval } from 'wallet/src/constants/misc'
 import {
   NftActivityType,
   NftItemScreenQuery,
   useNftItemScreenQuery,
-} from 'wallet/src/data/__generated__/types-and-hooks'
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
+import { isAndroid, isIOS } from 'uniswap/src/utils/platform'
+import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
+import { AddressDisplay } from 'wallet/src/components/accounts/AddressDisplay'
+import { PollingInterval } from 'wallet/src/constants/misc'
 import { NFTViewer } from 'wallet/src/features/images/NFTViewer'
 import { GQLNftAsset } from 'wallet/src/features/nfts/hooks'
 import { pushNotification } from 'wallet/src/features/notifications/slice'
@@ -42,10 +51,8 @@ import { areAddressesEqual } from 'wallet/src/utils/addresses'
 import { setClipboardImage } from 'wallet/src/utils/clipboard'
 import {
   MIN_COLOR_CONTRAST_THRESHOLD,
-  passesContrast,
   useNearestThemeColorFromImageUri,
 } from 'wallet/src/utils/colors'
-import { isAndroid, isIOS } from 'wallet/src/utils/platform'
 
 const MAX_NFT_IMAGE_HEIGHT = 375
 
@@ -176,7 +183,7 @@ function NFTItemScreenContents({
 
   const onLongPressNFTImage = async (): Promise<void> => {
     await setClipboardImage(imageUrl)
-    await impactAsync()
+    await HapticFeedback.impact()
     dispatch(
       pushNotification({
         type: AppNotificationType.Copied,
@@ -265,8 +272,8 @@ function NFTItemScreenContents({
                         style={{ backgroundColor: colorsDark.surface2 }}
                         width="100%">
                         <BaseCard.ErrorState
-                          retryButtonLabel="Retry"
-                          title={t('Couldn’t load NFT details')}
+                          retryButtonLabel={t('common.button.retry')}
+                          title={t('tokens.nfts.details.error.load.title')}
                           onRetry={(): Promise<ApolloQueryResult<NftItemScreenQuery>> =>
                             refetch?.()
                           }
@@ -315,7 +322,7 @@ function NFTItemScreenContents({
                   {listingPrice?.value ? (
                     <AssetMetadata
                       color={accentTextColor}
-                      title={t('Current price')}
+                      title={t('tokens.nfts.details.price')}
                       valueComponent={
                         <PriceAmount
                           iconColor="$neutral1"
@@ -329,7 +336,7 @@ function NFTItemScreenContents({
                   {lastSaleData?.price?.value ? (
                     <AssetMetadata
                       color={accentTextColor}
-                      title={t('Last sale price')}
+                      title={t('tokens.nfts.details.recentPrice')}
                       valueComponent={
                         <PriceAmount
                           iconColor="$neutral1"
@@ -344,7 +351,7 @@ function NFTItemScreenContents({
                   {owner && (
                     <AssetMetadata
                       color={accentTextColor}
-                      title={t('Owned by')}
+                      title={t('tokens.nfts.details.owner')}
                       valueComponent={
                         <TouchableArea
                           disabled={disableProfileNavigation}
@@ -368,7 +375,7 @@ function NFTItemScreenContents({
                 {asset?.traits && asset?.traits?.length > 0 ? (
                   <Flex gap="$spacing12">
                     <Text color="$neutral1" ml="$spacing24" variant="body2">
-                      {t('Traits')}
+                      {t('tokens.nfts.details.traits')}
                     </Text>
                     <NFTTraitList titleTextColor={accentTextColor} traits={asset.traits} />
                   </Flex>

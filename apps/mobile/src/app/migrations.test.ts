@@ -57,7 +57,11 @@ import {
   v55Schema,
   v56Schema,
   v57Schema,
+  v58Schema,
+  v59Schema,
   v5Schema,
+  v60Schema,
+  v61Schema,
   v6Schema,
   v7Schema,
   v8Schema,
@@ -68,12 +72,15 @@ import { ScannerModalState } from 'src/components/QRCodeScanner/constants'
 import { initialBiometricsSettingsState } from 'src/features/biometrics/slice'
 import { initialCloudBackupState } from 'src/features/CloudBackup/cloudBackupSlice'
 import { initialPasswordLockoutState } from 'src/features/CloudBackup/passwordLockoutSlice'
-import { initialModalState } from 'src/features/modals/modalSlice'
+import { initialModalsState } from 'src/features/modals/modalSlice'
 import { initialTelemetryState } from 'src/features/telemetry/slice'
 import { initialTweaksState } from 'src/features/tweaks/slice'
 import { initialWalletConnectState } from 'src/features/walletConnect/walletConnectSlice'
 import { ChainId } from 'wallet/src/constants/chains'
-import { initialBehaviorHistoryState } from 'wallet/src/features/behaviorHistory/slice'
+import {
+  ExtensionOnboardingState,
+  initialBehaviorHistoryState,
+} from 'wallet/src/features/behaviorHistory/slice'
 import { initialFavoritesState } from 'wallet/src/features/favorites/slice'
 import { initialFiatCurrencyState } from 'wallet/src/features/fiatCurrency/slice'
 import { initialLanguageState } from 'wallet/src/features/language/slice'
@@ -96,7 +103,25 @@ import {
 } from 'wallet/src/features/wallet/accounts/types'
 import { initialWalletState, SwapProtectionSetting } from 'wallet/src/features/wallet/slice'
 import { ModalName } from 'wallet/src/telemetry/constants'
-import { account, fiatOnRampTxDetailsFailed, txDetailsConfirmed } from 'wallet/src/test/fixtures'
+import {
+  fiatPurchaseTransactionInfo,
+  signerMnemonicAccount,
+  transactionDetails,
+} from 'wallet/src/test/fixtures'
+
+const account = signerMnemonicAccount()
+
+const txDetailsConfirmed = transactionDetails({
+  status: TransactionStatus.Success,
+})
+const fiatOnRampTxDetailsFailed = transactionDetails({
+  status: TransactionStatus.Failed,
+  typeInfo: fiatPurchaseTransactionInfo({
+    explorerUrl:
+      'https://buy-sandbox.moonpay.com/transaction_receipt?transactionId=d6c32bb5-7cd9-4c22-8f46-6bbe786c599f',
+    id: 'd6c32bb5-7cd9-4c22-8f46-6bbe786c599f',
+  }),
+})
 
 // helps with object assignment
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,7 +183,7 @@ describe('Redux state migrations', () => {
       favorites: initialFavoritesState,
       fiatCurrencySettings: initialFiatCurrencyState,
       languageSettings: initialLanguageState,
-      modals: initialModalState,
+      modals: initialModalsState,
       notifications: initialNotificationsState,
       passwordLockout: initialPasswordLockoutState,
       behaviorHistory: initialBehaviorHistoryState,
@@ -1298,5 +1323,71 @@ describe('Redux state migrations', () => {
     const v58 = migrations[58](v57Stub)
 
     expect(v58.behaviorHistory.hasSkippedUnitagPrompt).toBe(false)
+  })
+
+  it('migrates from v58 to 59', () => {
+    const v58Stub = { ...v58Schema }
+    const v59 = migrations[59](v58Stub)
+
+    expect(v59.behaviorHistory.hasCompletedUnitagsIntroModal).toBe(false)
+  })
+
+  it('migrates from v59 to 60', () => {
+    const v59Stub = { ...v59Schema }
+    const v60 = migrations[60](v59Stub)
+
+    expect(v60.behaviorHistory.hasViewedUniconV2IntroModal).toBe(false)
+  })
+
+  it('migrates from v60 to 61', () => {
+    const v60Stub = { ...v60Schema }
+    const address1 = '0x123'
+    const address2 = '0x456'
+    const nftKey1 = '0xNFTKey1'
+    const nftKey2 = '0xNFTKey2'
+    const nftKey3 = '0xNFTKey3'
+    const nftKey4 = '0xNFTKey4'
+
+    const currency1ToVisibility = { ['0xCurrency1']: { isVisible: true } }
+    const currency2ToVisibility = { ['0xCurrency2']: { isVisible: false } }
+    const currency3ToVisibility = { ['0xCurrency3']: { isVisible: false } }
+    const nft1ToVisibility = { [nftKey1]: { isSpamIgnored: true } }
+    const nft2ToVisibility = { [nftKey2]: { isHidden: true } }
+    const nft3ToVisibility = { [nftKey3]: { isSpamIgnored: false, isHidden: false } }
+    const nft4ToVisibility = { [nftKey4]: { isSpamIgnored: false, isHidden: true } }
+
+    v60Stub.favorites = {
+      ...v60Stub.favorites,
+      tokensVisibility: {
+        [address1]: { ...currency1ToVisibility, ...currency2ToVisibility },
+        [address2]: { ...currency2ToVisibility, ...currency3ToVisibility },
+      },
+      nftsData: {
+        [address1]: { ...nft1ToVisibility, ...nft2ToVisibility, ...nft3ToVisibility },
+        [address2]: { ...nft3ToVisibility, ...nft4ToVisibility },
+      },
+    }
+
+    const v61 = migrations[61](v60Stub)
+
+    expect(v61.favorites.nftsData).toBeUndefined()
+    expect(v61.favorites.tokensVisibility).toMatchObject({
+      ...currency1ToVisibility,
+      ...currency2ToVisibility,
+      ...currency3ToVisibility,
+    })
+    expect(v61.favorites.nftsVisibility).toMatchObject({
+      [nftKey1]: { isVisible: true },
+      [nftKey2]: { isVisible: false },
+      [nftKey3]: { isVisible: true },
+      [nftKey4]: { isVisible: false },
+    })
+  })
+
+  it('migrates from v61 to 62', () => {
+    const v61Stub = { ...v61Schema }
+    const v62 = migrations[62](v61Stub)
+
+    expect(v62.behaviorHistory.extensionOnboardingState).toBe(ExtensionOnboardingState.Undefined)
   })
 })

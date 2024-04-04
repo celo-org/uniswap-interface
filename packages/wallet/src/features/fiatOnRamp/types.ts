@@ -1,3 +1,12 @@
+import {
+  FiatPurchaseTransactionInfo,
+  TransactionDetails,
+} from 'wallet/src/features/transactions/types'
+
+export type FiatOnRampTransactionDetails = TransactionDetails & {
+  typeInfo: FiatPurchaseTransactionInfo
+}
+
 export type FiatOnRampWidgetUrlQueryParameters = {
   colorCode: string
   externalTransactionId: string
@@ -161,15 +170,20 @@ export type MoonpayTransactionResponseItem = MoonpayQuote & {
   }>
 }
 
-// /supported-countries
-
-export type FORSupportedCountry = {
+export type FORCountry = {
   countryCode: string
   displayName: string
+  state: string | undefined
 }
 
+// /get-country
+
+export type FORGetCountryResponse = FORCountry
+
+// /supported-countries
+
 export type FORSupportedCountriesResponse = {
-  supportedCountries: FORSupportedCountry[]
+  supportedCountries: FORCountry[]
 }
 
 // /quote
@@ -180,6 +194,7 @@ export type FORQuoteRequest = {
   sourceAmount: number
   sourceCurrencyCode: string
   walletAddress: string
+  state?: string
 }
 
 export type FORQuote = {
@@ -189,6 +204,7 @@ export type FORQuote = {
   destinationAmount: number
   destinationCurrencyCode: string
   serviceProvider: string
+  totalFee: number
 }
 
 export type FORQuoteResponse = {
@@ -209,6 +225,11 @@ export type FORServiceProvider = {
   name: string
   url: string
   logos: FORLogo
+  paymentMethods: string[]
+}
+
+export type FORServiceProvidersRequest = {
+  countryCode: string
 }
 
 export type FORServiceProvidersResponse = {
@@ -233,6 +254,22 @@ export type FORSupportedToken = {
 
 export type FORSupportedTokensResponse = {
   supportedTokens: FORSupportedToken[]
+}
+
+// /supported-fiat-currencies
+
+export type FORSupportedFiatCurrenciesRequest = {
+  countryCode: string
+}
+
+export type FORSupportedFiatCurrency = {
+  fiatCurrencyCode: string
+  displayName: string
+  symbol: string
+}
+
+export type FORSupportedFiatCurrenciesResponse = {
+  fiatCurrencies: FORSupportedFiatCurrency[]
 }
 
 // /transfer-institutions
@@ -265,12 +302,12 @@ export type FORWidgetUrlRequest = {
   serviceProvider: string
   walletAddress: string
   externalSessionId: string
+  redirectUrl?: string
 }
 
 export type FORWidgetUrlResponse = {
   id: string
   widgetUrl: string
-  token: string
 }
 
 // /transfer-widget-url
@@ -282,45 +319,36 @@ export type FORTransferWidgetUrlRequest = {
   institutionId: string
   walletAddress: string
   externalSessionId: string
+  redirectURL: string
 }
 
 // /transactions
 
-export type FORCryptoPurchaseDetails = {
-  destinationCurrencyCode: string
-  destinationAmount: number
+export type FORCryptoDetails = {
   walletAddress: string
   networkFee: number
   transactionFee: number
-  partnerFee: number | null
   totalFee: number
-  networkFeeInUsd: number | null
-  transactionFeeInUsd: number | null
-  partnerFeeInUsd: number | null
-  totalFeeInUsd: number | null
   blockchainTransactionId: string
-  institution: string | null
+  chainId: string
 }
 
 export type FORTransaction = {
-  key: string
   id: string
-  paymentMethod: string | null
-  transactionType: string
   status: string
   sourceAmount: number
   sourceCurrencyCode: string
   destinationAmount: number
   destinationCurrencyCode: string
-  paymentMethodType: string
   serviceProvider: string
-  description: string | null
-  cryptoPurchaseDetails: FORCryptoPurchaseDetails
+  cryptoDetails: FORCryptoDetails
   createdAt: string
   updatedAt: string
-  countryCode: string
-  externalSessionId: string | null
-  sourceAmountInUsd: number
+  externalSessionId: string
+}
+
+export type FORTransactionsRequest = {
+  limit?: number
 }
 
 export type FORTransactionsResponse = {

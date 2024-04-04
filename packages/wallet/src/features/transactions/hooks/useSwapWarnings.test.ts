@@ -1,13 +1,14 @@
 import { CurrencyAmount } from '@uniswap/sdk-core'
+import i18n from 'uniswap/src/i18n/i18n'
 import { ChainId } from 'wallet/src/constants/chains'
 import { DAI, USDC } from 'wallet/src/constants/tokens'
 import { NativeCurrency } from 'wallet/src/features/tokens/NativeCurrency'
+import { WarningLabel } from 'wallet/src/features/transactions/WarningModal/types'
 import { getSwapWarnings } from 'wallet/src/features/transactions/hooks/useSwapWarnings'
 import { DerivedSwapInfo } from 'wallet/src/features/transactions/swap/types'
 import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
 import { WrapType } from 'wallet/src/features/transactions/types'
 import { isOffline } from 'wallet/src/features/transactions/utils'
-import { WarningLabel } from 'wallet/src/features/transactions/WarningModal/types'
 import {
   daiCurrencyInfo,
   ethCurrencyInfo,
@@ -15,6 +16,7 @@ import {
   networkUnknown,
   networkUp,
 } from 'wallet/src/test/fixtures'
+import { mockLocalizedFormatter } from 'wallet/src/test/mocks'
 
 const ETH = NativeCurrency.onChain(ChainId.Mainnet)
 
@@ -44,7 +46,7 @@ const swapState: DerivedSwapInfo = {
     [CurrencyField.OUTPUT]: undefined,
   },
   currencies: {
-    [CurrencyField.INPUT]: ethCurrencyInfo,
+    [CurrencyField.INPUT]: ethCurrencyInfo(),
     [CurrencyField.OUTPUT]: undefined,
   },
   exactCurrencyField: CurrencyField.INPUT,
@@ -66,8 +68,8 @@ const insufficientBalanceState: DerivedSwapInfo = {
     [CurrencyField.OUTPUT]: CurrencyAmount.fromRawAmount(DAI, '0'),
   },
   currencies: {
-    [CurrencyField.INPUT]: ethCurrencyInfo,
-    [CurrencyField.OUTPUT]: daiCurrencyInfo,
+    [CurrencyField.INPUT]: ethCurrencyInfo(),
+    [CurrencyField.OUTPUT]: daiCurrencyInfo(),
   },
   exactCurrencyField: CurrencyField.INPUT,
   trade: { loading: false, error: undefined, trade: null },
@@ -88,8 +90,8 @@ const tradeErrorState: DerivedSwapInfo = {
     [CurrencyField.OUTPUT]: CurrencyAmount.fromRawAmount(ETH, '0'),
   },
   currencies: {
-    [CurrencyField.INPUT]: daiCurrencyInfo,
-    [CurrencyField.OUTPUT]: ethCurrencyInfo,
+    [CurrencyField.INPUT]: daiCurrencyInfo(),
+    [CurrencyField.OUTPUT]: ethCurrencyInfo(),
   },
   exactCurrencyField: CurrencyField.INPUT,
   trade: {
@@ -98,22 +100,21 @@ const tradeErrorState: DerivedSwapInfo = {
     trade: null,
   },
 }
-
-const mockTranslate = jest.fn()
+const { formatPercent } = mockLocalizedFormatter
 
 describe(getSwapWarnings, () => {
   it('catches incomplete form errors', async () => {
-    const warnings = getSwapWarnings(mockTranslate, swapState, isOffline(networkUp))
+    const warnings = getSwapWarnings(i18n.t, formatPercent, swapState, isOffline(networkUp()))
     expect(warnings.length).toBe(1)
     expect(warnings[0]?.type).toEqual(WarningLabel.FormIncomplete)
   })
 
   it('catches insufficient balance errors', () => {
     const warnings = getSwapWarnings(
-      mockTranslate,
-
+      i18n.t,
+      formatPercent,
       insufficientBalanceState,
-      isOffline(networkUp)
+      isOffline(networkUp())
     )
     expect(warnings.length).toBe(1)
     expect(warnings[0]?.type).toEqual(WarningLabel.InsufficientFunds)
@@ -129,26 +130,36 @@ describe(getSwapWarnings, () => {
     }
 
     const warnings = getSwapWarnings(
-      mockTranslate,
-
+      i18n.t,
+      formatPercent,
       incompleteAndInsufficientBalanceState,
-      isOffline(networkUp)
+      isOffline(networkUp())
     )
     expect(warnings.length).toBe(2)
   })
 
   it('catches errors returned by the routing api', () => {
-    const warnings = getSwapWarnings(mockTranslate, tradeErrorState, isOffline(networkUp))
+    const warnings = getSwapWarnings(i18n.t, formatPercent, tradeErrorState, isOffline(networkUp()))
     expect(warnings.find((warning) => warning.type === WarningLabel.SwapRouterError)).toBeTruthy()
   })
 
   it('errors if there is no internet', () => {
-    const warnings = getSwapWarnings(mockTranslate, tradeErrorState, isOffline(networkDown))
+    const warnings = getSwapWarnings(
+      i18n.t,
+      formatPercent,
+      tradeErrorState,
+      isOffline(networkDown())
+    )
     expect(warnings.find((warning) => warning.type === WarningLabel.NetworkError)).toBeTruthy()
   })
 
   it('does not error when network state is unknown', () => {
-    const warnings = getSwapWarnings(mockTranslate, tradeErrorState, isOffline(networkUnknown))
+    const warnings = getSwapWarnings(
+      i18n.t,
+      formatPercent,
+      tradeErrorState,
+      isOffline(networkUnknown())
+    )
     expect(warnings.find((warning) => warning.type === WarningLabel.NetworkError)).toBeFalsy()
   })
 })

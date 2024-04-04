@@ -1,8 +1,7 @@
-import { ImpactFeedbackStyle } from 'expo-haptics'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { AnimatedFlex, Flex, Icons, Text, TouchableArea } from 'ui/src'
+import { AnimatedFlex, Flex, Icons, ImpactFeedbackStyle, Text, TouchableArea } from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
 
 export function HiddenNftsRowLeft({ numHidden }: { numHidden: number }): JSX.Element {
@@ -18,7 +17,7 @@ export function HiddenNftsRowLeft({ numHidden }: { numHidden: number }): JSX.Ele
       my="$spacing16"
       py="$spacing4">
       <Text color="$neutral2" variant="subheading2">
-        {t('Hidden ({{numHidden}})', { numHidden })}
+        {t('tokens.nfts.hidden.label', { numHidden })}
       </Text>
     </Flex>
   )
@@ -39,7 +38,7 @@ export function HiddenNftsRowRight({
     return {
       transform: [{ rotateZ: `${chevronRotate.value}deg` }],
     }
-  })
+  }, [chevronRotate])
 
   const onPressRow = useCallback(() => {
     chevronRotate.value = withTiming(chevronRotate.value === 0 ? 180 : 0, {
@@ -65,7 +64,7 @@ export function HiddenNftsRowRight({
           pr="$spacing8"
           py="$spacing4">
           <Text color="$neutral2" variant="buttonLabel3">
-            {isExpanded ? t('Hide') : t('Show')}
+            {isExpanded ? t('common.button.hide') : t('common.button.show')}
           </Text>
           <AnimatedFlex style={chevronAnimatedStyle}>
             <Icons.RotatableChevron

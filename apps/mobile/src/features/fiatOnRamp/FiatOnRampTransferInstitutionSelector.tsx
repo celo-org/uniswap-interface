@@ -1,13 +1,11 @@
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet'
-import { ImpactFeedbackStyle } from 'expo-haptics'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ListRenderItemInfo } from 'react-native'
 import { getCountry } from 'react-native-localize'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useAppDispatch } from 'src/app/hooks'
 import { openModal } from 'src/features/modals/modalSlice'
-import { AnimatedFlex, Flex, Loader, Text, TouchableArea } from 'ui/src'
+import { AnimatedFlex, Flex, ImpactFeedbackStyle, Loader, Text, TouchableArea } from 'ui/src'
 import { iconSizes } from 'ui/src/theme'
 import { useFiatOnRampAggregatorTransferInstitutionsQuery } from 'wallet/src/features/fiatOnRamp/api'
 import { FORTransferInstitution } from 'wallet/src/features/fiatOnRamp/types'
@@ -28,7 +26,6 @@ function CEXItemWrapper({
   institution: FORTransferInstitution
   onSelectTransferInstitution: (transferInstitution: FORTransferInstitution) => void
 }): JSX.Element | null {
-  const { t } = useTranslation()
   const onPress = (): void => onSelectTransferInstitution(institution)
 
   return (
@@ -56,9 +53,6 @@ function CEXItemWrapper({
             {institution.name}
           </Text>
         </Flex>
-        <Text color="$neutral3" variant="body3">
-          {t('Not linked')}
-        </Text>
       </Flex>
     </TouchableArea>
   )

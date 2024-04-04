@@ -2,11 +2,18 @@ import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 import { SwapEventName } from '@uniswap/analytics-events'
 import { TradeType } from '@uniswap/sdk-core'
 import { BigNumberish, providers } from 'ethers'
-import { call, delay, fork, put, race, take } from 'typed-redux-saga'
+import { Statsig } from 'statsig-react-native'
+import { call, delay, fork, put, race, select, take } from 'typed-redux-saga'
+import { FeatureFlags, getFeatureFlagName } from 'uniswap/src/features/experiments/flags'
+import i18n from 'uniswap/src/i18n/i18n'
 import { logger } from 'utilities/src/logger/logger'
 import { ChainId } from 'wallet/src/constants/chains'
 import { PollingInterval } from 'wallet/src/constants/misc'
-import { fetchFiatOnRampTransaction } from 'wallet/src/features/fiatOnRamp/api'
+import {
+  fetchFiatOnRampTransaction,
+  fetchMoonpayTransaction,
+} from 'wallet/src/features/fiatOnRamp/api'
+import { FiatOnRampTransactionDetails } from 'wallet/src/features/fiatOnRamp/types'
 import { pushNotification, setNotificationStatus } from 'wallet/src/features/notifications/slice'
 import { AppNotificationType } from 'wallet/src/features/notifications/types'
 import { attemptCancelTransaction } from 'wallet/src/features/transactions/cancelTransactionSaga'
@@ -34,16 +41,21 @@ import {
   TransactionType,
 } from 'wallet/src/features/transactions/types'
 import { getFinalizedTransactionStatus } from 'wallet/src/features/transactions/utils'
-import { getProvider } from 'wallet/src/features/wallet/context'
-import i18n from 'wallet/src/i18n/i18n'
+import { getProvider, getSignerManager } from 'wallet/src/features/wallet/context'
+import { selectActiveAccount } from 'wallet/src/features/wallet/selectors'
 import { appSelect } from 'wallet/src/state'
 import { sendWalletAnalyticsEvent, sendWalletAppsFlyerEvent } from 'wallet/src/telemetry'
-import { WalletAppsFlyerEvents, WalletEventName } from 'wallet/src/telemetry/constants'
+import {
+  FiatOnRampEventName,
+  InstitutionTransferEventName,
+  WalletAppsFlyerEvents,
+  WalletEventName,
+} from 'wallet/src/telemetry/constants'
 
 export function* transactionWatcher({
   apolloClient,
 }: {
-  apolloClient: ApolloClient<NormalizedCacheObject> | null
+  apolloClient: ApolloClient<NormalizedCacheObject>
 }) {
   logger.debug('transactionWatcherSaga', 'transactionWatcher', 'Starting tx watcher')
 
@@ -52,7 +64,7 @@ export function* transactionWatcher({
   const incompleteTransactions = yield* appSelect(selectIncompleteTransactions)
   for (const transaction of incompleteTransactions) {
     if (transaction.typeInfo.type === TransactionType.FiatPurchase) {
-      yield* fork(watchFiatOnRampTransaction, transaction)
+      yield* fork(watchFiatOnRampTransaction, transaction as FiatOnRampTransactionDetails)
     } else {
       yield* fork(watchTransaction, { transaction, apolloClient })
     }
@@ -66,7 +78,7 @@ export function* transactionWatcher({
     ])
     try {
       if (transaction.typeInfo.type === TransactionType.FiatPurchase) {
-        yield* fork(watchFiatOnRampTransaction, transaction)
+        yield* fork(watchFiatOnRampTransaction, transaction as FiatOnRampTransactionDetails)
       } else {
         yield* fork(watchTransaction, { transaction, apolloClient })
       }
@@ -83,64 +95,112 @@ export function* transactionWatcher({
         pushNotification({
           type: AppNotificationType.Error,
           address: transaction.from,
-          errorMessage: i18n.t('Error while checking transaction status'),
+          errorMessage: i18n.t('transaction.watcher.error.status'),
         })
       )
     }
   }
 }
 
-export function* watchFiatOnRampTransaction(transaction: TransactionDetails) {
-  // id represents `externalTransactionId` sent to Moonpay
+export function* fetchUpdatedFiatOnRampTransaction(transaction: FiatOnRampTransactionDetails) {
+  const activeAccount = yield* select(selectActiveAccount)
+  if (!activeAccount) {
+    return
+  }
+  const signerManager = yield* call(getSignerManager)
+  return yield* call(
+    fetchFiatOnRampTransaction,
+    /** previousTransactionDetails= */ transaction,
+    activeAccount,
+    signerManager
+  )
+}
+
+export function* fetchUpdatedMoonpayTransaction(transaction: FiatOnRampTransactionDetails) {
+  return yield* call(fetchMoonpayTransaction, /** previousTransactionDetails= */ transaction)
+}
+
+export function* watchFiatOnRampTransaction(transaction: FiatOnRampTransactionDetails) {
+  // we want to re-fetch this every time we've added a transaction,
+  // as this feature flag could be changed after the app has started
+  const useOldMoonpayIntegration = !Statsig.checkGate(
+    getFeatureFlagName(FeatureFlags.ForAggregator)
+  )
+
   const { id } = transaction
 
   logger.debug(
     'transactionWatcherSaga',
     'watchFiatOnRampTransaction',
     'Watching for updates for fiat onramp tx:',
-    id
+    id,
+    'useOldMoonpayIntegration:',
+    useOldMoonpayIntegration
   )
 
   try {
     while (true) {
-      const updatedTransaction = yield* call(
-        fetchFiatOnRampTransaction,
-        /** previousTransactionDetails= */ transaction
-      )
+      const updatedTransaction = yield* useOldMoonpayIntegration
+        ? fetchUpdatedMoonpayTransaction(transaction)
+        : fetchUpdatedFiatOnRampTransaction(transaction)
 
+      // We've got an invalid response from backend
       if (!updatedTransaction) {
         return
       }
-
-      // not strictly necessary but avoid dispatching an action if tx hasn't changed
+      // Transaction has been updated
       if (JSON.stringify(updatedTransaction) !== JSON.stringify(transaction)) {
         logger.debug(
           'transactionWatcherSaga',
           'watchFiatOnRampTransaction',
           `Updating transaction with id ${id} from status ${transaction.status} to ${updatedTransaction.status}`
         )
+        const isTransfer =
+          updatedTransaction.typeInfo.inputSymbol === updatedTransaction.typeInfo.outputSymbol
+        if (isTransfer && transaction.typeInfo.institution) {
+          yield* call(
+            sendWalletAnalyticsEvent,
+            InstitutionTransferEventName.InstitutionTransferTransactionUpdated,
+            {
+              externalTransactionId: transaction.id,
+              status: transaction.status,
+              institutionName: transaction.typeInfo.institution,
+            }
+          )
+        } else if (transaction.typeInfo.serviceProvider) {
+          yield* call(sendWalletAnalyticsEvent, FiatOnRampEventName.FiatOnRampTransactionUpdated, {
+            externalTransactionId: transaction.id,
+            status: transaction.status,
+            serviceProvider: transaction.typeInfo.serviceProvider,
+          })
+        }
+
+        // Stale transaction
+        if (updatedTransaction.status === TransactionStatus.Unknown) {
+          yield* call(deleteTransaction, updatedTransaction)
+          break // stop polling
+        }
+
+        // Update transaction
         yield* put(upsertFiatOnRampTransaction(updatedTransaction))
+
+        // Finished transaction
+        if (
+          updatedTransaction.status === TransactionStatus.Failed ||
+          updatedTransaction.status === TransactionStatus.Success
+        ) {
+          // Show notification badge
+          yield* put(setNotificationStatus({ address: transaction.from, hasNotifications: true }))
+          break // stop polling
+        }
       }
 
-      if (
-        updatedTransaction.status === TransactionStatus.Failed ||
-        updatedTransaction.status === TransactionStatus.Success ||
-        updatedTransaction.status === TransactionStatus.Unknown
-      ) {
-        // Flip status to true so we can render Notification badge on home
-        yield* put(setNotificationStatus({ address: transaction.from, hasNotifications: true }))
-        // can stop polling once transaction is final
-        break
-      }
-
-      // at this point, we received a response from Moonpay's API
+      // at this point, we received a response from backend
       // however, we didn't have enough information to act
-      // try again after a waiting period or when we've come back from Moonpay page
-      // TODO: Currently, when user closes in-app browser we would not re-fetch the data, but we should.
-      //       When https://uniswaplabs.atlassian.net/browse/DATA-734 is implemented, remove `forceFetchFiatOnRampTransactions` related logic
+      // try again after a waiting period or when we've come back WebView
       yield* race({
         forceFetch: take(forceFetchFiatOnRampTransactions),
-        timeout: delay(PollingInterval.Normal),
+        timeout: delay(useOldMoonpayIntegration ? PollingInterval.Normal : PollingInterval.Fast),
       })
     }
   } catch (error) {
@@ -155,7 +215,7 @@ export function* watchTransaction({
   apolloClient,
 }: {
   transaction: TransactionDetails
-  apolloClient: ApolloClient<NormalizedCacheObject> | null
+  apolloClient: ApolloClient<NormalizedCacheObject>
 }): Generator<unknown> {
   const { chainId, id, hash, options } = transaction
 
@@ -203,7 +263,7 @@ export function* watchTransaction({
         pushNotification({
           type: AppNotificationType.Error,
           address: transaction.from,
-          errorMessage: i18n.t('Unable to cancel transaction'),
+          errorMessage: i18n.t('transaction.watcher.error.cancel'),
         })
       )
     }
@@ -339,7 +399,7 @@ export function logTransactionEvent(
 type StatusOverride =
   | TransactionStatus.Success
   | TransactionStatus.Failed
-  | TransactionStatus.Cancelled
+  | TransactionStatus.Canceled
 
 function* finalizeTransaction({
   apolloClient,
@@ -347,7 +407,7 @@ function* finalizeTransaction({
   statusOverride,
   transaction,
 }: {
-  apolloClient: ApolloClient<NormalizedCacheObject> | null
+  apolloClient: ApolloClient<NormalizedCacheObject>
   ethersReceipt?: providers.TransactionReceipt | null
   statusOverride?: StatusOverride
   transaction: TransactionDetails

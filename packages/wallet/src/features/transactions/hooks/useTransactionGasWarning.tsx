@@ -1,6 +1,7 @@
 import { CurrencyAmount, NativeCurrency } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { isWeb } from 'ui/src'
 import { useOnChainNativeCurrencyBalance } from 'wallet/src/features/portfolio/api'
 import { DerivedSwapInfo } from 'wallet/src/features/transactions/swap/types'
 import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
@@ -50,10 +51,16 @@ export function useTransactionGasWarning({
       type: WarningLabel.InsufficientGasFunds,
       severity: WarningSeverity.Medium,
       action: WarningAction.DisableSubmit,
-      title: t('You don’t have enough {{ nativeCurrency }} to cover the network cost', {
-        nativeCurrency: nativeCurrencyBalance.currency.symbol,
+      title: t('swap.warning.insufficientGas.title', {
+        currencySymbol: nativeCurrencyBalance.currency.symbol,
       }),
+      buttonText: isWeb
+        ? t('swap.warning.insufficientGas.button', {
+            currencySymbol: nativeCurrencyBalance.currency.symbol,
+          })
+        : undefined,
       message: undefined,
+      currency: nativeCurrencyBalance.currency,
     }
   }, [gasFee, balanceInsufficient, nativeCurrencyBalance, hasGasFunds, t])
 }

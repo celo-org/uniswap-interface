@@ -1,11 +1,4 @@
 export {
-  Toast,
-  ToastProvider,
-  ToastViewport,
-  useToastController,
-  useToastState,
-} from '@tamagui/toast'
-export {
   Accordion,
   Anchor,
   AnimatePresence,
@@ -25,9 +18,12 @@ export {
   YGroup,
   getToken,
   getTokenValue,
+  isWeb,
   styled,
+  useComposedRefs,
   useMedia,
   usePropsAndStyle,
+  useWindowDimensions,
 } from 'tamagui'
 export type {
   Adapt,
@@ -35,6 +31,7 @@ export type {
   ColorTokens,
   GetRef,
   InputProps,
+  PopperProps,
   SpaceTokens,
   SwitchProps,
   TamaguiProviderProps,
@@ -69,6 +66,7 @@ export {
 } from './components/layout'
 export * as Logos from './components/logos'
 export * from './components/text'
+export { Tooltip } from './components/tooltip/Tooltip'
 export * from './components/touchable'
 export { useDeviceDimensions } from './hooks/useDeviceDimensions'
 export { useDeviceInsets } from './hooks/useDeviceInsets'
@@ -82,3 +80,5 @@ export * from './loading/Skeleton'
 export * from './loading/TransactionLoader'
 export { config as tamaguiConfig } from './tamagui.config'
 export * from './theme/shadows'
+export * from './utils/colors'
+export * from './utils/haptics/HapticFeedback'

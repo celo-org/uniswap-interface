@@ -26,6 +26,7 @@ exports[`AccountDetails renders without error 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
+          "flexShrink": 1,
           "gap": 8,
         }
       }
@@ -51,6 +52,7 @@ exports[`AccountDetails renders without error 1`] = `
             "position": "relative",
           }
         }
+        testID="account-icon"
       >
         <View
           style={
@@ -274,6 +276,7 @@ exports[`AccountDetails renders without error 1`] = `
               {
                 "alignItems": "center",
                 "flexDirection": "row",
+                "gap": 4,
                 "justifyContent": "center",
               }
             }
@@ -281,6 +284,7 @@ exports[`AccountDetails renders without error 1`] = `
             <Text
               adjustsFontSizeToFit={true}
               allowFontScaling={true}
+              ellipsizeMode="tail"
               maxFontSizeMultiplier={1.4}
               numberOfLines={1}
               style={
@@ -359,6 +363,7 @@ exports[`AccountDetails renders without error with chevron 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
+          "flexShrink": 1,
           "gap": 8,
         }
       }
@@ -384,6 +389,7 @@ exports[`AccountDetails renders without error with chevron 1`] = `
             "position": "relative",
           }
         }
+        testID="account-icon"
       >
         <View
           style={
@@ -607,6 +613,7 @@ exports[`AccountDetails renders without error with chevron 1`] = `
               {
                 "alignItems": "center",
                 "flexDirection": "row",
+                "gap": 4,
                 "justifyContent": "center",
               }
             }
@@ -614,6 +621,7 @@ exports[`AccountDetails renders without error with chevron 1`] = `
             <Text
               adjustsFontSizeToFit={true}
               allowFontScaling={true}
+              ellipsizeMode="tail"
               maxFontSizeMultiplier={1.4}
               numberOfLines={1}
               style={

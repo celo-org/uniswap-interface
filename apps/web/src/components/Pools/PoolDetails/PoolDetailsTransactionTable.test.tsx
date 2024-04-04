@@ -1,14 +1,14 @@
 import { ApolloError } from '@apollo/client'
-import { getLocaleTimeString } from 'components/Table/utils'
-import { PoolTransactionType, usePoolTransactions } from 'graphql/thegraph/PoolTransactions'
+import { getAbbreviatedTimeString } from 'components/Table/utils'
 import Router from 'react-router-dom'
 import { mocked } from 'test-utils/mocked'
 import { usdcWethPoolAddress, validParams } from 'test-utils/pools/fixtures'
 import { render, screen } from 'test-utils/render'
 
+import { PoolTableTransactionType, usePoolTransactions } from 'graphql/data/pools/usePoolTransactions'
 import { PoolDetailsTransactionsTable } from './PoolDetailsTransactionsTable'
 
-jest.mock('graphql/thegraph/PoolTransactions')
+jest.mock('graphql/data/pools/usePoolTransactions')
 jest.mock('components/Table/utils')
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -64,8 +64,8 @@ describe('PoolDetailsTransactionsTable', () => {
         maker: '0xabc',
         amount0: 200,
         amount1: 300,
-        amountUSD: '400',
-        type: PoolTransactionType.BUY,
+        amountUSD: 400,
+        type: PoolTableTransactionType.BUY,
       },
     ]
     mocked(usePoolTransactions).mockReturnValue({
@@ -74,7 +74,7 @@ describe('PoolDetailsTransactionsTable', () => {
       error: undefined,
       loadMore: jest.fn(),
     })
-    mocked(getLocaleTimeString).mockReturnValue('01/12, 05:46am')
+    mocked(getAbbreviatedTimeString).mockReturnValue('1mo ago')
 
     const { asFragment } = render(<PoolDetailsTransactionsTable poolAddress={usdcWethPoolAddress} />)
     expect(screen.getByTestId('pool-details-transactions-table')).not.toBeNull()

@@ -3,8 +3,6 @@ import { BrowserEvent, InterfaceElementName, InterfaceEventName, SharedEventName
 import { CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { sendAnalyticsEvent, TraceEvent } from 'analytics'
-import { OpenLimitOrdersButton } from 'components/AccountDrawer/MiniPortfolio/Limits/OpenLimitOrdersButton'
-import { UniTagBanner } from 'components/Banner/UniTag'
 import { ButtonEmphasis, ButtonSize, ThemeButton } from 'components/Button'
 import Column from 'components/Column'
 import { CreditCardIcon } from 'components/Icons/CreditCard'
@@ -15,11 +13,9 @@ import Row, { AutoRow } from 'components/Row'
 import { LoadingBubble } from 'components/Tokens/loading'
 import { DeltaArrow } from 'components/Tokens/TokenDetails/Delta'
 import { getConnection } from 'connection'
-import { useUniTagsEnabled } from 'featureFlags/flags/uniTags'
 import { useDisableNFTRoutes } from 'hooks/useDisableNFTRoutes'
 import useENSName from 'hooks/useENSName'
 import { useProfilePageState, useSellAsset, useWalletCollections } from 'nft/hooks'
-import { useIsNftClaimAvailable } from 'nft/hooks/useIsNftClaimAvailable'
 import { ProfilePageStateType } from 'nft/types'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -27,9 +23,9 @@ import { useAppDispatch } from 'state/hooks'
 import { setRecentConnectionDisconnected } from 'state/user/reducer'
 import styled from 'styled-components'
 import { ThemedText } from 'theme/components'
+import { useUnitagByAddressWithoutFlag } from 'uniswap/src/features/unitags/hooksWithoutFlags'
 import { isPathBlocked } from 'utils/blockedPaths'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
-import { useUnitagByAddress } from 'wallet/src/features/unitags/hooks'
 import { useCloseModal, useFiatOnrampAvailability, useOpenModal, useToggleModal } from '../../state/application/hooks'
 import { ApplicationModal } from '../../state/application/reducer'
 import { useUserHasAvailableClaim, useUserUnclaimedAmount } from '../../state/claim/hooks'
@@ -98,15 +94,7 @@ const PortfolioDrawerContainer = styled(Column)`
   flex: 1;
 `
 
-export default function AuthenticatedHeader({
-  account,
-  openSettings,
-  openLimitsMenu,
-}: {
-  account: string
-  openSettings: () => void
-  openLimitsMenu: () => void
-}) {
+export default function AuthenticatedHeader({ account, openSettings }: { account: string; openSettings: () => void }) {
   const { connector } = useWeb3React()
   const { ENSName } = useENSName(account)
   const dispatch = useAppDispatch()
@@ -115,7 +103,6 @@ export default function AuthenticatedHeader({
   const setSellPageState = useProfilePageState((state) => state.setProfilePageState)
   const resetSellAssets = useSellAsset((state) => state.reset)
   const clearCollectionFilters = useWalletCollections((state) => state.clearCollectionFilters)
-  const isClaimAvailable = useIsNftClaimAvailable((state) => state.isClaimAvailable)
   const shouldShowBuyFiatButton = !isPathBlocked('/buy')
   const { formatNumber, formatDelta } = useFormatter()
 
@@ -125,7 +112,6 @@ export default function AuthenticatedHeader({
   const isUnclaimed = useUserHasAvailableClaim(account)
   const connection = getConnection(connector)
   const openClaimModal = useToggleModal(ApplicationModal.ADDRESS_CLAIM)
-  const openNftModal = useToggleModal(ApplicationModal.UNISWAP_NFT_AIRDROP_CLAIM)
   const disconnect = useCallback(() => {
     connector.deactivate?.()
     connector.resetState()
@@ -176,8 +162,7 @@ export default function AuthenticatedHeader({
   const percentChange = portfolio?.tokensTotalDenominatedValueChange?.percentage?.value
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false)
 
-  const isUniTagsEnabled = useUniTagsEnabled()
-  const { unitag } = useUnitagByAddress(account, isUniTagsEnabled && Boolean(account))
+  const { unitag } = useUnitagByAddressWithoutFlag(account, Boolean(account))
 
   return (
     <AuthenticatedHeaderWrapper>
@@ -258,17 +243,10 @@ export default function AuthenticatedHeader({
             />
           )}
         </Row>
-        {isUniTagsEnabled && <UniTagBanner />}
-        <OpenLimitOrdersButton openLimitsMenu={openLimitsMenu} account={account} />
         <MiniPortfolio account={account} />
         {isUnclaimed && (
           <UNIButton onClick={openClaimModal} size={ButtonSize.medium} emphasis={ButtonEmphasis.medium}>
             <Trans>Claim</Trans> {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} <Trans>reward</Trans>
-          </UNIButton>
-        )}
-        {isClaimAvailable && (
-          <UNIButton size={ButtonSize.medium} emphasis={ButtonEmphasis.medium} onClick={openNftModal}>
-            <Trans>Claim Uniswap NFT Airdrop</Trans>
           </UNIButton>
         )}
       </PortfolioDrawerContainer>

@@ -1,37 +1,27 @@
-import { ChartModel, ChartModelParams } from 'components/Charts/ChartModel'
+import { ChartHoverData, ChartModel, ChartModelParams } from 'components/Charts/ChartModel'
 import { ISeriesApi, UTCTimestamp } from 'lightweight-charts'
 
-import { CurrencyAmount, Token } from '@uniswap/sdk-core'
+import { ChainId, CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { FeeAmount, Pool, TICK_SPACINGS, TickMath, tickToPrice } from '@uniswap/v3-sdk'
 import { BigNumber } from 'ethers/lib/ethers'
 import { TickProcessed, usePoolActiveLiquidity } from 'hooks/usePoolTickData'
 import JSBI from 'jsbi'
 import { useEffect, useState } from 'react'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
-import { TooltipPrimitive } from '../Primitives/tooltip'
 import { LiquidityBarSeries } from './liquidity-bar-series'
 import { LiquidityBarData, LiquidityBarProps, LiquidityBarSeriesOptions } from './renderer'
 
-interface LiquidityBarChartModelParams extends ChartModelParams<LiquidityBarData>, LiquidityBarProps {
-  TooltipBody: React.FunctionComponent<{ data: LiquidityBarData }>
-  showTooltip: boolean
-}
+interface LiquidityBarChartModelParams extends ChartModelParams<LiquidityBarData>, LiquidityBarProps {}
 
 export class LiquidityBarChartModel extends ChartModel<LiquidityBarData> {
   protected series: ISeriesApi<'Custom'>
   private activeTick?: number
-  private tooltipPrimitive: TooltipPrimitive<LiquidityBarData>
 
   constructor(chartDiv: HTMLDivElement, params: LiquidityBarChartModelParams) {
     super(chartDiv, params)
     this.series = this.api.addCustomSeries(new LiquidityBarSeries(params))
 
     this.series.setData(this.data)
-
-    this.tooltipPrimitive = new TooltipPrimitive({ followMode: 'tracking', tooltipBody: params.TooltipBody })
-    if (params.showTooltip) {
-      this.series.attachPrimitive(this.tooltipPrimitive)
-    }
 
     this.updateOptions(params)
     this.fitContent()
@@ -95,12 +85,11 @@ export class LiquidityBarChartModel extends ChartModel<LiquidityBarData> {
     })
 
     this.series.applyOptions(params)
-    this.tooltipPrimitive.applyOptions({ tooltipBody: params.TooltipBody })
   }
 
-  override onSeriesHover(item: LiquidityBarData | undefined) {
-    super.onSeriesHover(item)
-    const updatedOptions: Partial<LiquidityBarSeriesOptions> = { hoveredTick: item?.tick ?? this.activeTick }
+  override onSeriesHover(hoverData?: ChartHoverData<LiquidityBarData>) {
+    super.onSeriesHover(hoverData)
+    const updatedOptions: Partial<LiquidityBarSeriesOptions> = { hoveredTick: hoverData?.item.tick ?? this.activeTick }
     this.series.applyOptions(updatedOptions)
   }
 
@@ -232,14 +221,16 @@ export function useLiquidityBarData({
   tokenB,
   feeTier,
   isReversed,
+  chainId,
 }: {
   tokenA: Token
   tokenB: Token
   feeTier: FeeAmount
   isReversed: boolean
+  chainId: ChainId
 }) {
   const { formatNumber, formatPrice } = useFormatter()
-  const activePoolData = usePoolActiveLiquidity(tokenA, tokenB, feeTier)
+  const activePoolData = usePoolActiveLiquidity(tokenA, tokenB, feeTier, chainId)
 
   const [tickData, setTickData] = useState<{
     barData: LiquidityBarData[]

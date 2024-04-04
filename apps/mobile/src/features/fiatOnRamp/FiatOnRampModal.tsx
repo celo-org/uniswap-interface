@@ -12,9 +12,6 @@ import {
 import { useMoonpayFiatOnRamp, useMoonpaySupportedTokens } from 'src/features/fiatOnRamp/hooks'
 import { FiatOnRampCurrency } from 'src/features/fiatOnRamp/types'
 import { closeModal } from 'src/features/modals/modalSlice'
-import { sendMobileAnalyticsEvent } from 'src/features/telemetry'
-import { MobileEventName } from 'src/features/telemetry/constants'
-import { MobileEventProperties } from 'src/features/telemetry/types'
 import { AnimatedFlex, Flex, Text, useDeviceInsets, useSporeColors } from 'ui/src'
 import MoonpayLogo from 'ui/src/assets/logos/svg/moonpay.svg'
 import { NumberType } from 'utilities/src/format/types'
@@ -29,7 +26,9 @@ import { ChainId } from 'wallet/src/constants/chains'
 import { useMoonpayFiatCurrencySupportInfo } from 'wallet/src/features/fiatOnRamp/hooks'
 import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { useCurrencyInfo } from 'wallet/src/features/tokens/useCurrencyInfo'
-import { ModalName } from 'wallet/src/telemetry/constants'
+import { sendWalletAnalyticsEvent } from 'wallet/src/telemetry'
+import { FiatOnRampEventName, ModalName } from 'wallet/src/telemetry/constants'
+import { WalletEventProperties } from 'wallet/src/telemetry/types'
 import { buildCurrencyId } from 'wallet/src/utils/currencyId'
 import { openUri } from 'wallet/src/utils/linking'
 import { FiatOnRampTokenSelectorModal } from './FiatOnRampTokenSelector'
@@ -126,6 +125,7 @@ function FiatOnRampContent({ onClose }: { onClose: () => void }): JSX.Element {
   } = useMoonpayFiatOnRamp({
     baseCurrencyAmount: value,
     quoteCurrencyCode: currency.moonpayCurrencyCode,
+    quoteChainId: currency.currencyInfo?.currency.chainId ?? ChainId.Mainnet,
   })
 
   useTimeout(
@@ -144,9 +144,9 @@ function FiatOnRampContent({ onClose }: { onClose: () => void }): JSX.Element {
     !isLoading && (!eligible || (!isError && fiatOnRampHostUrl && quoteCurrencyAmountReady))
 
   const onChangeValue =
-    (source: MobileEventProperties[MobileEventName.FiatOnRampAmountEntered]['source']) =>
+    (source: WalletEventProperties[FiatOnRampEventName.FiatOnRampAmountEntered]['source']) =>
     (newAmount: string): void => {
-      sendMobileAnalyticsEvent(MobileEventName.FiatOnRampAmountEntered, {
+      sendWalletAnalyticsEvent(FiatOnRampEventName.FiatOnRampAmountEntered, {
         source,
       })
       setValue(newAmount)
@@ -175,6 +175,16 @@ function FiatOnRampContent({ onClose }: { onClose: () => void }): JSX.Element {
 
   const insets = useDeviceInsets()
 
+  const onSelectCurrency = (newCurrency: FiatOnRampCurrency): void => {
+    setCurrency(newCurrency)
+    setShowTokenSelector(false)
+    if (newCurrency.currencyInfo?.currency.symbol) {
+      sendWalletAnalyticsEvent(FiatOnRampEventName.FiatOnRampTokenSelected, {
+        token: newCurrency.currencyInfo.currency.symbol.toLowerCase(),
+      })
+    }
+  }
+
   return (
     <Flex grow pt={showConnectingToMoonpayScreen ? undefined : insets.top}>
       {!showConnectingToMoonpayScreen && (
@@ -188,7 +198,7 @@ function FiatOnRampContent({ onClose }: { onClose: () => void }): JSX.Element {
               px="$spacing24"
               width="100%">
               <HandleBar backgroundColor="none" />
-              <Text variant="subheading1">{t('Buy')}</Text>
+              <Text variant="subheading1">{t('common.button.buy')}</Text>
               <FiatOnRampAmountSection
                 appFiatCurrencySupported={appFiatCurrencySupportedInMoonpay}
                 currency={currency}
@@ -233,7 +243,9 @@ function FiatOnRampContent({ onClose }: { onClose: () => void }): JSX.Element {
                 <FiatOnRampCtaButton
                   analyticsProperties={{ externalTransactionId }}
                   continueButtonText={
-                    appFiatCurrencySupportedInMoonpay ? t('Continue to checkout') : t('Checkout')
+                    appFiatCurrencySupportedInMoonpay
+                      ? t('fiatOnRamp.button.continueCheckout')
+                      : t('fiatOnRamp.checkout.button')
                   }
                   disabled={!buttonEnabled}
                   eligible={eligible}
@@ -256,10 +268,7 @@ function FiatOnRampContent({ onClose }: { onClose: () => void }): JSX.Element {
               loading={supportedTokensLoading}
               onClose={(): void => setShowTokenSelector(false)}
               onRetry={supportedTokensRefetch}
-              onSelectCurrency={(newCurrency: FiatOnRampCurrency): void => {
-                setCurrency(newCurrency)
-                setShowTokenSelector(false)
-              }}
+              onSelectCurrency={onSelectCurrency}
             />
           )}
         </AnimatedFlex>

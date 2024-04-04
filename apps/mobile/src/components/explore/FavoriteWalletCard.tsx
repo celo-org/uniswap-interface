@@ -1,4 +1,3 @@
-import { ImpactFeedbackStyle } from 'expo-haptics'
 import { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ViewProps } from 'react-native'
@@ -6,19 +5,19 @@ import ContextMenu from 'react-native-context-menu-view'
 import { SharedValue } from 'react-native-reanimated'
 import { useAppDispatch } from 'src/app/hooks'
 import { useEagerExternalProfileNavigation } from 'src/app/navigation/hooks'
-import { useAnimatedCardDragStyle } from 'src/components/explore/hooks'
 import RemoveButton from 'src/components/explore/RemoveButton'
+import { useAnimatedCardDragStyle } from 'src/components/explore/hooks'
 import { disableOnPress } from 'src/utils/disableOnPress'
-import { AnimatedFlex, Flex, TouchableArea } from 'ui/src'
+import { AnimatedFlex, Flex, ImpactFeedbackStyle, TouchableArea } from 'ui/src'
 import { borderRadii, iconSizes } from 'ui/src/theme'
+import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
 import { AccountIcon } from 'wallet/src/components/accounts/AccountIcon'
 import { DisplayNameText } from 'wallet/src/components/accounts/DisplayNameText'
-import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
 import { removeWatchedAddress } from 'wallet/src/features/favorites/slice'
 import { useAvatar, useDisplayName } from 'wallet/src/features/wallet/hooks'
 import { DisplayNameType } from 'wallet/src/features/wallet/types'
 
-type FavoriteWalletCardProps = {
+export type FavoriteWalletCardProps = {
   address: Address
   isEditing?: boolean
   isTouched: SharedValue<boolean>
@@ -52,8 +51,8 @@ function FavoriteWalletCard({
   /// Options for long press context menu
   const menuActions = useMemo(() => {
     return [
-      { title: t('Remove favorite'), systemIcon: 'heart.fill' },
-      { title: t('Edit favorites'), systemIcon: 'square.and.pencil' },
+      { title: t('explore.wallets.favorite.action.remove'), systemIcon: 'heart.fill' },
+      { title: t('explore.wallets.favorite.action.edit'), systemIcon: 'square.and.pencil' },
     ]
   }, [t])
 
@@ -85,6 +84,7 @@ function FavoriteWalletCard({
           disabled={isEditing}
           hapticStyle={ImpactFeedbackStyle.Light}
           m="$spacing4"
+          testID="favorite-wallet-card"
           onLongPress={disableOnPress}
           onPress={(): void => {
             navigate(address)

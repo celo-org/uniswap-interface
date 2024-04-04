@@ -1,6 +1,7 @@
 import { Plural, Trans } from '@lingui/macro'
 import { PERMIT2_ADDRESS } from '@uniswap/permit2-sdk'
 import { useWeb3React } from '@web3-react/core'
+import { sendAnalyticsEvent } from 'analytics'
 import {
   CancelLimitsDialog,
   CancellationState,
@@ -12,12 +13,14 @@ import { LimitDetailActivityRow } from 'components/AccountDrawer/MiniPortfolio/L
 import { SlideOutMenu } from 'components/AccountDrawer/SlideOutMenu'
 import { ButtonEmphasis, ButtonSize, ThemeButton } from 'components/Button'
 import Column from 'components/Column'
+import { LimitDisclaimer } from 'components/swap/LimitDisclaimer'
+import { ContractTransaction } from 'ethers/lib/ethers'
 import { useContract } from 'hooks/useContract'
-import { useCallback, useState } from 'react'
-import { UniswapXOrderDetails } from 'state/signatures/types'
+import { useCallback, useMemo, useState } from 'react'
+import { SignatureType, UniswapXOrderDetails } from 'state/signatures/types'
 import styled from 'styled-components'
-import PERMIT2_ABI from 'wallet/src/abis/permit2.json'
-import { Permit2 } from 'wallet/src/abis/types/Permit2'
+import PERMIT2_ABI from 'uniswap/src/abis/permit2.json'
+import { Permit2 } from 'uniswap/src/abis/types/Permit2'
 
 const Container = styled(Column)`
   height: 100%;
@@ -25,18 +28,29 @@ const Container = styled(Column)`
 `
 
 const StyledCancelButton = styled(ThemeButton)`
-  position: absolute;
-  bottom: 16px;
+  bottom: 0;
   width: 100%;
+  margin: 24px 0 0;
 `
 
-function useCancelMultipleOrders(orders?: UniswapXOrderDetails[]): () => Promise<true | undefined> {
+const StyledLimitsDisclaimer = styled(LimitDisclaimer)`
+  margin-bottom: 24px;
+`
+
+function useCancelMultipleOrders(orders?: UniswapXOrderDetails[]): () => Promise<ContractTransaction[] | undefined> {
   const { provider } = useWeb3React()
   const permit2 = useContract<Permit2>(PERMIT2_ADDRESS, PERMIT2_ABI, true)
   return useCallback(async () => {
     if (!orders || orders.length === 0) return undefined
+
+    sendAnalyticsEvent('UniswapX Order Cancel Initiated', {
+      orders: orders.map((order) => order.orderHash),
+    })
+
     return cancelMultipleUniswapXOrders({
-      encodedOrders: orders.map((order) => order.encodedOrder as string),
+      orders: orders.map((order) => {
+        return { encodedOrder: order.encodedOrder as string, type: order.type as SignatureType }
+      }),
       permit2,
       provider,
       chainId: orders?.[0].chainId,
@@ -46,55 +60,72 @@ function useCancelMultipleOrders(orders?: UniswapXOrderDetails[]): () => Promise
 
 export function LimitsMenu({ onClose, account }: { account: string; onClose: () => void }) {
   const { openLimitOrders } = useOpenLimitOrders(account)
-  const [selectedOrders, setSelectedOrders] = useState<Record<string, UniswapXOrderDetails>>({})
+  const [selectedOrdersByHash, setSelectedOrdersByHash] = useState<Record<string, UniswapXOrderDetails>>({})
   const [cancelState, setCancelState] = useState(CancellationState.NOT_STARTED)
-  const cancelOrders = useCancelMultipleOrders(Object.values(selectedOrders))
+  const [cancelTxHash, setCancelTxHash] = useState<string | undefined>()
+
+  const selectedOrders = useMemo(() => {
+    return Object.values(selectedOrdersByHash)
+  }, [selectedOrdersByHash])
+
+  const cancelOrders = useCancelMultipleOrders(selectedOrders)
 
   const toggleOrderSelection = (order: Activity) => {
-    const newSelectedOrders = { ...selectedOrders }
-    if (order.hash in selectedOrders) {
+    const newSelectedOrders = { ...selectedOrdersByHash }
+    if (order.hash in selectedOrdersByHash) {
       delete newSelectedOrders[order.hash]
     } else if (order.offchainOrderDetails) {
       newSelectedOrders[order.hash] = order.offchainOrderDetails
     }
-    setSelectedOrders(newSelectedOrders)
+    setSelectedOrdersByHash(newSelectedOrders)
   }
 
   return (
     <SlideOutMenu title={<Trans>Open limits</Trans>} onClose={onClose}>
+      <StyledLimitsDisclaimer />
       <Container data-testid="LimitsMenuContainer">
         {openLimitOrders.map((order) => (
           <LimitDetailActivityRow
             key={order.hash}
             order={order}
-            selected={order.hash in selectedOrders}
+            selected={order.hash in selectedOrdersByHash}
             onToggleSelect={toggleOrderSelection}
           />
         ))}
-        <StyledCancelButton
-          emphasis={ButtonEmphasis.destructive}
-          onClick={() => setCancelState(CancellationState.REVIEWING_CANCELLATION)}
-          size={ButtonSize.large}
-          disabled={cancelState !== CancellationState.NOT_STARTED || Object.keys(selectedOrders).length === 0}
-        >
-          <Plural
-            id="cancelling"
-            value={Object.keys(selectedOrders).length}
-            one="Cancel limit"
-            other={`Cancel ${Object.keys(selectedOrders).length} limits`}
-          />
-        </StyledCancelButton>
+        {Boolean(Object.keys(selectedOrdersByHash).length) && (
+          <StyledCancelButton
+            emphasis={ButtonEmphasis.medium}
+            onClick={() => setCancelState(CancellationState.REVIEWING_CANCELLATION)}
+            size={ButtonSize.medium}
+            disabled={cancelState !== CancellationState.NOT_STARTED || selectedOrders.length === 0}
+          >
+            <Plural
+              id="cancelling"
+              value={selectedOrders.length}
+              one="Cancel limit"
+              other={`Cancel ${selectedOrders.length} limits`}
+            />
+          </StyledCancelButton>
+        )}
       </Container>
       <CancelLimitsDialog
         isVisible={cancelState !== CancellationState.NOT_STARTED}
-        orders={Object.values(selectedOrders)}
+        orders={selectedOrders}
         onCancel={() => setCancelState(CancellationState.NOT_STARTED)}
         onConfirm={async () => {
-          setCancelState(CancellationState.CANCELLING)
-          const result = await cancelOrders()
-          setCancelState(result ? CancellationState.NOT_STARTED : CancellationState.REVIEWING_CANCELLATION)
+          setCancelState(CancellationState.PENDING_SIGNATURE)
+          const transactions = await cancelOrders()
+          if (transactions && transactions.length > 0) {
+            setCancelState(CancellationState.PENDING_CONFIRMATION)
+            setCancelTxHash(transactions[0].hash)
+            await transactions[0].wait(1)
+            setCancelState(CancellationState.CANCELLED)
+          } else {
+            setCancelState(CancellationState.REVIEWING_CANCELLATION)
+          }
         }}
-        cancelling={cancelState === CancellationState.CANCELLING}
+        cancelState={cancelState}
+        cancelTxHash={cancelTxHash}
       />
     </SlideOutMenu>
   )

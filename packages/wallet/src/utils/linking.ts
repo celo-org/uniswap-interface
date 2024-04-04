@@ -1,9 +1,9 @@
 import * as WebBrowser from 'expo-web-browser'
 import { Linking } from 'react-native'
 import { colorsLight } from 'ui/src/theme'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
 import { logger } from 'utilities/src/logger/logger'
 import { CHAIN_INFO, ChainId } from 'wallet/src/constants/chains'
-import { uniswapUrls } from 'wallet/src/constants/urls'
 import { toUniswapWebAppLink } from 'wallet/src/features/chains/utils'
 import { FiatPurchaseTransactionInfo } from 'wallet/src/features/transactions/types'
 import { currencyIdToChain, currencyIdToGraphQLAddress } from 'wallet/src/utils/currencyId'
@@ -40,7 +40,11 @@ export async function openUri(
     return
   }
 
-  const supported = await Linking.canOpenURL(uri)
+  const isHttp = /^https?:\/\//.test(trimmedURI)
+
+  // `canOpenURL` returns `false` for App Links / Universal Links, so we just assume any device can handle the `https://` protocol.
+  const supported = isHttp ? true : await Linking.canOpenURL(uri)
+
   if (!supported) {
     logger.warn('linking', 'openUri', `Cannot open URI: ${uri}`)
     return
@@ -112,6 +116,12 @@ export function getExplorerLink(chainId: ChainId, data: string, type: ExplorerDa
       return `${prefix}tx/${data}`
 
     case ExplorerDataType.TOKEN:
+      if (
+        data === CHAIN_INFO[chainId].nativeCurrency.address &&
+        CHAIN_INFO[chainId].nativeCurrency.explorerLink
+      ) {
+        return CHAIN_INFO[chainId].nativeCurrency.explorerLink ?? `${prefix}token/${data}`
+      }
       return `${prefix}token/${data}`
 
     case ExplorerDataType.BLOCK:
@@ -155,7 +165,7 @@ export function getTokenUrl(currencyId: string): string | undefined {
       // this is how web app handles native tokens
       tokenAddress = UNISWAP_APP_NATIVE_TOKEN
     }
-    return `${uniswapUrls.appUrl}/tokens/${network}/${tokenAddress}`
+    return `${uniswapUrls.interfaceTokensUrl}/${network}/${tokenAddress}`
   } catch (_) {
     return
   }

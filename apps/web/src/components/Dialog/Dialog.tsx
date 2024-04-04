@@ -4,10 +4,11 @@ import { ColumnCenter } from 'components/Column'
 import Modal from 'components/Modal'
 import Row from 'components/Row'
 import { ReactNode } from 'react'
-import styled from 'styled-components'
-import { ClickableStyle, CloseIcon, ThemedText } from 'theme/components'
+import styled, { DefaultTheme } from 'styled-components'
+import { Gap } from 'theme'
+import { CloseIcon, ThemedText } from 'theme/components'
 
-const Container = styled(ColumnCenter)`
+export const Container = styled(ColumnCenter)`
   background-color: ${({ theme }) => theme.surface1};
   outline: 1px solid ${({ theme }) => theme.surface3};
   border-radius: 20px;
@@ -40,25 +41,26 @@ const DescriptionText = styled(ThemedText.BodySecondary)`
   text-align: center;
 `
 
-const StyledButton = styled(ThemeButton)`
+const StyledButton = styled(ThemeButton)<{ $color?: keyof DefaultTheme }>`
   display: flex;
   flex-grow: 1;
   height: 40px;
-`
-
-const StyledReviewCloseIcon = styled(CloseIcon)`
-  ${ClickableStyle}
+  ${({ $color, theme }) => $color && `color: ${theme[$color]};`}
+  border-radius: 12px;
 `
 
 export enum DialogButtonType {
   Primary = 'primary',
   Error = 'error',
+  Accent = 'accent',
 }
 
 function getButtonEmphasis(type?: DialogButtonType) {
   switch (type) {
     case DialogButtonType.Error:
       return ButtonEmphasis.destructive
+    case DialogButtonType.Accent:
+      return ButtonEmphasis.high
     default:
       return ButtonEmphasis.medium
   }
@@ -69,11 +71,13 @@ type ButtonConfig = {
   title: ReactNode
   onClick: () => void
   disabled?: boolean
+  textColor?: keyof DefaultTheme
 }
 
 type ButtonsConfig = {
   left?: ButtonConfig
   right?: ButtonConfig
+  gap?: Gap
 }
 
 export interface DialogProps {
@@ -83,7 +87,7 @@ export interface DialogProps {
   description: ReactNode
   body?: ReactNode
   onCancel: () => void
-  buttonsConfig: ButtonsConfig
+  buttonsConfig?: ButtonsConfig
 }
 
 /**
@@ -100,13 +104,13 @@ export interface DialogProps {
  *  ------------------
  */
 export function Dialog({ isVisible, buttonsConfig, icon, title, onCancel, description, body }: DialogProps) {
-  const { left, right } = buttonsConfig
+  const { left, right, gap } = buttonsConfig ?? {}
   return (
     <Modal $scrollOverlay isOpen={isVisible} onDismiss={onCancel}>
       <Container gap="lg">
         <Row gap="10px" width="100%" padding="4px 0px" justify="end" align="center">
           <GetHelp />
-          <StyledReviewCloseIcon data-testid="Dialog-closeButton" onClick={onCancel} />
+          <CloseIcon data-testid="Dialog-closeButton" onClick={onCancel} />
         </Row>
         <ColumnCenter gap="md">
           <IconContainer>{icon}</IconContainer>
@@ -114,13 +118,14 @@ export function Dialog({ isVisible, buttonsConfig, icon, title, onCancel, descri
           <DescriptionText>{description}</DescriptionText>
           {body}
         </ColumnCenter>
-        <Row align="center" justify="center" gap="md">
+        <Row align="center" justify="center" gap={gap ?? 'md'}>
           {left && (
             <StyledButton
               size={ButtonSize.small}
               onClick={left.onClick}
               disabled={left.disabled}
               emphasis={getButtonEmphasis(left.type)}
+              $color={left.textColor}
             >
               {left.title}
             </StyledButton>
@@ -131,6 +136,7 @@ export function Dialog({ isVisible, buttonsConfig, icon, title, onCancel, descri
               onClick={right.onClick}
               disabled={right.disabled}
               emphasis={getButtonEmphasis(right.type)}
+              $color={right.textColor}
             >
               {right.title}
             </StyledButton>

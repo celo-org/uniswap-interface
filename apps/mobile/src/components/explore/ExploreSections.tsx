@@ -17,15 +17,15 @@ import {
 } from 'src/features/explore/utils'
 import { usePollOnFocusOnly } from 'src/utils/hooks'
 import { Flex, Loader, Text, useDeviceInsets } from 'ui/src'
-import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
-import { getWrappedNativeAddress } from 'wallet/src/constants/addresses'
-import { ChainId } from 'wallet/src/constants/chains'
-import { PollingInterval } from 'wallet/src/constants/misc'
 import {
   Chain,
   ExploreTokensTabQuery,
   useExploreTokensTabQuery,
-} from 'wallet/src/data/__generated__/types-and-hooks'
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
+import { BaseCard } from 'wallet/src/components/BaseCard/BaseCard'
+import { getWrappedNativeAddress } from 'wallet/src/constants/addresses'
+import { ChainId } from 'wallet/src/constants/chains'
+import { PollingInterval } from 'wallet/src/constants/misc'
 import { fromGraphQLChain } from 'wallet/src/features/chains/utils'
 import { usePersistedError } from 'wallet/src/features/dataApi/utils'
 import {
@@ -142,8 +142,8 @@ export function ExploreSections({ listRef }: ExploreSectionsProps): JSX.Element 
     return (
       <Flex height="100%" pb="$spacing60">
         <BaseCard.ErrorState
-          retryButtonLabel={t('Retry')}
-          title={t('Couldn’t load tokens')}
+          retryButtonLabel={t('common.button.retry')}
+          title={t('explore.tokens.error')}
           onRetry={onRetry}
         />
       </Flex>
@@ -188,7 +188,7 @@ export function ExploreSections({ listRef }: ExploreSectionsProps): JSX.Element 
               mt="$spacing16"
               pl="$spacing4">
               <Text color="$neutral2" flexShrink={0} paddingEnd="$spacing8" variant="subheading2">
-                {t('Top tokens')}
+                {t('explore.tokens.top.title')}
               </Text>
               <Flex flexShrink={1}>
                 <SortButton orderBy={orderBy} />

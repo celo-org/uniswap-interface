@@ -5,10 +5,10 @@ import { BigNumber } from 'ethers/lib/ethers'
 import { Interface } from 'ethers/lib/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PositionDetails } from 'types/position'
+import { NonfungiblePositionManager, UniswapInterfaceMulticall } from 'uniswap/src/abis/types/v3'
+import { UniswapV3PoolInterface } from 'uniswap/src/abis/types/v3/UniswapV3Pool'
 import { DEFAULT_ERC20_DECIMALS } from 'utilities/src/tokens/constants'
 import { currencyKey } from 'utils/currencyKey'
-import { NonfungiblePositionManager, UniswapInterfaceMulticall } from 'wallet/src/abis/types/v3'
-import { UniswapV3PoolInterface } from 'wallet/src/abis/types/v3/UniswapV3Pool'
 
 import { PositionInfo, useCachedPositions, useGetCachedTokens, usePoolAddressCache } from './cache'
 import { Call, DEFAULT_GAS_LIMIT } from './getTokensAsync'
@@ -48,6 +48,7 @@ const DEFAULT_CHAINS = [
   ChainId.BNB,
   ChainId.AVALANCHE,
   ChainId.BASE,
+  ChainId.BLAST,
 ]
 
 type UseMultiChainPositionsData = { positions?: PositionInfo[]; loading: boolean }
@@ -160,6 +161,9 @@ export default function useMultiChainPositions(account: string, chains = DEFAULT
 
   const fetchPositionsForChain = useCallback(
     async (chainId: ChainId): Promise<PositionInfo[]> => {
+      if (!account || account.length === 0) {
+        return []
+      }
       try {
         const pm = pms[chainId]
         const multicall = multicalls[chainId]

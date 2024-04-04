@@ -103,6 +103,7 @@ Object {
   "offchainOrderDetails": Object {
     "addedTime": 10000,
     "chainId": 1,
+    "encodedOrder": undefined,
     "id": "someId",
     "offerer": "someOfferer",
     "orderHash": "someHash",
@@ -119,7 +120,7 @@ Object {
       "type": 1,
     },
     "txHash": "someHash",
-    "type": "signUniswapXOrder",
+    "type": undefined,
   },
   "prefixIconSrc": "bolt.svg",
   "status": "FAILED",
@@ -138,7 +139,7 @@ Object {
       "decimals": 18,
       "isNative": true,
       "isToken": false,
-      "name": "Ether",
+      "name": "Ethereum",
       "symbol": "ETH",
     },
     Token {
@@ -414,7 +415,6 @@ Object {
       "type": 1,
     },
     "txHash": "someHash",
-    "type": "signUniswapXOrder",
   },
   "prefixIconSrc": "bolt.svg",
   "status": "CONFIRMED",

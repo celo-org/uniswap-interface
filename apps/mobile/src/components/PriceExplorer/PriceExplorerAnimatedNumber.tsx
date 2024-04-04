@@ -1,8 +1,10 @@
+import { SCREEN_WIDTH } from '@gorhom/bottom-sheet'
 import _ from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import Animated, {
   SharedValue,
+  useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -38,6 +40,19 @@ const getEmphasizedNumberColor = (
     return deemphasizedColor
   }
   return emphasizedColor
+}
+
+const shouldUseSeparator = (
+  index: number,
+  commaIndex: number,
+  decimalPlaceIndex: number
+): boolean => {
+  'worklet'
+  return (
+    (index - commaIndex) % 4 === 0 &&
+    index - commaIndex < 0 &&
+    index > commaIndex - decimalPlaceIndex
+  )
 }
 
 const NumbersMain = ({
@@ -122,7 +137,7 @@ const RollNumber = ({
     const char = chars.value[index - (commaIndex - decimalPlace.value)]
     const number = char ? parseFloat(char) : undefined
     return Number.isNaN(number) ? undefined : number
-  }, [chars])
+  }, [chars, commaIndex, decimalPlace, index])
 
   const animatedFontStyle = useAnimatedStyle(() => {
     return {
@@ -143,7 +158,7 @@ const RollNumber = ({
           restSpeedThreshold: 2,
         })
       : endValue
-  }, [shouldAnimate])
+  }, [animatedDigit, shouldAnimate])
 
   const animatedWrapperStyle = useAnimatedStyle(() => {
     const digitWidth =
@@ -163,11 +178,7 @@ const RollNumber = ({
   // need it in case the current value is eg $999.00 but maximum value in chart is more than $1,000.00
   // so it can hide the comma to avoid something like $,999.00
   const animatedWrapperSeparatorStyle = useAnimatedStyle(() => {
-    const isSeparator =
-      (index - commaIndex) % 4 === 0 &&
-      index - commaIndex < 0 &&
-      index > commaIndex - decimalPlace.value
-    if (!isSeparator) {
+    if (!shouldUseSeparator(index, commaIndex, decimalPlace.value)) {
       return {
         width: withTiming(0),
       }
@@ -202,11 +213,7 @@ const RollNumber = ({
     )
   }
 
-  if (
-    (index - commaIndex) % 4 === 0 &&
-    index - commaIndex < 0 &&
-    index > commaIndex - decimalPlace.value
-  ) {
+  if ((index - commaIndex) % 4 === 0 && index - commaIndex < 0) {
     return (
       <Animated.View style={animatedWrapperSeparatorStyle}>
         <Animated.Text
@@ -256,7 +263,7 @@ const Numbers = ({
 
   const decimalPlace = useDerivedValue(() => {
     return price.formatted.value.indexOf(currency.decimalSeparator)
-  }, [price])
+  }, [currency.decimalSeparator, price.formatted])
 
   const commaIndex = numberOfDigits.left + Math.floor((numberOfDigits.left - 1) / 3)
 
@@ -264,10 +271,10 @@ const Numbers = ({
     numberOfDigits.left + numberOfDigits.right + Math.floor((numberOfDigits.left - 1) / 3) + 1,
     (index) => (
       <Animated.View
-        key={`$number_${index - (commaIndex - decimalPlace.value)}`}
+        key={`$number_${index - commaIndex}`}
         style={[{ height: DIGIT_HEIGHT }, AnimatedCharStyles.wrapperStyle]}>
         <RollNumber
-          key={`$number_${index - (commaIndex - decimalPlace.value)}`}
+          key={`$number_${index - commaIndex}`}
           chars={chars}
           commaIndex={commaIndex}
           currency={currency}
@@ -289,6 +296,8 @@ const LoadingWrapper = (): JSX.Element | null => {
   )
 }
 
+const SCREEN_WIDTH_BUFFER = 50
+
 const PriceExplorerAnimatedNumber = ({
   price,
   numberOfDigits,
@@ -300,6 +309,8 @@ const PriceExplorerAnimatedNumber = ({
 }): JSX.Element => {
   const colors = useSporeColors()
   const hideShimmer = useSharedValue(false)
+  const scale = useSharedValue(1)
+  const offset = useSharedValue(0)
   const animatedWrapperStyle = useAnimatedStyle(() => {
     return {
       opacity: price.value.value > 0 && hideShimmer.value ? 0 : 1,
@@ -314,6 +325,31 @@ const PriceExplorerAnimatedNumber = ({
       width: price.formatted.value[0] === '<' ? withTiming(22) : withTiming(0),
     }
   })
+
+  useAnimatedReaction(
+    () => {
+      return Number(
+        [0, ...price.formatted.value.split('')].reduce((accumulator, currentValue) => {
+          if (NUMBER_WIDTH_ARRAY[Number(currentValue)]) {
+            return Number(accumulator) + Number(NUMBER_WIDTH_ARRAY[Number(currentValue)])
+          }
+          return accumulator
+        })
+      )
+    },
+    (priceWidth: number) => {
+      const newScale = (SCREEN_WIDTH - SCREEN_WIDTH_BUFFER) / priceWidth
+
+      if (newScale < 1) {
+        const newOffset = (priceWidth - priceWidth * newScale) / 2
+        scale.value = withTiming(newScale)
+        offset.value = withTiming(-newOffset)
+      } else if (scale.value < 1) {
+        scale.value = withTiming(1)
+        offset.value = withTiming(0)
+      }
+    }
+  )
 
   const hidePlaceholder = (): void => {
     hideShimmer.value = true
@@ -339,8 +375,18 @@ const PriceExplorerAnimatedNumber = ({
     </Animated.Text>
   )
 
+  const scaleWraper = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: -SCREEN_WIDTH / 2 },
+        { scale: scale.value },
+        { translateX: SCREEN_WIDTH / 2 },
+      ],
+    }
+  })
+
   return (
-    <>
+    <Animated.View style={scaleWraper}>
       <Animated.View style={animatedWrapperStyle}>
         <LoadingWrapper />
       </Animated.View>
@@ -351,7 +397,7 @@ const PriceExplorerAnimatedNumber = ({
         {Numbers({ price, hidePlaceholder, numberOfDigits, currency })}
         {!currency.symbolAtFront && currencySymbol}
       </View>
-    </>
+    </Animated.View>
   )
 }
 

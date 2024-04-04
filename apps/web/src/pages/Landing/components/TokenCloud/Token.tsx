@@ -1,12 +1,15 @@
-import { useInfoExplorePageEnabled } from 'featureFlags/flags/infoExplore'
 import { motion } from 'framer-motion'
-import { useCollectionPromoQuery, useTokenPromoQuery } from 'graphql/data/__generated__/types-and-hooks'
 import { getTokenDetailsURL } from 'graphql/data/util'
 import { TokenStandard } from 'pages/Landing/assets/approvedTokens'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
+import {
+  useCollectionPromoQuery,
+  useTokenPromoQuery,
+} from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 
+import { NATIVE_CHAIN_ID } from 'constants/tokens'
 import { TokenPoint } from '.'
 import { Ticker } from './Ticker'
 import { randomChoice } from './utils'
@@ -128,7 +131,7 @@ export function Token(props: {
 
   const tokenPromoQuery = useTokenPromoQuery({
     variables: {
-      address: address !== 'NATIVE' ? address : undefined,
+      address: address !== NATIVE_CHAIN_ID ? address : undefined,
       chain,
     },
     skip: standard !== TokenStandard.ERC20,
@@ -152,7 +155,6 @@ export function Token(props: {
   ])
 
   const navigate = useNavigate()
-  const isInfoExplorePageEnabled = useInfoExplorePageEnabled()
   const handleOnClick = useMemo(
     () => () =>
       navigate(
@@ -160,11 +162,10 @@ export function Token(props: {
           ? getTokenDetailsURL({
               address,
               chain,
-              isInfoExplorePageEnabled,
             })
           : `/nfts/collection/${address}`
       ),
-    [address, chain, isInfoExplorePageEnabled, navigate, standard]
+    [address, chain, navigate, standard]
   )
 
   const borderRadius = size / 8

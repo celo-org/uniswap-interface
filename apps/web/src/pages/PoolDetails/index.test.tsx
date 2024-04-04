@@ -1,4 +1,4 @@
-import { usePoolData } from 'graphql/thegraph/PoolData'
+import { usePoolData } from 'graphql/data/pools/usePoolData'
 import Router from 'react-router-dom'
 import store from 'state'
 import { addSerializedToken } from 'state/user/reducer'
@@ -13,8 +13,8 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }))
 
-jest.mock('graphql/thegraph/PoolData', () => {
-  const originalModule = jest.requireActual('graphql/thegraph/PoolData')
+jest.mock('graphql/data/pools/usePoolData', () => {
+  const originalModule = jest.requireActual('graphql/data/pools/usePoolData')
   return {
     ...originalModule,
     usePoolData: jest.fn(),

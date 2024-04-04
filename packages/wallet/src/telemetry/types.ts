@@ -4,13 +4,16 @@ import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
 import { MoonpayEventName, SharedEventName, SwapEventName } from '@uniswap/analytics-events'
 import { Protocol } from '@uniswap/router-sdk'
 import { providers } from 'ethers'
+import { UnitagClaimContext } from 'uniswap/src/features/unitags/types'
 import { TraceProps } from 'utilities/src/telemetry/trace/Trace'
 import { ChainId } from 'wallet/src/constants/chains'
 import { ImportType } from 'wallet/src/features/onboarding/types'
 import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
 import { QuoteType } from 'wallet/src/features/transactions/utils'
-import { UnitagClaimContext } from 'wallet/src/features/unitags/types'
 import {
+  ExtensionOnboardingEventName,
+  FiatOnRampEventName,
+  InstitutionTransferEventName,
   UnitagEventName,
   WalletAppsFlyerEvents,
   WalletEventName,
@@ -30,6 +33,7 @@ export type SwapTradeBaseProperties = {
   fee_amount?: string
   quoteType?: QuoteType
   requestId?: string
+  quoteId?: string
 } & TraceProps
 
 type SwapTransactionResultProperties = {
@@ -74,6 +78,31 @@ export type SearchResultContextProperties = {
 }
 
 export type WalletEventProperties = {
+  [InstitutionTransferEventName.InstitutionTransferTransactionUpdated]: {
+    status: string
+    externalTransactionId: string
+    institutionName: string
+  }
+  [InstitutionTransferEventName.InstitutionTransferWidgetOpened]: TraceProps & {
+    externalTransactionId: string
+    institutionName: string
+  }
+  [FiatOnRampEventName.FiatOnRampAmountEntered]: TraceProps & { source: 'chip' | 'textInput' }
+  [FiatOnRampEventName.FiatOnRampTokenSelected]: TraceProps & { token: string }
+  [FiatOnRampEventName.FiatOnRampTransactionUpdated]: {
+    status: string
+    externalTransactionId: string
+    serviceProvider: string
+  }
+  [FiatOnRampEventName.FiatOnRampWidgetOpened]: TraceProps & {
+    countryCode: string
+    countryState?: string
+    cryptoCurrency: string
+    externalTransactionId: string
+    fiatCurrency: string
+    preselectedServiceProvider: string
+    serviceProvider: string
+  }
   [SharedEventName.ANALYTICS_SWITCH_TOGGLED]: {
     enabled: boolean
   }
@@ -152,6 +181,9 @@ export type WalletEventProperties = {
     twitter: boolean
   }
   [UnitagEventName.UnitagRemoved]: undefined
+  [ExtensionOnboardingEventName.PromoBannerActionTaken]: {
+    action: 'join' | 'dismiss'
+  }
 }
 
 export type WalletAppsFlyerEventProperties = {

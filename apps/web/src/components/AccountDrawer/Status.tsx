@@ -142,7 +142,7 @@ export function Status({
           >
             <Row gap="2px">
               {uniswapUsername ?? ensUsername ?? shortenAddress(account)}
-              {uniswapUsername && <Icons.Unitag size={24} />}
+              {uniswapUsername && <Icons.Unitag size={18} />}
             </Row>
           </CopyHelper>
         </ThemedText.SubHeader>

@@ -1,18 +1,19 @@
 import { useHeaderDateFormatter } from 'components/Charts/hooks'
 import Column from 'components/Column'
-import Row, { RowBetween } from 'components/Row'
-import { PriceSource } from 'graphql/data/__generated__/types-and-hooks'
+import Row from 'components/Row'
 import { getProtocolColor, getProtocolName } from 'graphql/data/util'
 import { UTCTimestamp } from 'lightweight-charts'
 import { ReactElement, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { EllipsisStyle } from 'theme/components'
 import { ThemedText } from 'theme/components/text'
 import { textFadeIn } from 'theme/styles'
+import { PriceSource } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 
 export type ChartHeaderProtocolInfo = { protocol: PriceSource; value?: number }
 
-const ChartHeaderWrapper = styled(RowBetween)`
+const ChartHeaderWrapper = styled(Row)`
   ${textFadeIn};
   position: absolute;
   width: 100%;
@@ -20,14 +21,22 @@ const ChartHeaderWrapper = styled(RowBetween)`
   align-items: flex-start;
 `
 const ChartHeaderLeftDisplay = styled.div`
+  position: absolute;
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding-bottom: 14px;
   text-align: left;
   pointer-events: none;
+  width: 70%;
+
+  * {
+    ${EllipsisStyle}
+  }
 `
 const ProtocolLegendWrapper = styled(Column)`
+  position: absolute;
+  right: 0px;
   padding: 4px 12px;
   gap: 12px;
   text-align: left;
@@ -38,6 +47,12 @@ const ProtocolBlip = styled.div<{ color: string }>`
   border-radius: 4px;
   width: 12px;
   height: 12px;
+`
+
+const ProtocolText = styled(ThemedText.Caption)`
+  width: 80px;
+  text-align: right;
+  ${EllipsisStyle}
 `
 
 function ProtocolLegend({ protocolData }: { protocolData?: ChartHeaderProtocolInfo[] }) {
@@ -53,7 +68,7 @@ function ProtocolLegend({ protocolData }: { protocolData?: ChartHeaderProtocolIn
             : getProtocolName(protocol)
           return (
             <Row gap="6px" justify="flex-end" key={protocol + '_blip'}>
-              <ThemedText.Caption>{display}</ThemedText.Caption>
+              <ProtocolText>{display}</ProtocolText>
               <ProtocolBlip color={getProtocolColor(protocol, theme)} />
             </Row>
           )
@@ -109,7 +124,7 @@ export function ChartHeader({
   additionalFields,
 }: ChartHeaderProps) {
   return (
-    <ChartHeaderWrapper>
+    <ChartHeaderWrapper data-cy="chart-header">
       <ChartHeaderLeftDisplay>
         <HeaderValueDisplay value={value} valueFormatterType={valueFormatterType} />
         <Row gap="sm">

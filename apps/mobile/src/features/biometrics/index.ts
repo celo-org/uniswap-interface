@@ -5,8 +5,8 @@ import {
   LocalAuthenticationResult,
 } from 'expo-local-authentication'
 import { NativeModulesProxy } from 'expo-modules-core'
+import i18n from 'uniswap/src/i18n/i18n'
 import { logger } from 'utilities/src/logger/logger'
-import i18n from 'wallet/src/i18n/i18n'
 
 const ELA = NativeModulesProxy.ExpoLocalAuthentication
 
@@ -47,8 +47,8 @@ export async function tryLocalAuthenticate(): Promise<BiometricAuthenticationSta
      */
     const enrolled = await isEnrolledAsync()
     const result = await authenticateAsync({
-      cancelLabel: i18n.t('Cancel'),
-      promptMessage: i18n.t('Please authenticate'),
+      cancelLabel: i18n.t('common.button.cancel'),
+      promptMessage: i18n.t('settings.setting.biometrics.auth'),
       requireConfirmation: false,
     })
 

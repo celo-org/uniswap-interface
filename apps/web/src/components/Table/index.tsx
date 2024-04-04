@@ -9,6 +9,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { BrowserEvent, SharedEventName } from '@uniswap/analytics-events'
+import { TraceEvent, useTrace } from 'analytics'
 import Loader from 'components/Icons/LoadingSpinner'
 import { ErrorModal } from 'components/Table/ErrorBox'
 import useDebounce from 'hooks/useDebounce'
@@ -16,6 +18,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ScrollSync, ScrollSyncPane } from 'react-scroll-sync'
 import { ThemedText } from 'theme/components'
 import { FadePresence } from 'theme/components/FadePresence'
+import { Z_INDEX } from 'theme/zIndex'
 import {
   CellContainer,
   DataRow,
@@ -43,6 +46,8 @@ function TableBody<Data extends RowData>({
   loading?: boolean
   error?: ApolloError
 }) {
+  const analyticsContext = useTrace()
+
   if (loading || error) {
     // loading and error states
     return (
@@ -88,12 +93,27 @@ function TableBody<Data extends RowData>({
           ))
         const rowOriginal = row.original as any
         const linkState = rowOriginal.linkState // optional data passed to linked page, accessible via useLocation().state
-        return 'link' in rowOriginal && typeof rowOriginal.link === 'string' ? (
-          <TableRowLink to={rowOriginal.link} key={row.id} state={linkState}>
-            <DataRow>{cells}</DataRow>
-          </TableRowLink>
-        ) : (
-          <DataRow key={row.id}>{cells}</DataRow>
+        const rowTestId = rowOriginal.testId
+        return (
+          <TraceEvent
+            shouldLogImpression={Boolean(rowOriginal.analytics)}
+            events={[BrowserEvent.onClick]}
+            name={SharedEventName.ELEMENT_CLICKED}
+            element={rowOriginal.analytics?.elementName}
+            properties={{
+              ...rowOriginal.analytics?.properties,
+              ...analyticsContext,
+            }}
+            key={row.id}
+          >
+            {'link' in rowOriginal && typeof rowOriginal.link === 'string' ? (
+              <TableRowLink to={rowOriginal.link} state={linkState} data-testid={rowTestId}>
+                <DataRow>{cells}</DataRow>
+              </TableRowLink>
+            ) : (
+              <DataRow data-testid={rowTestId}>{cells}</DataRow>
+            )}
+          </TraceEvent>
         )
       })}
     </>
@@ -106,6 +126,7 @@ export function Table<Data extends RowData>({
   loading,
   error,
   loadMore,
+  maxWidth,
   maxHeight,
 }: {
   columns: ColumnDef<Data, any>[]
@@ -113,6 +134,7 @@ export function Table<Data extends RowData>({
   loading?: boolean
   error?: ApolloError
   loadMore?: ({ onComplete }: { onComplete?: () => void }) => void
+  maxWidth?: number
   maxHeight?: number
 }) {
   const [showReturn, setShowReturn] = useState(false)
@@ -127,6 +149,8 @@ export function Table<Data extends RowData>({
   })
   const { distanceFromTop, distanceToBottom } = useDebounce(scrollPosition, 125)
   const tableBodyRef = useRef<HTMLDivElement>(null)
+  const lastLoadedLengthRef = useRef(data?.length ?? 0)
+  const canLoadMore = useRef(true)
 
   useEffect(() => {
     const scrollableElement = maxHeight ? tableBodyRef.current : window
@@ -153,7 +177,7 @@ export function Table<Data extends RowData>({
 
   useEffect(() => {
     setShowReturn(!loading && !error && distanceFromTop >= SHOW_RETURN_TO_TOP_OFFSET)
-    if (distanceToBottom < LOAD_MORE_BOTTOM_OFFSET && !loadingMore && loadMore && !error) {
+    if (distanceToBottom < LOAD_MORE_BOTTOM_OFFSET && !loadingMore && loadMore && canLoadMore.current && !error) {
       setLoadingMore(true)
       // Manually update scroll position to prevent re-triggering
       setScrollPosition({
@@ -163,10 +187,15 @@ export function Table<Data extends RowData>({
       loadMore({
         onComplete: () => {
           setLoadingMore(false)
+          if (data?.length === lastLoadedLengthRef.current) {
+            canLoadMore.current = false
+          } else {
+            lastLoadedLengthRef.current = data?.length ?? 0
+          }
         },
       })
     }
-  }, [distanceFromTop, distanceToBottom, error, loadMore, loading, loadingMore])
+  }, [data?.length, distanceFromTop, distanceToBottom, error, loadMore, loading, loadingMore])
 
   const table = useReactTable({
     columns,
@@ -177,7 +206,7 @@ export function Table<Data extends RowData>({
   return (
     <div>
       <ScrollSync>
-        <TableContainer $maxHeight={maxHeight}>
+        <TableContainer $maxWidth={maxWidth} $maxHeight={maxHeight}>
           <TableHead $isSticky={!maxHeight}>
             <ScrollSyncPane>
               <HeaderRow $dimmed={!!error}>
@@ -189,7 +218,7 @@ export function Table<Data extends RowData>({
               </HeaderRow>
             </ScrollSyncPane>
             {showReturn && (
-              <FadePresence>
+              <FadePresence $zIndex={Z_INDEX.hover}>
                 <ReturnButtonContainer $top={maxHeight ? 55 : 75}>
                   <ReturnButton
                     height="24px"

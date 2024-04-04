@@ -1,11 +1,10 @@
 import { SkipToken, skipToken } from '@reduxjs/toolkit/query/react'
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
-import { useGatewayDNSUpdateEnabled } from 'featureFlags/flags/gatewayDNSUpdate'
-import { useUniswapXSyntheticQuoteEnabled } from 'featureFlags/flags/uniswapXUseSyntheticQuote'
-import { useFeesEnabled } from 'featureFlags/flags/useFees'
 import { useMemo } from 'react'
 import { GetQuoteArgs, INTERNAL_ROUTER_PREFERENCE_PRICE, RouterPreference } from 'state/routing/types'
 import { currencyAddressForSwapQuote } from 'state/routing/utils'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 
 /**
  * Returns query arguments for the Routing API query or undefined if the
@@ -27,11 +26,9 @@ export function useRoutingAPIArguments({
   tradeType: TradeType
   routerPreference: RouterPreference | typeof INTERNAL_ROUTER_PREFERENCE_PRICE
 }): GetQuoteArgs | SkipToken {
-  const uniswapXForceSyntheticQuotes = useUniswapXSyntheticQuoteEnabled()
-  const gatewayDNSUpdateEnabled = useGatewayDNSUpdateEnabled()
-  const feesEnabled = useFeesEnabled()
+  const uniswapXForceSyntheticQuotes = useFeatureFlag(FeatureFlags.UniswapXSyntheticQuote)
   // Don't enable fee logic if this is a quote for pricing
-  const sendPortionEnabled = routerPreference === INTERNAL_ROUTER_PREFERENCE_PRICE ? false : feesEnabled
+  const sendPortionEnabled = routerPreference !== INTERNAL_ROUTER_PREFERENCE_PRICE
 
   return useMemo(
     () =>
@@ -53,18 +50,7 @@ export function useRoutingAPIArguments({
             needsWrapIfUniswapX: tokenIn.isNative,
             uniswapXForceSyntheticQuotes,
             sendPortionEnabled,
-            gatewayDNSUpdateEnabled,
           },
-    [
-      account,
-      amount,
-      routerPreference,
-      tokenIn,
-      tokenOut,
-      tradeType,
-      uniswapXForceSyntheticQuotes,
-      sendPortionEnabled,
-      gatewayDNSUpdateEnabled,
-    ]
+    [account, amount, routerPreference, tokenIn, tokenOut, tradeType, uniswapXForceSyntheticQuotes, sendPortionEnabled]
   )
 }

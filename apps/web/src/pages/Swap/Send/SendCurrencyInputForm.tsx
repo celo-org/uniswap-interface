@@ -16,12 +16,15 @@ import { useUSDPrice } from 'hooks/useUSDPrice'
 import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
 import { SendInputError } from 'state/send/hooks'
 import { useSendContext } from 'state/send/SendContext'
-import { CurrencyState, useSwapAndLimitContext } from 'state/swap/SwapContext'
 import styled, { css } from 'styled-components'
 import { ClickableStyle, ThemedText } from 'theme/components'
+import { Text } from 'ui/src'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 import { maxAmountSpend } from 'utils/maxAmountSpend'
 
+import { asSupportedChain, SupportedInterfaceChain } from 'constants/chains'
+import { useSwapAndLimitContext } from 'state/swap/hooks'
+import { CurrencyState } from 'state/swap/types'
 import useResizeObserver from 'use-resize-observer'
 import { ReactComponent as DropDown } from '../../../assets/images/dropdown.svg'
 
@@ -76,6 +79,7 @@ const NumericalInputWrapper = styled(Row)`
 
 const StyledNumericalInput = styled(NumericalInput)<{ $width?: number }>`
   max-height: 84px;
+  max-width: 100%;
   width: ${({ $width }) => `${$width ?? 43}px`}; // this value is from the size of a 0 which is the default value
   ${NumericalInputFontStyle}
 
@@ -93,6 +97,7 @@ const NumericalInputMimic = styled.span`
 `
 
 const NumericalInputSymbolContainer = styled.span<{ showPlaceholder: boolean }>`
+  user-select: none;
   ${NumericalInputFontStyle}
   ${({ showPlaceholder }) =>
     showPlaceholder &&
@@ -236,7 +241,10 @@ export default function SendCurrencyInputForm({
   const showMaxButton = Boolean(maxInputAmount?.greaterThan(0) && !parsedTokenAmount?.equalTo(maxInputAmount))
 
   const [tokenSelectorOpen, setTokenSelectorOpen] = useState(false)
-  const fiatCurrency = useMemo(() => STABLECOIN_AMOUNT_OUT[chainId ?? ChainId.MAINNET].currency, [chainId])
+  const fiatCurrency = useMemo(
+    () => STABLECOIN_AMOUNT_OUT[asSupportedChain(chainId) ?? (ChainId.MAINNET as SupportedInterfaceChain)].currency,
+    [chainId]
+  )
   const fiatCurrencyEqualsTransferCurrency = !!inputCurrency && fiatCurrency.equals(inputCurrency)
 
   const formattedBalance = formatCurrencyAmount({
@@ -328,9 +336,9 @@ export default function SendCurrencyInputForm({
     <Wrapper $disabled={disabled}>
       <InputWrapper>
         <InputLabelContainer>
-          <ThemedText.SubHeaderSmall color="neutral2">
+          <Text variant="body3" userSelect="none" color="$neutral2">
             <Trans>You&apos;re sending</Trans>
-          </ThemedText.SubHeaderSmall>
+          </Text>
         </InputLabelContainer>
         <NumericalInputWrapper>
           {inputInFiat && (
@@ -342,6 +350,7 @@ export default function SendCurrencyInputForm({
             onUserInput={handleUserInput}
             placeholder="0"
             $width={displayValue && hiddenObserver.width ? hiddenObserver.width + 1 : undefined}
+            maxDecimals={inputInFiat ? 6 : inputCurrency?.decimals}
           />
           <NumericalInputMimic ref={hiddenObserver.ref}>{displayValue}</NumericalInputMimic>
         </NumericalInputWrapper>

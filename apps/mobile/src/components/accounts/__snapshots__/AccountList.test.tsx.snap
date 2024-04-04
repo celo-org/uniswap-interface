@@ -109,6 +109,7 @@ exports[`AccountList renders without error 1`] = `
         >
           <View
             cancelable={true}
+            disabled={false}
             focusable={true}
             hitSlop={[Function]}
             minPressDuration={0}
@@ -144,7 +145,7 @@ exports[`AccountList renders without error 1`] = `
                   "gap": 16,
                 }
               }
-              testID="account_item/0x82D56A352367453f74FC0dC7B071b311da373Fa6"
+              testID="account-item/0x82D56A352367453f74FC0dC7B071b311da373Fa6"
             >
               <View
                 style={
@@ -159,6 +160,7 @@ exports[`AccountList renders without error 1`] = `
                     {
                       "alignItems": "center",
                       "flexDirection": "row",
+                      "flexShrink": 1,
                       "gap": 12,
                     }
                   }
@@ -192,6 +194,7 @@ exports[`AccountList renders without error 1`] = `
                           "position": "relative",
                         }
                       }
+                      testID="account-icon"
                     >
                       <View
                         style={
@@ -386,6 +389,7 @@ exports[`AccountList renders without error 1`] = `
                           {
                             "alignItems": "center",
                             "flexDirection": "row",
+                            "gap": 4,
                             "justifyContent": "center",
                           }
                         }
@@ -393,6 +397,7 @@ exports[`AccountList renders without error 1`] = `
                         <Text
                           adjustsFontSizeToFit={true}
                           allowFontScaling={true}
+                          ellipsizeMode="tail"
                           maxFontSizeMultiplier={1.4}
                           numberOfLines={1}
                           style={

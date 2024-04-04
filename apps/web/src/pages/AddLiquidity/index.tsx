@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import type { TransactionResponse } from '@ethersproject/providers'
 import { Trans } from '@lingui/macro'
 import { BrowserEvent, InterfaceElementName, InterfaceEventName, LiquidityEventName } from '@uniswap/analytics-events'
-import { Currency, CurrencyAmount, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES, Percent } from '@uniswap/sdk-core'
+import { ChainId, Currency, CurrencyAmount, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES, Percent } from '@uniswap/sdk-core'
 import { FeeAmount, NonfungiblePositionManager } from '@uniswap/v3-sdk'
 import { useWeb3React } from '@web3-react/core'
 import { TraceEvent, sendAnalyticsEvent, useTrace } from 'analytics'
@@ -30,6 +30,10 @@ import { addressesAreEquivalent } from 'utils/addressesAreEquivalent'
 import { WrongChainError } from 'utils/errors'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 
+import { OutOfSyncWarning } from 'components/addLiquidity/OutOfSyncWarning'
+import { useIsPoolOutOfSync } from 'hooks/useIsPoolOutOfSync'
+import { atomWithStorage, useAtomValue, useUpdateAtom } from 'jotai/utils'
+import { BlastRebasingAlert, BlastRebasingModal } from 'pages/AddLiquidity/blastAlerts'
 import { ButtonError, ButtonLight, ButtonPrimary, ButtonText } from '../../components/Button'
 import { BlueCard, OutlineCard, YellowCard } from '../../components/Card'
 import { AutoColumn } from '../../components/Column'
@@ -54,7 +58,7 @@ import { useV3NFTPositionManagerContract } from '../../hooks/useContract'
 import { useDerivedPositionInfo } from '../../hooks/useDerivedPositionInfo'
 import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
 import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
-import useTransactionDeadline from '../../hooks/useTransactionDeadline'
+import { useGetTransactionDeadline } from '../../hooks/useTransactionDeadline'
 import { useV3PositionFromTokenId } from '../../hooks/useV3Positions'
 import { Bound, Field } from '../../state/mint/v3/actions'
 import { useTransactionAdder } from '../../state/transactions/hooks'
@@ -69,11 +73,18 @@ import { Review } from './Review'
 import { DynamicSection, MediumOnly, ResponsiveTwoColumns, ScrollablePage, StyledInput, Wrapper } from './styled'
 
 const DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE = new Percent(50, 10_000)
+const blastRebasingAlertAtom = atomWithStorage<boolean>('shouldShowBlastRebasingAlert', true)
 
 const StyledBodyWrapper = styled(BodyWrapper)<{ $hasExistingPosition: boolean }>`
   padding: ${({ $hasExistingPosition }) => ($hasExistingPosition ? '10px' : 0)};
   max-width: 640px;
 `
+
+const BLAST_REBASING_TOKENS = [
+  'ETH',
+  '0x4300000000000000000000000000000000000004',
+  '0x4300000000000000000000000000000000000003',
+]
 
 export default function AddLiquidityWrapper() {
   const { chainId } = useWeb3React()
@@ -120,6 +131,7 @@ function AddLiquidity() {
 
   const baseCurrency = useCurrency(currencyIdA)
   const currencyB = useCurrency(currencyIdB)
+
   // prevent an error if they input ETH/WETH
   const quoteCurrency =
     baseCurrency && currencyB && baseCurrency.wrapped.equals(currencyB.wrapped) ? undefined : currencyB
@@ -170,7 +182,7 @@ function AddLiquidity() {
   const [attemptingTxn, setAttemptingTxn] = useState<boolean>(false) // clicked confirm
 
   // txn values
-  const deadline = useTransactionDeadline() // custom from users settings
+  const getDeadline = useGetTransactionDeadline() // custom from users settings
 
   const [txHash, setTxHash] = useState<string>('')
 
@@ -228,6 +240,8 @@ function AddLiquidity() {
     if (!positionManager || !baseCurrency || !quoteCurrency) {
       return
     }
+
+    const deadline = await getDeadline()
 
     if (position && account && deadline) {
       const useNative = baseCurrency.isNative ? baseCurrency : quoteCurrency.isNative ? quoteCurrency : undefined
@@ -569,6 +583,18 @@ function AddLiquidity() {
   const ownsNFT =
     addressesAreEquivalent(owner, account) || addressesAreEquivalent(existingPositionDetails?.operator, account)
   const showOwnershipWarning = Boolean(hasExistingPosition && account && !ownsNFT)
+  const showBlastRebasingWarning =
+    chainId === ChainId.BLAST &&
+    ((!!currencyIdA && BLAST_REBASING_TOKENS.includes(currencyIdA)) ||
+      (!!currencyIdB && BLAST_REBASING_TOKENS.includes(currencyIdB)))
+
+  const showBlastRebasingModal = useAtomValue(blastRebasingAlertAtom) && showBlastRebasingWarning
+  const updateShowBlastRebasingModal = useUpdateAtom(blastRebasingAlertAtom)
+  const handleBlastModalContinue = useCallback(() => {
+    updateShowBlastRebasingModal(false)
+  }, [updateShowBlastRebasingModal])
+
+  const outOfSync = useIsPoolOutOfSync(price)
 
   return (
     <>
@@ -608,7 +634,6 @@ function AddLiquidity() {
           <AddRemoveTabs
             creating={false}
             adding={true}
-            positionID={tokenId}
             autoSlippage={DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE}
             showBackLink={!hasExistingPosition}
           >
@@ -630,6 +655,11 @@ function AddLiquidity() {
                 {!hasExistingPosition && (
                   <>
                     <AutoColumn gap="md">
+                      {outOfSync && (
+                        <RowBetween paddingBottom="20px">
+                          <OutOfSyncWarning />
+                        </RowBetween>
+                      )}
                       <RowBetween paddingBottom="20px">
                         <ThemedText.DeprecatedLabel>
                           <Trans>Select pair</Trans>
@@ -662,7 +692,7 @@ function AddLiquidity() {
                           id="add-liquidity-input-tokenb"
                         />
                       </RowBetween>
-
+                      {showBlastRebasingWarning && <BlastRebasingAlert />}
                       <FeeSelector
                         disabled={!quoteCurrency || !baseCurrency}
                         feeAmount={feeAmount}
@@ -679,6 +709,7 @@ function AddLiquidity() {
                     title={<Trans>Selected range</Trans>}
                     inRange={!outOfRange}
                     ticksAtLimit={ticksAtLimit}
+                    showBlastAlert={showBlastRebasingWarning}
                   />
                 )}
               </AutoColumn>
@@ -907,6 +938,9 @@ function AddLiquidity() {
         )}
       </ScrollablePage>
       <SwitchLocaleLink />
+      {showBlastRebasingModal && (
+        <BlastRebasingModal currencyIdA={currencyIdA} currencyIdB={currencyIdB} onContinue={handleBlastModalContinue} />
+      )}
     </>
   )
 }

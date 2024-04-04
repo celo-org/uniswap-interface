@@ -4,19 +4,20 @@ import QRCode from 'src/components/QRCodeScanner/custom-qr-code-generator'
 import {
   ColorTokens,
   Flex,
+  getUniconV2Colors,
+  passesContrast,
+  useExtractedColors,
   useIsDarkMode,
   useSporeColors,
   useUniconColors,
-  useUniconV2Colors,
 } from 'ui/src'
 
 import { borderRadii } from 'ui/src/theme'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
+import { isAndroid } from 'uniswap/src/utils/platform'
 import { AccountIcon } from 'wallet/src/components/accounts/AccountIcon'
-import { FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
-import { useFeatureFlag } from 'wallet/src/features/experiments/hooks'
 import { useAvatar } from 'wallet/src/features/wallet/hooks'
-import { passesContrast, useExtractedColors } from 'wallet/src/utils/colors'
-import { isAndroid } from 'wallet/src/utils/platform'
 
 type AvatarColors = {
   primary: string
@@ -37,9 +38,9 @@ type ColorProps = {
 const useColorProps = (address: Address, color?: string): ColorProps => {
   const colors = useSporeColors()
   const gradientData = useUniconColors(address)
-  const isUniconsV2Enabled = useFeatureFlag(FEATURE_FLAGS.UniconsV2)
+  const isUniconsV2Enabled = useFeatureFlag(FeatureFlags.UniconsV2)
   const isDarkMode = useIsDarkMode()
-  const uniconV2Color = useUniconV2Colors(address, isDarkMode) as { color: string }
+  const uniconV2Color = getUniconV2Colors(address, isDarkMode) as { color: string }
   const { avatar, loading: avatarLoading } = useAvatar(address)
   const { colors: avatarColors } = useExtractedColors(avatar) as { colors: AvatarColors }
   const hasAvatar = !!avatar && !avatarLoading

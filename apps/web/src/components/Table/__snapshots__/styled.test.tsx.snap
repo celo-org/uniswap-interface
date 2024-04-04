@@ -2,32 +2,7 @@
 
 exports[`TokenLinkCell renders known token on a different chain 1`] = `
 <DocumentFragment>
-  .c4 {
-  --size: 16px;
-  border-radius: 100px;
-  color: #222222;
-  background-color: #22222212;
-  font-size: calc(var(--size) / 3);
-  font-weight: 535;
-  height: 16px;
-  line-height: 16px;
-  text-align: center;
-  width: 16px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c1 {
+  .c1 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
@@ -74,6 +49,12 @@ exports[`TokenLinkCell renders known token on a different chain 1`] = `
   left: 0;
 }
 
+.c4 {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
 .c5 {
   position: absolute;
   border-radius: 4px;
@@ -118,6 +99,7 @@ exports[`TokenLinkCell renders known token on a different chain 1`] = `
 .c7 {
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 <span
@@ -128,7 +110,7 @@ exports[`TokenLinkCell renders known token on a different chain 1`] = `
     >
       <a
         class="c0"
-        href="/explore/tokens/polygon/NATIVE"
+        href="/explore/tokens/polygon/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
       >
         <div
           class="c1 c2"
@@ -136,11 +118,10 @@ exports[`TokenLinkCell renders known token on a different chain 1`] = `
           <div
             class="c3"
           >
-            <div
+            <img
               class="c4"
-            >
-              USD
-            </div>
+              src="blank_token.svg"
+            />
             <div
               class="c5"
             >
@@ -190,32 +171,7 @@ exports[`TokenLinkCell renders known token on a different chain 1`] = `
 
 exports[`TokenLinkCell renders known token on mainnet 1`] = `
 <DocumentFragment>
-  .c4 {
-  --size: 16px;
-  border-radius: 100px;
-  color: #222222;
-  background-color: #22222212;
-  font-size: calc(var(--size) / 3);
-  font-weight: 535;
-  height: 16px;
-  line-height: 16px;
-  text-align: center;
-  width: 16px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c1 {
+  .c1 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
@@ -262,6 +218,12 @@ exports[`TokenLinkCell renders known token on mainnet 1`] = `
   left: 0;
 }
 
+.c4 {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
 .c0 {
   -webkit-text-decoration: none;
   text-decoration: none;
@@ -284,6 +246,7 @@ exports[`TokenLinkCell renders known token on mainnet 1`] = `
 .c6 {
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 <span
@@ -294,7 +257,7 @@ exports[`TokenLinkCell renders known token on mainnet 1`] = `
     >
       <a
         class="c0"
-        href="/explore/tokens/ethereum/NATIVE"
+        href="/explore/tokens/ethereum/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
       >
         <div
           class="c1 c2"
@@ -302,11 +265,10 @@ exports[`TokenLinkCell renders known token on mainnet 1`] = `
           <div
             class="c3"
           >
-            <div
+            <img
               class="c4"
-            >
-              USD
-            </div>
+              src="blank_token.svg"
+            />
           </div>
           <div
             class="c5 c6 css-1urox24"
@@ -322,32 +284,7 @@ exports[`TokenLinkCell renders known token on mainnet 1`] = `
 
 exports[`TokenLinkCell renders unknown token 1`] = `
 <DocumentFragment>
-  .c4 {
-  --size: 16px;
-  border-radius: 100px;
-  color: #222222;
-  background-color: #22222212;
-  font-size: calc(var(--size) / 3);
-  font-weight: 535;
-  height: 16px;
-  line-height: 16px;
-  text-align: center;
-  width: 16px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c1 {
+  .c1 {
   box-sizing: border-box;
   margin: 0;
   min-width: 0;
@@ -394,6 +331,12 @@ exports[`TokenLinkCell renders unknown token 1`] = `
   left: 0;
 }
 
+.c4 {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
 .c0 {
   -webkit-text-decoration: none;
   text-decoration: none;
@@ -416,6 +359,7 @@ exports[`TokenLinkCell renders unknown token 1`] = `
 .c6 {
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 <span
@@ -426,7 +370,7 @@ exports[`TokenLinkCell renders unknown token 1`] = `
     >
       <a
         class="c0"
-        href="/explore/tokens/ethereum/unknown"
+        href="/explore/tokens/ethereum/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
       >
         <div
           class="c1 c2"
@@ -434,8 +378,9 @@ exports[`TokenLinkCell renders unknown token 1`] = `
           <div
             class="c3"
           >
-            <div
+            <img
               class="c4"
+              src="blank_token.svg"
             />
           </div>
           <div

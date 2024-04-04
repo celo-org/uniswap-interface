@@ -1,25 +1,28 @@
 import { ApolloError, NetworkStatus } from '@apollo/client'
 import { TradeType } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
+import { uniswapUrls } from 'uniswap/src/constants/urls'
+import { useRestQuery } from 'uniswap/src/data/rest'
 import { logger } from 'utilities/src/logger/logger'
-import { ONE_MINUTE_MS } from 'utilities/src/time/time'
+import { ONE_SECOND_MS, inXMinutesUnix } from 'utilities/src/time/time'
 import { useDebounceWithStatus } from 'utilities/src/time/timing'
 import { PollingInterval } from 'wallet/src/constants/misc'
-import { uniswapUrls } from 'wallet/src/constants/urls'
-import { useRestQuery } from 'wallet/src/data/rest'
 import {
   RoutingPreference,
   QuoteRequest as TradingApiQuoteRequest,
   QuoteResponse as TradingApiQuoteResponse,
   TradeType as TradingApiTradeType,
-} from 'wallet/src/data/tradingApi/__generated__/api'
+} from 'wallet/src/data/tradingApi/__generated__/index'
+import { useLocalizationContext } from 'wallet/src/features/language/LocalizationContext'
 import { TradingApiApolloClient } from 'wallet/src/features/transactions/swap/trade/tradingApi/client'
 import {
   getTokenAddressForApiRequest,
   toTradingApiSupportedChainId,
   transformTradingApiResponseToTrade,
+  validateTrade,
 } from 'wallet/src/features/transactions/swap/trade/tradingApi/utils'
 import { TradeWithStatus, UseTradeArgs } from 'wallet/src/features/transactions/swap/trade/types'
+import { CurrencyField } from 'wallet/src/features/transactions/transactionState/types'
 import { useActiveAccountAddressWithThrow } from 'wallet/src/features/wallet/hooks'
 import { areCurrencyIdsEqual, currencyId } from 'wallet/src/utils/currencyId'
 
@@ -30,23 +33,35 @@ export const SWAP_QUOTE_ERROR = 'QUOTE_ERROR'
 // client side error code for when the api returns an empty response
 export const NO_QUOTE_DATA = 'NO_QUOTE_DATA'
 
-const DEFAULT_DEADLINE_S = 60 * 30 // 30 minutes in seconds
+export const DEFAULT_SWAP_VALIDITY_TIME_MINS = 30
+
+export const SWAP_FORM_DEBOUNCE_TIME_MS = 250
+
+// We poll approximately once per block.
+// Ideally, we would poll more often to account for cases where we start polling right at the end of a block,
+// but our backend can't handle this right now, so do not increase this value without discussing it with the backend team first.
+export const SWAP_QUOTE_POLL_INTERVAL_MS = PollingInterval.Fast
 
 export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
   const {
     amountSpecified,
     otherCurrency,
     tradeType,
-    pollingInterval,
+    pollInterval,
     customSlippageTolerance,
     isUSDQuote,
     skip,
   } = args
   const activeAccountAddress = useActiveAccountAddressWithThrow()
 
+  const formatter = useLocalizationContext()
+
   /***** Format request arguments ******/
 
-  const [debouncedAmountSpecified, isDebouncing] = useDebounceWithStatus(amountSpecified)
+  const [debouncedAmountSpecified, isDebouncing] = useDebounceWithStatus(
+    amountSpecified,
+    SWAP_FORM_DEBOUNCE_TIME_MS
+  )
   const shouldDebounce =
     amountSpecified && debouncedAmountSpecified?.currency.chainId === otherCurrency?.chainId
   const amount = shouldDebounce ? debouncedAmountSpecified : amountSpecified
@@ -64,7 +79,9 @@ export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
   const tokenOutAddress = getTokenAddressForApiRequest(currencyOut)
 
   const requestTradeType =
-    tradeType === TradeType.EXACT_INPUT ? TradingApiTradeType.Input : TradingApiTradeType.Output
+    tradeType === TradeType.EXACT_INPUT
+      ? TradingApiTradeType.EXACT_INPUT
+      : TradingApiTradeType.EXACT_OUTPUT
 
   const skipQuery =
     skip ||
@@ -89,7 +106,8 @@ export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
       tokenOut: tokenOutAddress,
       slippageTolerance: customSlippageTolerance,
       includeGasInfo: true,
-      routingPreference: RoutingPreference.Classic,
+      routingPreference: RoutingPreference.CLASSIC,
+      deadline: inXMinutesUnix(DEFAULT_SWAP_VALIDITY_TIME_MINS),
     }
   }, [
     activeAccountAddress,
@@ -105,6 +123,8 @@ export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
 
   /***** Fetch quote from trading API  ******/
 
+  const internalPollInterval = pollInterval ?? SWAP_QUOTE_POLL_INTERVAL_MS
+
   const response = useRestQuery<
     TradingApiQuoteResponse,
     TradingApiQuoteRequest | Record<string, never>
@@ -113,8 +133,12 @@ export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
     quoteRequestArgs ?? {},
     ['quote', 'permitData'],
     {
-      pollInterval: pollingInterval ?? PollingInterval.Fast,
-      ttlMs: ONE_MINUTE_MS,
+      pollInterval: internalPollInterval,
+      // We set the `ttlMs` to 15 seconds longer than the poll interval so that there's more than enough time for a refetch to complete before we clear the stale data.
+      // If the user loses internet connection (or leaves the app and comes back) for longer than this,
+      // then we clear stale data and show a big loading spinner in the swap review screen.
+      ttlMs: internalPollInterval + ONE_SECOND_MS * 15,
+      clearIfStale: true,
       skip: !quoteRequestArgs,
       notifyOnNetworkStatusChange: true,
     },
@@ -158,13 +182,25 @@ export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
       return { ...response, trade: null }
     }
 
-    const trade = transformTradingApiResponseToTrade({
+    const formattedTrade = transformTradingApiResponseToTrade({
       tokenInIsNative: Boolean(currencyIn?.isNative),
       tokenOutIsNative: Boolean(currencyOut?.isNative),
       tradeType,
-      deadline: DEFAULT_DEADLINE_S,
+      deadline: inXMinutesUnix(DEFAULT_SWAP_VALIDITY_TIME_MINS), // TODO(MOB-3050): set deadline as `quoteRequestArgs.deadline`
       slippageTolerance: customSlippageTolerance,
       data,
+    })
+
+    const exactCurrencyField =
+      tradeType === TradeType.EXACT_INPUT ? CurrencyField.INPUT : CurrencyField.OUTPUT
+
+    const trade = validateTrade({
+      trade: formattedTrade,
+      currencyIn,
+      currencyOut,
+      exactAmount: amount,
+      exactCurrencyField,
+      formatter,
     })
 
     // If `transformTradingApiResponseToTrade` returns a `null` trade, it means we have a non-null quote, but no routes.
@@ -186,12 +222,14 @@ export function useTradingApiTrade(args: UseTradeArgs): TradeWithStatus {
       isFetching: networkStatus === NetworkStatus.poll,
     }
   }, [
+    amount,
     amountSpecified,
     currencyIn,
     currencyOut,
     customSlippageTolerance,
     data,
     error,
+    formatter,
     isDebouncing,
     isUSDQuote,
     loading,

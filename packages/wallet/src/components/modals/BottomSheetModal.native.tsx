@@ -25,9 +25,9 @@ import {
   useSporeColors,
 } from 'ui/src'
 import { borderRadii, spacing } from 'ui/src/theme'
+import { isAndroid, isIOS } from 'uniswap/src/utils/platform'
 import { Trace } from 'utilities/src/telemetry/trace/Trace'
 import { BottomSheetModalProps } from 'wallet/src/components/modals/BottomSheetModalProps'
-import { isAndroid, isIOS } from 'wallet/src/utils/platform'
 import { useKeyboardLayout } from 'wallet/src/utils/useKeyboardLayout'
 import { BottomSheetContextProvider } from './BottomSheetContext'
 import { HandleBar } from './HandleBar'
@@ -92,6 +92,7 @@ export function BottomSheetModal({
   // keyboardBehavior="extend" does not work and it's hard to figure why,
   // probably it requires usage of <BottomSheetTextInput>
   extendOnKeyboardVisible = false,
+  hideScrim = false,
 }: BottomSheetModalProps): JSX.Element {
   const dimensions = useDeviceDimensions()
   const insets = useDeviceInsets()
@@ -135,11 +136,11 @@ export function BottomSheetModal({
         {...props}
         appearsOnIndex={BACKDROP_APPEARS_ON_INDEX}
         disappearsOnIndex={DISAPPEARS_ON_INDEX}
-        opacity={blurredBackground ? 0.2 : 0.4}
+        opacity={hideScrim ? 0 : blurredBackground ? 0.2 : 0.4}
         pressBehavior={isDismissible ? 'close' : 'none'}
       />
     ),
-    [blurredBackground, isDismissible]
+    [blurredBackground, hideScrim, isDismissible]
   )
 
   const renderHandleBar = useCallback(

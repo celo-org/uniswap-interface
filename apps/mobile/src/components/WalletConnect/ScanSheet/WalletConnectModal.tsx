@@ -1,35 +1,33 @@
-import { selectionAsync } from 'expo-haptics'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import 'react-native-reanimated'
 import { useAppDispatch, useAppSelector } from 'src/app/hooks'
 import { useEagerExternalProfileRootNavigation } from 'src/app/navigation/hooks'
-import { BackButtonView } from 'src/components/layout/BackButtonView'
-import { ScannerModalState } from 'src/components/QRCodeScanner/constants'
 import { QRCodeScanner } from 'src/components/QRCodeScanner/QRCodeScanner'
 import { WalletQRCode } from 'src/components/QRCodeScanner/WalletQRCode'
+import { ScannerModalState } from 'src/components/QRCodeScanner/constants'
 import Trace from 'src/components/Trace/Trace'
 import { ConnectedDappsList } from 'src/components/WalletConnect/ConnectedDapps/ConnectedDappsList'
 import {
-  getSupportedURI,
-  isAllowedUwULinkRequest,
-  parseScantasticParams,
   URIType,
   UWULINK_PREFIX,
+  getSupportedURI,
+  isAllowedUwULinkRequest,
 } from 'src/components/WalletConnect/ScanSheet/util'
-import { closeAllModals, openModal } from 'src/features/modals/modalSlice'
+import { BackButtonView } from 'src/components/layout/BackButtonView'
+import { openDeepLink } from 'src/features/deepLinking/handleDeepLinkSaga'
 import { useWalletConnect } from 'src/features/walletConnect/useWalletConnect'
 import { pairWithWalletConnectURI } from 'src/features/walletConnect/utils'
 import { addRequest } from 'src/features/walletConnect/walletConnectSlice'
-import { Flex, Text, TouchableArea, useIsDarkMode, useSporeColors } from 'ui/src'
+import { Flex, HapticFeedback, Text, TouchableArea, useIsDarkMode, useSporeColors } from 'ui/src'
 import Scan from 'ui/src/assets/icons/receive.svg'
 import ScanQRIcon from 'ui/src/assets/icons/scan.svg'
 import { iconSizes } from 'ui/src/theme'
+import { FeatureFlags } from 'uniswap/src/features/experiments/flags'
+import { useFeatureFlag } from 'uniswap/src/features/experiments/hooks'
 import { logger } from 'utilities/src/logger/logger'
 import { BottomSheetModal } from 'wallet/src/components/modals/BottomSheetModal'
-import { FEATURE_FLAGS } from 'wallet/src/features/experiments/constants'
-import { useFeatureFlag } from 'wallet/src/features/experiments/hooks'
 import { selectActiveAccountAddress } from 'wallet/src/features/wallet/selectors'
 import { EthMethod, UwULinkRequest } from 'wallet/src/features/walletConnect/types'
 import { ElementName, ModalName } from 'wallet/src/telemetry/constants'
@@ -53,8 +51,8 @@ export function WalletConnectModal({
   const [shouldFreezeCamera, setShouldFreezeCamera] = useState(false)
   const { preload, navigate } = useEagerExternalProfileRootNavigation()
   const dispatch = useAppDispatch()
-  const isUwULinkEnabled = useFeatureFlag(FEATURE_FLAGS.UwULink)
-  const isScantasticEnabled = useFeatureFlag(FEATURE_FLAGS.Scantastic)
+  const isUwULinkEnabled = useFeatureFlag(FeatureFlags.UwULink)
+  const isScantasticEnabled = useFeatureFlag(FeatureFlags.Scantastic)
 
   // Update QR scanner states when pending session error alert is shown from WCv2 saga event channel
   useEffect(() => {
@@ -70,20 +68,18 @@ export function WalletConnectModal({
       if (!activeAddress || hasPendingSessionError || shouldFreezeCamera) {
         return
       }
-      await selectionAsync()
+      await HapticFeedback.selection()
 
       const supportedURI = await getSupportedURI(uri, { isUwULinkEnabled, isScantasticEnabled })
       if (!supportedURI) {
         setShouldFreezeCamera(true)
         Alert.alert(
-          t('Invalid QR Code'),
+          t('walletConnect.error.unsupported.title'),
           // TODO(EXT-495): Add Scantastic product name here when ready
-          t(
-            'Make sure that you’re scanning a valid WalletConnect or Ethereum address QR code before trying again.'
-          ),
+          t('walletConnect.error.unsupported.message'),
           [
             {
-              text: t('Try again'),
+              text: t('common.button.tryAgain'),
               onPress: (): void => {
                 setShouldFreezeCamera(false)
               },
@@ -103,13 +99,11 @@ export function WalletConnectModal({
       if (supportedURI.type === URIType.WalletConnectURL) {
         setShouldFreezeCamera(true)
         Alert.alert(
-          t('Invalid QR Code'),
-          t(
-            'WalletConnect v1 is no longer supported. The application you’re trying to connect to needs to upgrade to WalletConnect v2.'
-          ),
+          t('walletConnect.error.unsupportedV1.title'),
+          t('walletConnect.error.unsupportedV1.message'),
           [
             {
-              text: t('OK'),
+              text: t('common.button.ok'),
               onPress: (): void => {
                 setShouldFreezeCamera(false)
               },
@@ -126,11 +120,11 @@ export function WalletConnectModal({
         } catch (error) {
           logger.error(error, { tags: { file: 'WalletConnectModal', function: 'onScanCode' } })
           Alert.alert(
-            t('WalletConnect Error'),
-            t('There was an issue with WalletConnect. Please try again'),
+            t('walletConnect.error.general.title'),
+            t('walletConnect.error.general.message'),
             [
               {
-                text: t('OK'),
+                text: t('common.button.ok'),
                 onPress: (): void => {
                   setShouldFreezeCamera(false)
                 },
@@ -141,23 +135,9 @@ export function WalletConnectModal({
       }
 
       if (supportedURI.type === URIType.Scantastic) {
-        const { pubKey, uuid, vendor, model, browser } = parseScantasticParams(supportedURI.value)
-
         setShouldFreezeCamera(true)
-        dispatch(closeAllModals())
-        dispatch(
-          openModal({
-            name: ModalName.Scantastic,
-            initialState: {
-              pubKey,
-              uuid,
-              vendor,
-              model,
-              browser,
-            },
-          })
-        )
-
+        dispatch(openDeepLink({ url: uri, coldStart: false }))
+        onClose()
         return
       }
 
@@ -168,14 +148,18 @@ export function WalletConnectModal({
           const isAllowed = isAllowedUwULinkRequest(parsedUwulinkRequest)
 
           if (!isAllowed) {
-            Alert.alert(t('UwU Link error'), t('This QR code is not supported.'), [
-              {
-                text: t('OK'),
-                onPress: (): void => {
-                  setShouldFreezeCamera(false)
+            Alert.alert(
+              t('walletConnect.error.uwu.title'),
+              t('walletConnect.error.uwu.unsupported'),
+              [
+                {
+                  text: t('common.button.ok'),
+                  onPress: (): void => {
+                    setShouldFreezeCamera(false)
+                  },
                 },
-              },
-            ])
+              ]
+            )
             return
           }
 
@@ -201,7 +185,7 @@ export function WalletConnectModal({
           onClose()
         } catch (_) {
           setShouldFreezeCamera(false)
-          Alert.alert(t('UwU Link error'), t('There was an issue scanning this QR code.'))
+          Alert.alert(t('walletConnect.error.uwu.title'), t('walletConnect.error.uwu.scan'))
         }
       }
 
@@ -312,8 +296,8 @@ export function WalletConnectModal({
               )}
               <Text color="$neutral1" variant="buttonLabel2">
                 {currentScreenState === ScannerModalState.ScanQr
-                  ? t('Show my QR code')
-                  : t('Scan a QR code')}
+                  ? t('qrScanner.recipient.action.show')
+                  : t('qrScanner.recipient.action.scan')}
               </Text>
             </Flex>
           </TouchableArea>

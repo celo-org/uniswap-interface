@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Flex, Text, TouchableArea, useSporeColors } from 'ui/src'
 import AlertTriangle from 'ui/src/assets/icons/alert-triangle.svg'
 import SlashCircleIcon from 'ui/src/assets/icons/slash-circle.svg'
+import { CurrencyId } from 'uniswap/src/types/currency'
 import { DisplayNameText } from 'wallet/src/components/accounts/DisplayNameText'
 import { SpinningLoader } from 'wallet/src/components/loading/SpinningLoader'
 import { BottomSheetModal } from 'wallet/src/components/modals/BottomSheetModal'
@@ -25,7 +26,6 @@ import { AccountType } from 'wallet/src/features/wallet/accounts/types'
 import { useActiveAccountWithThrow, useDisplayName } from 'wallet/src/features/wallet/hooks'
 import { useAppDispatch } from 'wallet/src/state'
 import { ModalName } from 'wallet/src/telemetry/constants'
-import { CurrencyId } from 'wallet/src/utils/currencyId'
 import { openMoonpayTransactionLink, openTransactionLink } from 'wallet/src/utils/linking'
 
 const LOADING_SPINNER_SIZE = 20
@@ -59,7 +59,7 @@ function TransactionSummaryLayout({
 
   const inProgress = status === TransactionStatus.Cancelling || status === TransactionStatus.Pending
   const inCancelling =
-    status === TransactionStatus.Cancelled || status === TransactionStatus.Cancelling
+    status === TransactionStatus.Canceled || status === TransactionStatus.Cancelling
 
   // Monitor latest nonce to identify queued transactions.
   const lowestPendingNonce = useLowestPendingNonce()
@@ -163,7 +163,7 @@ function TransactionSummaryLayout({
                 {status === TransactionStatus.Failed && onRetry && (
                   <Flex flexShrink={0}>
                     <Text color="$accent1" variant="buttonLabel3" onPress={onRetry}>
-                      {t('Retry')}
+                      {t('common.button.retry')}
                     </Text>
                   </Flex>
                 )}
